@@ -16,6 +16,15 @@ abstract class CustomerOrderDataSource {
   Future<void> requestCancelOrder(String orderId, String userId);
   Future<void> cancelRequestCancelOrder(String orderId, String userId);
   Future<void> requestReturnOrder(String orderId, String userId);
+  Future<void> cancelRequestReturnOrder(String orderId, String userId);
+  Future<void> updateOrderInfo({
+    required String orderId,
+    required String userId,
+    required String customerName,
+    required String customerPhone,
+    required String customerAddress,
+    String? note,
+  });
 }
 
 class CustomerOrderRepository implements CustomerOrderDataSource {
@@ -114,6 +123,48 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
           'p_user_id': userId,
         },
       );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> cancelRequestReturnOrder(String orderId, String userId) async {
+    try {
+      await _client.rpc(
+        'customer_cancel_request_return_order',
+        params: {
+          'p_order_id': orderId,
+          'p_user_id': userId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> updateOrderInfo({
+    required String orderId,
+    required String userId,
+    required String customerName,
+    required String customerPhone,
+    required String customerAddress,
+    String? note,
+  }) async {
+    try {
+      await _client
+          .from('orders')
+          .update({
+            'customer_name': customerName,
+            'customer_phone': customerPhone,
+            'customer_address': customerAddress,
+            'note': note ?? '',
+          })
+          .eq('id', orderId)
+          .eq('customer_id', userId);
     } catch (e) {
       final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
       throw Exception(msg);

@@ -474,6 +474,38 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
       );
     }
   }
+
+  @override
+  Future<void> cancelRequestReturnOrder(String orderId, String userId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'delivered',
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  @override
+  Future<void> updateOrderInfo({
+    required String orderId,
+    required String userId,
+    required String customerName,
+    required String customerPhone,
+    required String customerAddress,
+    String? note,
+  }) async {
+    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        customerName: customerName,
+        customerPhone: customerPhone,
+        customerAddress: customerAddress,
+        note: note,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
 }
 
 class _FakeAdminOrderRepository implements AdminOrderDataSource {

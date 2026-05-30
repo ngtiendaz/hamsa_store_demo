@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/utils/debounce.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/customer_order_list_view_model.dart';
 
@@ -15,12 +16,26 @@ class CustomerOrderListView extends StatefulWidget {
 }
 
 class _CustomerOrderListViewState extends State<CustomerOrderListView> {
+  String _statusFilter = 'all'; 
+  String _searchQuery = '';
+
+  late final Debounce _debounce;
+  final _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    _debounce = Debounce(delay: const Duration(milliseconds: 300));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _debounce.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _refresh() {
@@ -42,108 +57,176 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
       );
     }
 
-    return DefaultTabController(
-      length: 6,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Consumer<CustomerOrderListViewModel>(
-          builder: (context, viewModel, child) {
-            if (viewModel.isLoading && viewModel.orders.isEmpty) {
-              return const AppLoading();
-            }
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Consumer<CustomerOrderListViewModel>(
+        builder: (context, viewModel, child) {
+          if (viewModel.isLoading && viewModel.orders.isEmpty) {
+            return const AppLoading();
+          }
 
-            return Column(
-              children: [
-                TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  indicatorColor: AppColors.primary,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.detail,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  tabs: const [
-                    Tab(text: 'Tất cả'),
-                    Tab(text: 'Chờ xác nhận'),
-                    Tab(text: 'Chờ xác nhận hủy'),
-                    Tab(text: 'Đang giao'),
-                    Tab(text: 'Đã giao'),
-                    Tab(text: 'Đã hủy'),
-                  ],
+          // Lọc danh sách theo status và tìm kiếm
+          final filteredOrders = viewModel.orders.where((order) {
+            final matchesStatus = _statusFilter == 'all' || order.status == _statusFilter;
+            final query = _searchQuery.trim().toLowerCase();
+            if (query.isEmpty) return matchesStatus;
+
+            final matchesCode = order.orderCode.toLowerCase().contains(query);
+            final matchesProduct = order.items.any((item) =>
+                item.productNameSnapshot.toLowerCase().contains(query));
+
+            return matchesStatus && (matchesCode || matchesProduct);
+          }).toList();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Search & Filter header
+              _buildHeader(),
+              
+              // Main Content
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async => _refresh(),
+                  child: filteredOrders.isEmpty
+                      ? const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
+                              SizedBox(height: 12),
+                              Text('Không tìm thấy đơn hàng nào.'),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filteredOrders.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final order = filteredOrders[index];
+                            return _OrderCard(
+                              order: order,
+                              userId: userId,
+                              viewModel: viewModel,
+                            );
+                          },
+                        ),
                 ),
-                const Divider(height: 1),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _buildOrderList(context, viewModel, userId, null),
-                      _buildOrderList(context, viewModel, userId, 'pending_confirmation'),
-                      _buildOrderList(context, viewModel, userId, 'cancel_requested'),
-                      _buildOrderList(context, viewModel, userId, 'shipping_or_confirmed'),
-                      _buildOrderList(context, viewModel, userId, 'delivered'),
-                      _buildOrderList(context, viewModel, userId, 'cancelled_or_failed'),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildOrderList(
-    BuildContext context,
-    CustomerOrderListViewModel viewModel,
-    String userId,
-    String? filterStatus,
-  ) {
-    final filteredOrders = viewModel.orders.where((order) {
-      if (filterStatus == null) return true;
-      if (filterStatus == 'shipping_or_confirmed') {
-        return order.status == 'shipping' || order.status == 'confirmed';
-      }
-      if (filterStatus == 'cancelled_or_failed') {
-        return order.status == 'cancelled' || order.status == 'delivery_failed';
-      }
-      return order.status == filterStatus;
-    }).toList();
+  Widget _buildHeader() {
+    final filters = [
+      {'value': 'all', 'label': 'Tất cả'},
+      {'value': 'pending_confirmation', 'label': 'Chờ xác nhận'},
+      {'value': 'cancel_requested', 'label': 'Chờ hủy'},
+      {'value': 'shipping', 'label': 'Đang giao'},
+      {'value': 'delivered', 'label': 'Đã giao'},
+      {'value': 'return_requested', 'label': 'Chờ hoàn trả'},
+      {'value': 'returned', 'label': 'Đã hoàn trả'},
+      {'value': 'cancelled', 'label': 'Đã hủy'},
+      {'value': 'delivery_failed', 'label': 'Giao thất bại'},
+    ];
 
-    if (filteredOrders.isEmpty) {
-      return RefreshIndicator(
-        onRefresh: () async => _refresh(),
-        child: const CustomScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
-                    SizedBox(height: 12),
-                    Text('Không có đơn hàng nào.'),
-                  ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLarge = constraints.maxWidth >= 700;
+          
+          final searchField = SizedBox(
+            width: isLarge ? 320 : double.infinity,
+            height: 40,
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) {
+                _debounce.run(() {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm mã đơn, sản phẩm...',
+                hintStyle: const TextStyle(color: AppColors.detail, fontSize: 13),
+                prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.detail),
+                fillColor: AppColors.surface,
+                filled: true,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.0),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    }
+          );
 
-    return RefreshIndicator(
-      onRefresh: () async => _refresh(),
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: filteredOrders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
-        itemBuilder: (context, index) {
-          final order = filteredOrders[index];
-          return _OrderCard(
-            order: order,
-            userId: userId,
-            viewModel: viewModel,
+          final filterDropdown = Container(
+            width: isLarge ? 220 : double.infinity,
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border, width: 0.5),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _statusFilter,
+                icon: const Icon(Icons.filter_list, size: 18, color: AppColors.detail),
+                style: const TextStyle(color: AppColors.onSurface, fontSize: 13, fontWeight: FontWeight.w500),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _statusFilter = newValue;
+                    });
+                  }
+                },
+                items: filters.map<DropdownMenuItem<String>>((filter) {
+                  return DropdownMenuItem<String>(
+                    value: filter['value'],
+                    child: Text(filter['label']!),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+
+          if (isLarge) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                searchField,
+                const SizedBox(width: 16),
+                filterDropdown,
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              filterDropdown,
+            ],
           );
         },
       ),
@@ -188,8 +271,17 @@ class _OrderCard extends StatelessWidget {
       case 'delivered':
         statusColor = Colors.green;
         break;
+      case 'delivery_failed':
+        statusColor = Colors.red;
+        break;
       case 'cancelled':
         statusColor = Colors.grey;
+        break;
+      case 'return_requested':
+        statusColor = Colors.amber;
+        break;
+      case 'returned':
+        statusColor = Colors.purple;
         break;
       default:
         statusColor = AppColors.detail;
@@ -354,12 +446,25 @@ class _OrderCard extends StatelessWidget {
             ),
 
             // Actions Buttons
-            if (order.status == 'pending_confirmation' || order.status == 'cancel_requested' || order.status == 'delivered') ...[
+            if (order.status == 'pending_confirmation' ||
+                order.status == 'cancel_requested' ||
+                order.status == 'delivered' ||
+                order.status == 'return_requested') ...[
               const Divider(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (order.status == 'pending_confirmation')
+                  if (order.status == 'pending_confirmation') ...[
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => _showUpdateDialog(context),
+                      child: const Text('Cập nhật'),
+                    ),
+                    const SizedBox(width: 8),
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
@@ -369,6 +474,7 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => _showCancelDialog(context),
                       child: const Text('Yêu cầu hủy'),
                     ),
+                  ],
                   if (order.status == 'cancel_requested')
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -390,11 +496,144 @@ class _OrderCard extends StatelessWidget {
                       onPressed: () => _showReturnDialog(context),
                       child: const Text('Yêu cầu đổi trả'),
                     ),
+                  if (order.status == 'return_requested')
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => _showCancelReturnDialog(context),
+                      child: const Text('Hủy yêu cầu hoàn trả'),
+                    ),
                 ],
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showUpdateDialog(BuildContext context) {
+    final nameController = TextEditingController(text: order.customerName);
+    final phoneController = TextEditingController(text: order.customerPhone);
+    final addressController = TextEditingController(text: order.customerAddress);
+    final noteController = TextEditingController(text: order.note ?? '');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cập nhật thông tin nhận hàng'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Họ và tên',
+                  hintText: 'Nhập họ và tên người nhận',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Số điện thoại',
+                  hintText: 'Nhập số điện thoại',
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Địa chỉ giao hàng',
+                  hintText: 'Nhập địa chỉ giao hàng',
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                decoration: const InputDecoration(
+                  labelText: 'Ghi chú',
+                  hintText: 'Nhập ghi chú thêm (nếu có)',
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              final phone = phoneController.text.trim();
+              final address = addressController.text.trim();
+              final note = noteController.text.trim();
+
+              if (name.isEmpty || phone.isEmpty || address.isEmpty) {
+                AppToast.showError(context, 'Họ tên, SĐT và địa chỉ là bắt buộc.');
+                return;
+              }
+
+              Navigator.of(ctx).pop();
+              final success = await viewModel.updateOrderInfo(
+                orderId: order.id,
+                userId: userId,
+                customerName: name,
+                customerPhone: phone,
+                customerAddress: address,
+                note: note,
+              );
+              if (context.mounted) {
+                if (success) {
+                  AppToast.showSuccess(context, 'Cập nhật thông tin đơn hàng thành công.');
+                } else if (viewModel.errorMessage != null) {
+                  AppToast.showError(context, viewModel.errorMessage!);
+                }
+              }
+            },
+            child: const Text('Lưu lại', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCancelReturnDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hủy yêu cầu hoàn trả'),
+        content: const Text('Bạn có chắc chắn muốn hủy yêu cầu hoàn trả cho đơn hàng này để đưa về trạng thái giao thành công không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final success = await viewModel.cancelRequestReturn(order.id, userId);
+              if (context.mounted) {
+                if (success) {
+                  AppToast.showSuccess(context, 'Đã hủy yêu cầu hoàn trả thành công.');
+                } else if (viewModel.errorMessage != null) {
+                  AppToast.showError(context, viewModel.errorMessage!);
+                }
+              }
+            },
+            child: const Text('Đồng ý', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

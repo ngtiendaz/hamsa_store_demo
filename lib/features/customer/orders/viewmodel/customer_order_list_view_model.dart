@@ -84,4 +84,54 @@ class CustomerOrderListViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> cancelRequestReturn(String orderId, String userId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.cancelRequestReturnOrder(orderId, userId);
+      await loadOrders(userId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateOrderInfo({
+    required String orderId,
+    required String userId,
+    required String customerName,
+    required String customerPhone,
+    required String customerAddress,
+    String? note,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.updateOrderInfo(
+        orderId: orderId,
+        userId: userId,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        customerAddress: customerAddress,
+        note: note,
+      );
+      await loadOrders(userId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

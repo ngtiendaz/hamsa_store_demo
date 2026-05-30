@@ -4,8 +4,14 @@ import '../../features/user/auth/view/login_view.dart';
 import '../../features/user/auth/viewmodel/auth_viewmodel.dart';
 import '../../features/admin/products/view/product_list_view.dart';
 import '../../features/admin/products/view/product_form_view.dart';
+import '../../features/admin/categories/view/category_list_view.dart';
+import '../../features/admin/categories/view/category_form_view.dart';
+import '../../features/admin/brands/view/brand_list_view.dart';
+import '../../features/admin/brands/view/brand_form_view.dart';
 import '../layout/main_layout.dart';
 import '../../../data/models/products_model.dart';
+import '../../../data/models/category_model.dart';
+import '../../../data/models/brand_model.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -72,17 +78,33 @@ class AppRouter {
             ),
             GoRoute(
               path: '/admin/categories',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text('Quản lý danh mục (Mockup)')),
-              ),
+              builder: (context, state) => const CategoryListView(),
+            ),
+            GoRoute(
+              path: '/admin/categories/new',
+              builder: (context, state) => const CategoryFormView(),
+            ),
+            GoRoute(
+              path: '/admin/categories/edit',
+              builder: (context, state) {
+                final category = state.extra as CategoryModel?;
+                return CategoryFormView(categoryToEdit: category);
+              },
             ),
             GoRoute(
               path: '/admin/brands',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text('Quản lý nhãn hàng (Mockup)')),
-              ),
+              builder: (context, state) => const BrandListView(),
+            ),
+            GoRoute(
+              path: '/admin/brands/new',
+              builder: (context, state) => const BrandFormView(),
+            ),
+            GoRoute(
+              path: '/admin/brands/edit',
+              builder: (context, state) {
+                final brand = state.extra as BrandModel?;
+                return BrandFormView(brandToEdit: brand);
+              },
             ),
             GoRoute(
               path: '/admin/orders',

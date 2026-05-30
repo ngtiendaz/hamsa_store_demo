@@ -178,6 +178,15 @@ lib/
   - Form thêm/sửa sản phẩm gồm các trường: Tên nội bộ (bắt buộc), Tên thương mại, Barcode, Giá, Tồn kho, Trạng thái.
   - Validate form: Tên nội bộ bắt buộc, Giá >= 0, Tồn kho >= 0.
 
+### PHASE 6.5: Module — Quản lý Danh mục & Nhãn hàng (Category & Brand Management)
+- [ ] 6.5.1. Viết `AdminCategoryRepository` thực hiện CRUD danh mục với logic re-route về "Khác" khi xóa.
+- [ ] 6.5.2. Viết `CategoryListViewModel` và `CategoryFormViewModel`.
+- [ ] 6.5.3. Thiết kế `CategoryListView` và `CategoryFormView` (giao diện tương tự Quản lý sản phẩm).
+- [ ] 6.5.4. Viết `AdminBrandRepository` thực hiện CRUD nhãn hàng với logic re-route về "Khác" khi xóa.
+- [ ] 6.5.5. Viết `BrandListViewModel` và `BrandFormViewModel`.
+- [ ] 6.5.6. Thiết kế `BrandListView` và `BrandFormView` (giao diện tương tự Quản lý sản phẩm).
+- [ ] 6.5.7. Đăng ký router và cấu hình route cho Category & Brand trong `app_router.dart`.
+
 ### PHASE 7: Module 4 — Quản lý đơn hàng (Order Management)
 - [ ] 7.1. Viết `AdminOrderRepository` tương tác với bảng `orders` và `order_items`.
 - [ ] 7.2. Xây dựng logic tạo đơn hàng (`OrderCreateViewModel` & `OrderCreateView`):

@@ -26,6 +26,7 @@ import '../../data/models/order_model.dart';
 import '../../features/admin/users/view/admin_user_list_view.dart';
 import '../../features/admin/users/view/admin_user_form_view.dart';
 import '../../data/models/profiles_model.dart';
+import '../../features/admin/dashboard/view/admin_dashboard_view.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -58,7 +59,8 @@ class AppRouter {
         }
 
         final profile = authViewModel.currentProfile;
-        if (state.matchedLocation.startsWith('/admin/users') &&
+        if ((state.matchedLocation.startsWith('/admin/users') ||
+                state.matchedLocation.startsWith('/admin/dashboard')) &&
             profile?.isAdmin != true) {
           return profile?.isCustomer == true ? '/shop' : '/admin/products';
         }
@@ -73,12 +75,7 @@ class AppRouter {
           routes: [
             GoRoute(
               path: '/admin/dashboard',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(
-                  child: Text('Trang Bảng Điều Khiển (Dashboard Mockup)'),
-                ),
-              ),
+              builder: (context, state) => const AdminDashboardView(),
             ),
             GoRoute(
               path: '/admin/products',

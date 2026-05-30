@@ -16,6 +16,9 @@ import 'package:hamsa_store_demo/features/customer/orders/repository/customer_or
 import 'package:hamsa_store_demo/features/customer/orders/viewmodel/customer_order_list_view_model.dart';
 import 'package:hamsa_store_demo/features/admin/orders/repository/admin_order_repository.dart';
 import 'package:hamsa_store_demo/features/admin/orders/viewmodel/admin_order_list_view_model.dart';
+import 'package:hamsa_store_demo/data/models/admin_dashboard_stats_model.dart';
+import 'package:hamsa_store_demo/features/admin/dashboard/repository/admin_dashboard_repository.dart';
+import 'package:hamsa_store_demo/features/admin/dashboard/viewmodel/admin_dashboard_view_model.dart';
 
 void main() {
   test(
@@ -112,7 +115,7 @@ void main() {
 
     final profile = _buildProfile().copyWith(phone: '0909123456');
     viewModel.initFromProfile(profile);
-    
+
     // Set shipping info
     viewModel.setCustomerAddress('123 Đường ABC');
     viewModel.setPaymentMethod('cash');
@@ -136,81 +139,51 @@ void main() {
     expect(viewModel.errorMessage, isNull);
   });
 
-  test('CheckoutViewModel payment wallet failed if insufficient balance', () async {
-    final orderRepo = _FakeCustomerOrderRepository();
-    final profileRepo = _FakeProfileRepository();
-    // Default mock profile balance is 100,000 VND
-    final viewModel = CheckoutViewModel(
-      orderRepository: orderRepo,
-      profileRepository: profileRepo,
-    );
+  test(
+    'CheckoutViewModel payment wallet failed if insufficient balance',
+    () async {
+      final orderRepo = _FakeCustomerOrderRepository();
+      final profileRepo = _FakeProfileRepository();
+      // Default mock profile balance is 100,000 VND
+      final viewModel = CheckoutViewModel(
+        orderRepository: orderRepo,
+        profileRepository: profileRepo,
+      );
 
-    final profile = _buildProfile().copyWith(phone: '0909123456');
-    viewModel.initFromProfile(profile);
-    await Future<void>.delayed(Duration.zero); // Wait for loadWalletBalance
+      final profile = _buildProfile().copyWith(phone: '0909123456');
+      viewModel.initFromProfile(profile);
+      await Future<void>.delayed(Duration.zero); // Wait for loadWalletBalance
 
-    viewModel.setCustomerAddress('123 Đường ABC');
-    viewModel.setPaymentMethod('wallet');
+      viewModel.setCustomerAddress('123 Đường ABC');
+      viewModel.setPaymentMethod('wallet');
 
-    // Make an entry with subtotal > 100,000 VND (e.g. 2 items of 100k = 200k)
-    final product = _buildProduct(stock: 10);
-    final entry = CustomerCartEntry(
-      id: 'cart-item-1',
-      product: product,
-      quantity: 2,
-    );
+      // Make an entry with subtotal > 100,000 VND (e.g. 2 items of 100k = 200k)
+      final product = _buildProduct(stock: 10);
+      final entry = CustomerCartEntry(
+        id: 'cart-item-1',
+        product: product,
+        quantity: 2,
+      );
 
-    final success = await viewModel.submitOrder(
-      userId: profile.id,
-      selectedEntries: [entry],
-    );
+      final success = await viewModel.submitOrder(
+        userId: profile.id,
+        selectedEntries: [entry],
+      );
 
-    expect(success, isFalse);
-    expect(viewModel.successOrderId, isNull);
-    expect(viewModel.errorMessage, contains('Số dư ví HamsaPay không đủ'));
-    expect(orderRepo.createOrderCalled, isFalse);
-  });
+      expect(success, isFalse);
+      expect(viewModel.successOrderId, isNull);
+      expect(viewModel.errorMessage, contains('Số dư ví HamsaPay không đủ'));
+      expect(orderRepo.createOrderCalled, isFalse);
+    },
+  );
 
-  test('CustomerOrderListViewModel request and cancel request cancellation', () async {
-    final orderRepo = _FakeCustomerOrderRepository();
-    final viewModel = CustomerOrderListViewModel(orderRepository: orderRepo);
+  test(
+    'CustomerOrderListViewModel request and cancel request cancellation',
+    () async {
+      final orderRepo = _FakeCustomerOrderRepository();
+      final viewModel = CustomerOrderListViewModel(orderRepository: orderRepo);
 
-    final initialOrder = OrderModel(
-      id: 'order-1',
-      orderCode: 'ORD-001',
-      customerId: 'user-1',
-      customerName: 'Khách hàng',
-      customerPhone: '0909123456',
-      customerAddress: '123 Đường ABC',
-      status: 'pending_confirmation',
-      totalAmount: 100000.0,
-      paymentMethod: 'cash',
-      paymentStatus: 'unpaid',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    orderRepo.orders.add(initialOrder);
-
-    await viewModel.loadOrders('user-1');
-    expect(viewModel.orders.length, 1);
-    expect(viewModel.orders[0].status, 'pending_confirmation');
-
-    // Request cancel
-    final cancelReqSuccess = await viewModel.requestCancel('order-1', 'user-1');
-    expect(cancelReqSuccess, isTrue);
-    expect(orderRepo.requestCancelCalled, isTrue);
-    expect(viewModel.orders[0].status, 'cancel_requested');
-
-    // Cancel request cancel
-    final withdrawSuccess = await viewModel.cancelRequestCancel('order-1', 'user-1');
-    expect(withdrawSuccess, isTrue);
-    expect(orderRepo.cancelRequestCancelCalled, isTrue);
-    expect(viewModel.orders[0].status, 'pending_confirmation');
-  });
-
-  test('AdminOrderListViewModel confirm shipping and approve cancellation', () async {
-    final initialOrders = [
-      OrderModel(
+      final initialOrder = OrderModel(
         id: 'order-1',
         orderCode: 'ORD-001',
         customerId: 'user-1',
@@ -223,37 +196,117 @@ void main() {
         paymentStatus: 'unpaid',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-      ),
-      OrderModel(
-        id: 'order-2',
-        orderCode: 'ORD-002',
-        customerId: 'user-1',
-        customerName: 'Khách hàng',
-        customerPhone: '0909123456',
-        customerAddress: '123 Đường ABC',
-        status: 'cancel_requested',
-        totalAmount: 100000.0,
-        paymentMethod: 'cash',
-        paymentStatus: 'unpaid',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    ];
-    final orderRepo = _FakeAdminOrderRepository(initialOrders);
-    final viewModel = AdminOrderListViewModel(orderRepository: orderRepo);
+      );
+      orderRepo.orders.add(initialOrder);
 
-    await viewModel.loadOrders();
-    expect(viewModel.orders.length, 2);
+      await viewModel.loadOrders('user-1');
+      expect(viewModel.orders.length, 1);
+      expect(viewModel.orders[0].status, 'pending_confirmation');
 
-    // Confirm shipping
-    final confirmSuccess = await viewModel.confirmOrder('order-1', 'admin-1');
-    expect(confirmSuccess, isTrue);
-    expect(viewModel.orders.firstWhere((o) => o.id == 'order-1').status, 'shipping');
+      // Request cancel
+      final cancelReqSuccess = await viewModel.requestCancel(
+        'order-1',
+        'user-1',
+      );
+      expect(cancelReqSuccess, isTrue);
+      expect(orderRepo.requestCancelCalled, isTrue);
+      expect(viewModel.orders[0].status, 'cancel_requested');
 
-    // Approve cancellation
-    final approveCancelSuccess = await viewModel.approveCancel('order-2', 'admin-1');
-    expect(approveCancelSuccess, isTrue);
-    expect(viewModel.orders.firstWhere((o) => o.id == 'order-2').status, 'cancelled');
+      // Cancel request cancel
+      final withdrawSuccess = await viewModel.cancelRequestCancel(
+        'order-1',
+        'user-1',
+      );
+      expect(withdrawSuccess, isTrue);
+      expect(orderRepo.cancelRequestCancelCalled, isTrue);
+      expect(viewModel.orders[0].status, 'pending_confirmation');
+    },
+  );
+
+  test(
+    'AdminOrderListViewModel confirm shipping and approve cancellation',
+    () async {
+      final initialOrders = [
+        OrderModel(
+          id: 'order-1',
+          orderCode: 'ORD-001',
+          customerId: 'user-1',
+          customerName: 'Khách hàng',
+          customerPhone: '0909123456',
+          customerAddress: '123 Đường ABC',
+          status: 'pending_confirmation',
+          totalAmount: 100000.0,
+          paymentMethod: 'cash',
+          paymentStatus: 'unpaid',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        OrderModel(
+          id: 'order-2',
+          orderCode: 'ORD-002',
+          customerId: 'user-1',
+          customerName: 'Khách hàng',
+          customerPhone: '0909123456',
+          customerAddress: '123 Đường ABC',
+          status: 'cancel_requested',
+          totalAmount: 100000.0,
+          paymentMethod: 'cash',
+          paymentStatus: 'unpaid',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+      final orderRepo = _FakeAdminOrderRepository(initialOrders);
+      final viewModel = AdminOrderListViewModel(orderRepository: orderRepo);
+
+      await viewModel.loadOrders();
+      expect(viewModel.orders.length, 2);
+
+      // Confirm shipping
+      final confirmSuccess = await viewModel.confirmOrder('order-1', 'admin-1');
+      expect(confirmSuccess, isTrue);
+      expect(
+        viewModel.orders.firstWhere((o) => o.id == 'order-1').status,
+        'shipping',
+      );
+
+      // Approve cancellation
+      final approveCancelSuccess = await viewModel.approveCancel(
+        'order-2',
+        'admin-1',
+      );
+      expect(approveCancelSuccess, isTrue);
+      expect(
+        viewModel.orders.firstWhere((o) => o.id == 'order-2').status,
+        'cancelled',
+      );
+    },
+  );
+
+  test('AdminDashboardViewModel reloads stats when period changes', () async {
+    final repository = _FakeAdminDashboardRepository();
+    final viewModel = AdminDashboardViewModel(repository: repository);
+
+    await viewModel.loadStats();
+    expect(viewModel.stats?.period, 'month');
+    expect(viewModel.stats?.revenue, 59081500);
+
+    await viewModel.changePeriod(DashboardPeriod.week);
+    expect(viewModel.period, DashboardPeriod.week);
+    expect(viewModel.stats?.period, 'week');
+
+    await viewModel.changePeriod(DashboardPeriod.month);
+    await viewModel.changeMonth(3);
+    await viewModel.changeYear(2025);
+    expect(viewModel.referenceDate, DateTime(2025, 3));
+    expect(repository.requestedPeriods, [
+      'month',
+      'week',
+      'month',
+      'month',
+      'month',
+    ]);
+    expect(repository.referenceDates.last, DateTime(2025, 3));
   });
 }
 
@@ -367,7 +420,9 @@ class _FakeProfileRepository implements ProfileDataSource {
   }
 
   @override
-  Future<List<WalletTransactionModel>> getWalletTransactions(String userId) async {
+  Future<List<WalletTransactionModel>> getWalletTransactions(
+    String userId,
+  ) async {
     return [];
   }
 
@@ -443,7 +498,9 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
   @override
   Future<void> requestCancelOrder(String orderId, String userId) async {
     requestCancelCalled = true;
-    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    final idx = orders.indexWhere(
+      (o) => o.id == orderId && o.customerId == userId,
+    );
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'cancel_requested',
@@ -455,7 +512,9 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
   @override
   Future<void> cancelRequestCancelOrder(String orderId, String userId) async {
     cancelRequestCancelCalled = true;
-    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    final idx = orders.indexWhere(
+      (o) => o.id == orderId && o.customerId == userId,
+    );
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'pending_confirmation',
@@ -466,7 +525,9 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
 
   @override
   Future<void> requestReturnOrder(String orderId, String userId) async {
-    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    final idx = orders.indexWhere(
+      (o) => o.id == orderId && o.customerId == userId,
+    );
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'return_requested',
@@ -477,7 +538,9 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
 
   @override
   Future<void> cancelRequestReturnOrder(String orderId, String userId) async {
-    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    final idx = orders.indexWhere(
+      (o) => o.id == orderId && o.customerId == userId,
+    );
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'delivered',
@@ -495,7 +558,9 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
     required String customerAddress,
     String? note,
   }) async {
-    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    final idx = orders.indexWhere(
+      (o) => o.id == orderId && o.customerId == userId,
+    );
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         customerName: customerName,
@@ -550,7 +615,9 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'delivered',
-        paymentStatus: orders[idx].paymentMethod == 'cash' ? 'paid' : orders[idx].paymentStatus,
+        paymentStatus: orders[idx].paymentMethod == 'cash'
+            ? 'paid'
+            : orders[idx].paymentStatus,
         updatedAt: DateTime.now(),
       );
     }
@@ -562,7 +629,9 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'delivery_failed',
-        paymentStatus: orders[idx].paymentMethod == 'wallet' ? 'refunded' : orders[idx].paymentStatus,
+        paymentStatus: orders[idx].paymentMethod == 'wallet'
+            ? 'refunded'
+            : orders[idx].paymentStatus,
         updatedAt: DateTime.now(),
       );
     }
@@ -574,7 +643,9 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'returned',
-        paymentStatus: orders[idx].paymentStatus == 'paid' ? 'refunded' : orders[idx].paymentStatus,
+        paymentStatus: orders[idx].paymentStatus == 'paid'
+            ? 'refunded'
+            : orders[idx].paymentStatus,
         updatedAt: DateTime.now(),
       );
     }
@@ -586,7 +657,11 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
     if (idx != -1) {
       orders[idx] = orders[idx].copyWith(
         status: 'cancelled',
-        paymentStatus: orders[idx].paymentMethod == 'wallet' && orders[idx].paymentStatus == 'paid' ? 'refunded' : orders[idx].paymentStatus,
+        paymentStatus:
+            orders[idx].paymentMethod == 'wallet' &&
+                orders[idx].paymentStatus == 'paid'
+            ? 'refunded'
+            : orders[idx].paymentStatus,
         updatedAt: DateTime.now(),
       );
     }
@@ -601,5 +676,36 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
         updatedAt: DateTime.now(),
       );
     }
+  }
+}
+
+class _FakeAdminDashboardRepository implements AdminDashboardDataSource {
+  final List<String> requestedPeriods = [];
+  final List<DateTime> referenceDates = [];
+
+  @override
+  Future<AdminDashboardStatsModel> getStats(
+    String period,
+    DateTime referenceDate,
+  ) async {
+    requestedPeriods.add(period);
+    referenceDates.add(referenceDate);
+
+    return AdminDashboardStatsModel(
+      period: period,
+      referenceDate: referenceDate,
+      startAt: DateTime(2026, 5, 1),
+      endAt: DateTime(2026, 6, 1),
+      revenue: 59081500,
+      shippingCount: 0,
+      cancelledCount: 1,
+      deliveredCount: 1,
+      refundedCount: 0,
+      refundedAmount: 0,
+      returnRate: 0,
+      deliverySuccessRate: 100,
+      lowStockProducts: const [],
+      topSellingProducts: const [],
+    );
   }
 }

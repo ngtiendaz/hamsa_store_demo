@@ -294,6 +294,23 @@ lib/
 - [x] 11.7.8. Đăng ký các routes (`/checkout`, `/admin/orders`) trong `app_router.dart` và đăng ký các ViewModels trong `main.dart`.
 - [x] 11.7.9. Viết unit tests kiểm chứng toàn bộ luồng thanh toán và cập nhật trạng thái đơn hàng trong `widget_test.dart`.
 
+### PHASE 12: Dashboard Admin
+- [x] 12.1. Kiểm tra schema Supabase thực tế và tạo RPC `admin_get_dashboard_stats`:
+  - Chỉ cho phép tài khoản `admin` đã đăng nhập gọi RPC.
+  - Thu hồi quyền thực thi từ `public`, `anon`; chỉ cấp quyền gọi cho `authenticated`.
+  - Lọc kỳ thống kê theo tuần, tháng hoặc năm hiện tại với múi giờ `Asia/Ho_Chi_Minh`.
+- [x] 12.2. Thống kê doanh thu ròng, đơn đang giao, đã hủy, giao thành công, đã hoàn tiền.
+- [x] 12.3. Tính tỷ lệ hoàn đơn và tỷ lệ giao hàng thành công theo kỳ.
+- [x] 12.4. Hiển thị sản phẩm sắp hết hàng đang kinh doanh có số lượng tồn kho `< 5`.
+- [x] 12.5. Hiển thị top 5 sản phẩm bán chạy theo tổng số lượng mua, bỏ qua đơn đã hủy hoặc giao thất bại.
+- [x] 12.6. Tạo `AdminDashboardRepository`, `AdminDashboardViewModel` và giao diện dashboard responsive theo MVVM + Provider.
+- [x] 12.7. Thay dashboard mockup trong router bằng dashboard thật và chặn nhân viên truy cập route admin dashboard.
+- [x] 12.8. Mở rộng bộ lọc dashboard:
+  - Cho phép chọn tuần cụ thể bằng lịch.
+  - Cho phép chọn tháng và năm cụ thể bằng dropdown.
+  - Cho phép chọn năm cụ thể bằng dropdown.
+  - Truyền ngày tham chiếu vào RPC để tính đúng ranh giới kỳ theo múi giờ Việt Nam.
+
 ---
 
 ## 🚦 Quy tắc cập nhật checklist

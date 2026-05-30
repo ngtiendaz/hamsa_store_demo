@@ -124,6 +124,7 @@ class ProfileViewModel extends ChangeNotifier {
   }
 
   Future<void> loadWalletInfo() async {
+    if (!_profile.isCustomer) return;
     _isLoadingWallet = true;
     _errorMessage = null;
     notifyListeners();

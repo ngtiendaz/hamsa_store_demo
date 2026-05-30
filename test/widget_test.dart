@@ -81,6 +81,20 @@ void main() {
     expect(await viewModel.save(), isFalse);
     expect(viewModel.errorMessage, 'Họ tên không được để trống.');
   });
+
+  test('ProfileViewModel does not load wallet for admin or employee', () async {
+    final repository = _FakeProfileRepository();
+    final adminProfile = _buildProfile().copyWith(role: 'admin');
+    final viewModel = ProfileViewModel(
+      profile: adminProfile,
+      repository: repository,
+    );
+
+    await Future<void>.delayed(Duration.zero);
+
+    expect(viewModel.wallet, isNull);
+    expect(repository.getWalletCalled, isFalse);
+  });
 }
 
 class _FakeCustomerCartRepository implements CustomerCartDataSource {
@@ -152,6 +166,7 @@ ProductModel _buildProduct({required int stock}) {
 
 class _FakeProfileRepository implements ProfileDataSource {
   String? updatedUserId;
+  bool getWalletCalled = false;
 
   @override
   Future<ProfileModel> updateProfile({
@@ -180,6 +195,7 @@ class _FakeProfileRepository implements ProfileDataSource {
 
   @override
   Future<WalletModel?> getWallet(String userId) async {
+    getWalletCalled = true;
     return WalletModel(
       id: 'wallet-1',
       userId: userId,

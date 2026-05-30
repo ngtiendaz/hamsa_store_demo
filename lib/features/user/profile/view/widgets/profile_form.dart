@@ -28,8 +28,10 @@ class ProfileForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _ProfileHeader(viewModel: viewModel),
-            const SizedBox(height: 20),
-            HamsapayCard(viewModel: viewModel),
+            if (viewModel.profile.isCustomer) ...[
+              const SizedBox(height: 20),
+              HamsapayCard(viewModel: viewModel),
+            ],
             const SizedBox(height: 20),
             Container(
               padding: EdgeInsets.all(isDesktop ? 28 : 20),

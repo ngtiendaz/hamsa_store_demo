@@ -84,15 +84,21 @@ class AdminProductRepository {
     return publicUrl;
   }
 
-  Future<void> saveProductImage(String productId, String imageUrl) async {
-    // Xóa ảnh cũ
+  Future<void> saveProductImages(String productId, List<String> imageUrls) async {
+    // Xóa tất cả ảnh hiện có của sản phẩm này
     await _client.from('product_images').delete().eq('product_id', productId);
-    // Chèn ảnh mới
-    await _client.from('product_images').insert({
-      'product_id': productId,
-      'image_url': imageUrl,
-      'sort_order': 0,
-    });
+    // Chèn lại toàn bộ danh sách
+    if (imageUrls.isNotEmpty) {
+      final List<Map<String, dynamic>> insertData = [];
+      for (int i = 0; i < imageUrls.length; i++) {
+        insertData.add({
+          'product_id': productId,
+          'image_url': imageUrls[i],
+          'sort_order': i,
+        });
+      }
+      await _client.from('product_images').insert(insertData);
+    }
   }
 
   Future<List<CategoryModel>> getCategories() async {

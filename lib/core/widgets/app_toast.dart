@@ -95,11 +95,11 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
               constraints: const BoxConstraints(maxWidth: 320),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: widget.isError ? AppColors.errorContainer : AppColors.surface,
+                color: widget.isError ? const Color(0xFFFEE2E2) : const Color(0xFFE2FBE9),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: widget.isError ? AppColors.error : AppColors.primary.withOpacity(0.1),
-                  width: 1,
+                  color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
+                  width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -114,7 +114,7 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
                 children: [
                   Icon(
                     widget.isError ? Icons.error_outline : Icons.check_circle_outline,
-                    color: widget.isError ? AppColors.error : AppColors.primary,
+                    color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -123,8 +123,8 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
                       widget.message,
                       style: AppTextStyles.bodyMd.copyWith(
                         fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: widget.isError ? AppColors.error : AppColors.onSurface,
+                        fontWeight: FontWeight.w600,
+                        color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
                       ),
                     ),
                   ),

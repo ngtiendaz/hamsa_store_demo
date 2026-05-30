@@ -238,42 +238,113 @@ class _ProductListViewState extends State<ProductListView> {
     ProductListViewModel viewModel,
     bool isAdmin,
   ) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.surface, width: 1.5),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Table(
-          columnWidths: const {
-            0: FixedColumnWidth(80), // Image
-            1: FlexColumnWidth(4), // Name
-            2: FlexColumnWidth(1.8), // Barcode
-            3: FlexColumnWidth(2), // Price
-            4: FixedColumnWidth(100), // Stock
-            5: FixedColumnWidth(130), // Status
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            // Table Header
-            TableRow(
-              decoration: const BoxDecoration(color: AppColors.surface),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.surface, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Table Header
+          Container(
+            color: AppColors.surface,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+            child: const Row(
               children: [
-                _buildHeaderCell('ẢNH'),
-                _buildHeaderCell('TÊN SẢN PHẨM'),
-                _buildHeaderCell('BARCODE'),
-                _buildHeaderCell('ĐƠN GIÁ'),
-                _buildHeaderCell('TỒN KHO'),
-                _buildHeaderCell('TRẠNG THÁI'),
+                SizedBox(
+                  width: 80,
+                  child: Center(
+                    child: Text(
+                      'ẢNH',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'TÊN SẢN PHẨM',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      'BARCODE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      'ĐƠN GIÁ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: Center(
+                    child: Text(
+                      'TỒN KHO',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 130,
+                  child: Center(
+                    child: Text(
+                      'TRẠNG THÁI',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.detail,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            // Table Rows
-            ...viewModel.products.map((product) {
-              Widget wrapClickable(Widget child) {
+          ),
+          // Table Rows
+          Flexible(
+            child: ListView.builder(
+              itemCount: viewModel.products.length,
+              itemBuilder: (context, index) {
+                final product = viewModel.products[index];
                 return InkWell(
                   onTap: () async {
+                    print('Selected product: ${product.toJson()}');
                     final result = await context.push(
                       '/admin/products/edit',
                       extra: product,
@@ -282,109 +353,106 @@ class _ProductListViewState extends State<ProductListView> {
                       viewModel.loadProducts(refresh: true);
                     }
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: child,
-                  ),
-                );
-              }
-
-              return TableRow(
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.surface, width: 1),
-                  ),
-                ),
-                children: [
-                  // Image
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: ProductImageWidget(
-                        imageUrl: product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
-                        size: 50,
+                  hoverColor: AppColors.surface.withOpacity(0.5),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.surface, width: 1),
                       ),
                     ),
-                  ),
-                  // Name
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            product.displayName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                    child: Row(
+                      children: [
+                        // Image (centered)
+                        SizedBox(
+                          width: 80,
+                          child: Center(
+                            child: ProductImageWidget(
+                              imageUrl: product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
+                              size: 50,
                             ),
                           ),
-                          if (product.tradeName != null)
-                            Text(
-                              product.internalName,
+                        ),
+                        // Name (left aligned)
+                        Expanded(
+                          flex: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.displayName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                if (product.tradeName != null)
+                                  Text(
+                                    product.internalName,
+                                    style: const TextStyle(
+                                      color: AppColors.detail,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Barcode (centered)
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: Text(
+                              product.barcode ?? '-',
+                              style: AppTextStyles.labelMd,
+                            ),
+                          ),
+                        ),
+                        // Price (centered)
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: Text(
+                              currencyFormat.format(product.price),
                               style: const TextStyle(
-                                color: AppColors.detail,
-                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Barcode
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        product.barcode ?? '-',
-                        style: AppTextStyles.labelMd,
-                      ),
-                    ),
-                  ),
-                  // Price
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        currencyFormat.format(product.price),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  // Stock
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        '${product.stock}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: product.stock < 5
-                              ? AppColors.error
-                              : AppColors.onSurface,
+                        // Stock (centered)
+                        SizedBox(
+                          width: 100,
+                          child: Center(
+                            child: Text(
+                              '${product.stock}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: product.stock < 5
+                                    ? AppColors.error
+                                    : AppColors.onSurface,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        // Status (centered)
+                        SizedBox(
+                          width: 130,
+                          child: Center(
+                            child: _buildStatusBadge(product.isActive),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // Status
-                  wrapClickable(
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _buildStatusBadge(product.isActive),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ],
-        ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -408,6 +476,7 @@ class _ProductListViewState extends State<ProductListView> {
           child: ListTile(
             contentPadding: const EdgeInsets.all(12),
             onTap: () async {
+              print('Selected product: ${product.toJson()}');
               final result = await context.push(
                 '/admin/products/edit',
                 extra: product,
@@ -451,19 +520,6 @@ class _ProductListViewState extends State<ProductListView> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildHeaderCell(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        text,
-        style: AppTextStyles.labelMd.copyWith(
-          color: AppColors.detail,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 

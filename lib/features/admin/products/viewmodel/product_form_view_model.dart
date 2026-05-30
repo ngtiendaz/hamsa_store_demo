@@ -6,6 +6,14 @@ import '../../../../data/models/products_model.dart';
 import '../../../../data/models/category_model.dart';
 import '../../../../data/models/brand_model.dart';
 
+class ProductImageItem {
+  final String? url; // null nếu là ảnh mới
+  final Uint8List? bytes; // null nếu là ảnh cũ trên server
+  final String id; // unique id để phân biệt
+
+  ProductImageItem({this.url, this.bytes, required this.id});
+}
+
 class ProductFormViewModel extends ChangeNotifier {
   final AdminProductRepository _repository = AdminProductRepository();
 
@@ -26,11 +34,9 @@ class ProductFormViewModel extends ChangeNotifier {
   String _status = 'active'; // 'active', 'inactive'
   String _categoryId = '';
   String _brandId = '';
-  String? _imageUrl;
 
-  // Local picked image state
-  Uint8List? _pickedImageBytes;
-  String? _pickedImageName;
+  // Images list
+  List<ProductImageItem> _images = [];
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -49,10 +55,53 @@ class ProductFormViewModel extends ChangeNotifier {
   String get status => _status;
   String get categoryId => _categoryId;
   String get brandId => _brandId;
-  String? get imageUrl => _imageUrl;
+  
+  List<ProductImageItem> get images => _images;
 
-  Uint8List? get pickedImageBytes => _pickedImageBytes;
-  String? get pickedImageName => _pickedImageName;
+  bool get isChanged {
+    if (_product == null) {
+      return _internalName.trim().isNotEmpty ||
+          (_tradeName != null && _tradeName!.trim().isNotEmpty) ||
+          (_barcode != null && _barcode!.trim().isNotEmpty) ||
+          (_description != null && _description!.trim().isNotEmpty) ||
+          _price > 0 ||
+          _stock > 0 ||
+          _images.isNotEmpty;
+    }
+    
+    final nameChanged = _internalName.trim() != _product!.internalName.trim();
+    final tradeNameChanged = (_tradeName ?? '').trim() != (_product!.tradeName ?? '').trim();
+    final barcodeChanged = (_barcode ?? '').trim() != (_product!.barcode ?? '').trim();
+    final descriptionChanged = (_description ?? '').trim() != (_product!.description ?? '').trim();
+    final priceChanged = _price != _product!.price;
+    final stockChanged = _stock != _product!.stock;
+    final statusChanged = _status != _product!.status;
+    final categoryChanged = _categoryId != _product!.categoryId;
+    final brandChanged = _brandId != _product!.brandId;
+    
+    bool imagesChanged = false;
+    if (_images.length != _product!.imageUrls.length) {
+      imagesChanged = true;
+    } else {
+      for (int i = 0; i < _images.length; i++) {
+        if (_images[i].url != _product!.imageUrls[i]) {
+          imagesChanged = true;
+          break;
+        }
+      }
+    }
+    
+    return nameChanged ||
+        tradeNameChanged ||
+        barcodeChanged ||
+        descriptionChanged ||
+        priceChanged ||
+        stockChanged ||
+        statusChanged ||
+        categoryChanged ||
+        brandChanged ||
+        imagesChanged;
+  }
 
   ProductFormViewModel() {
     _loadFilters();
@@ -77,6 +126,7 @@ class ProductFormViewModel extends ChangeNotifier {
 
   void init(ProductModel? product) {
     _product = product;
+    _images = [];
     if (product != null) {
       _internalName = product.internalName;
       _tradeName = product.tradeName;
@@ -87,7 +137,7 @@ class ProductFormViewModel extends ChangeNotifier {
       _status = product.status;
       _categoryId = product.categoryId;
       _brandId = product.brandId;
-      _imageUrl = product.imageUrls.isNotEmpty ? product.imageUrls.first : null;
+      _images = product.imageUrls.map((url) => ProductImageItem(url: url, id: url)).toList();
     }
     notifyListeners();
   }
@@ -102,20 +152,23 @@ class ProductFormViewModel extends ChangeNotifier {
   void setStatus(String value) { _status = value; notifyListeners(); }
   void setCategoryId(String value) { _categoryId = value; notifyListeners(); }
   void setBrandId(String value) { _brandId = value; notifyListeners(); }
-  void setImageUrl(String value) { _imageUrl = value.trim().isEmpty ? null : value; notifyListeners(); }
 
-  Future<void> pickImage() async {
+  Future<void> pickImages() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
+      final List<XFile> pickedFiles = await picker.pickMultiImage(
         maxWidth: 800,
         maxHeight: 800,
         imageQuality: 85,
       );
-      if (image != null) {
-        _pickedImageBytes = await image.readAsBytes();
-        _pickedImageName = image.name;
+      if (pickedFiles.isNotEmpty) {
+        for (final file in pickedFiles) {
+          final bytes = await file.readAsBytes();
+          _images.add(ProductImageItem(
+            bytes: bytes,
+            id: '${DateTime.now().microsecondsSinceEpoch}_${file.name}',
+          ));
+        }
         _errorMessage = null;
         notifyListeners();
       }
@@ -125,9 +178,8 @@ class ProductFormViewModel extends ChangeNotifier {
     }
   }
 
-  void clearPickedImage() {
-    _pickedImageBytes = null;
-    _pickedImageName = null;
+  void removeImage(ProductImageItem item) {
+    _images.remove(item);
     notifyListeners();
   }
 
@@ -183,15 +235,22 @@ class ProductFormViewModel extends ChangeNotifier {
     };
 
     try {
-      // 1. Tải ảnh lên Supabase Storage nếu có ảnh mới được chọn
-      String? uploadedImageUrl;
-      if (_pickedImageBytes != null && _pickedImageName != null) {
-        final extension = _pickedImageName!.split('.').last;
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
-        uploadedImageUrl = await _repository.uploadProductImage(fileName, _pickedImageBytes!);
+      // 1. Tải các ảnh mới chọn lên Supabase Storage
+      final List<String> finalImageUrls = [];
+      for (final item in _images) {
+        if (item.url != null) {
+          finalImageUrls.add(item.url!);
+        } else if (item.bytes != null) {
+          final extension = item.id.split('.').last.toLowerCase();
+          final safeExtension = (extension == 'png' || extension == 'jpeg' || extension == 'webp') ? extension : 'jpg';
+          final cleanUnique = UniqueKey().toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+          final fileName = '${DateTime.now().millisecondsSinceEpoch}_$cleanUnique.$safeExtension';
+          final url = await _repository.uploadProductImage(fileName, item.bytes!);
+          finalImageUrls.add(url);
+        }
       }
 
-      // 2. Lưu sản phẩm
+      // 2. Lưu sản phẩm chính
       String productId;
       if (isEditing) {
         productId = _product!.id;
@@ -204,11 +263,8 @@ class ProductFormViewModel extends ChangeNotifier {
         productId = newProduct.id;
       }
 
-      // 3. Cập nhật bảng product_images nếu có ảnh mới
-      if (uploadedImageUrl != null) {
-        await _repository.saveProductImage(productId, uploadedImageUrl);
-        _imageUrl = uploadedImageUrl;
-      }
+      // 3. Đồng bộ lại toàn bộ danh sách hình ảnh của sản phẩm
+      await _repository.saveProductImages(productId, finalImageUrls);
 
       _isLoading = false;
       notifyListeners();

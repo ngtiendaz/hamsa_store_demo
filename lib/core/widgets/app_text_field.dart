@@ -9,6 +9,9 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final String? errorText;
   final String? initialValue;
+  final TextEditingController? controller;
+  final int? maxLines;
+  final int? minLines;
 
   const AppTextField({
     super.key,
@@ -19,6 +22,9 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.errorText,
     this.initialValue,
+    this.controller,
+    this.maxLines,
+    this.minLines,
   });
 
   @override
@@ -32,10 +38,13 @@ class AppTextField extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller,
+          initialValue: controller == null ? initialValue : null,
           onChanged: onChanged,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          maxLines: keyboardType == TextInputType.multiline ? maxLines : 1,
+          minLines: keyboardType == TextInputType.multiline ? minLines : 1,
           decoration: InputDecoration(
             hintText: hintText,
             errorText: errorText,

@@ -14,142 +14,175 @@ class MainLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isDesktop = mediaQuery.size.width > 900;
-    final currentRoute = GoRouterState.of(context).matchedLocation;
     final authViewModel = Provider.of<AuthViewModel>(context);
     final profile = authViewModel.currentProfile;
 
     final menuItems = _getMenuItems(profile?.role ?? 'customer');
+    final router = GoRouter.of(context);
 
-    if (isDesktop) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        body: Row(
-          children: [
-            // Sidebar
-            Container(
-              width: 260,
-              decoration: const BoxDecoration(
-                border: Border(
-                  right: BorderSide(color: AppColors.surface, width: 1.5),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    'HAMSA STORE',
-                    style: AppTextStyles.headlineMd.copyWith(letterSpacing: -1),
-                  ),
-                  const SizedBox(height: 40),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: menuItems.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemBuilder: (context, index) {
-                        final item = menuItems[index];
-                        final isSelected = currentRoute.startsWith(item.route);
+    return AnimatedBuilder(
+      animation: router.routerDelegate,
+      builder: (context, childWidget) {
+        final currentRoute = router.routeInformationProvider.value.uri.path;
 
-                        return _buildMenuItemTile(
-                          context: context,
-                          item: item,
-                          isSelected: isSelected,
-                        );
-                      },
+        if (isDesktop) {
+          return Scaffold(
+            backgroundColor: AppColors.background,
+            body: Row(
+              children: [
+                // Sidebar
+                Container(
+                  width: 260,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: AppColors.surface, width: 1.5),
                     ),
                   ),
-                  // User Profile Box
-                  _buildProfileBox(context, profile, authViewModel),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-            // Main content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Top Bar
-                  Container(
-                    height: 70,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppColors.surface,
-                          width: 1.5,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      Text(
+                        'HAMSA STORE',
+                        style: AppTextStyles.headlineMd.copyWith(letterSpacing: -1),
+                      ),
+                      const SizedBox(height: 40),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: menuItems.length,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemBuilder: (context, index) {
+                            final item = menuItems[index];
+                            final isSelected = currentRoute.startsWith(item.route);
+
+                            return _buildMenuItemTile(
+                              context: context,
+                              item: item,
+                              isSelected: isSelected,
+                            );
+                          },
                         ),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _getPageTitle(currentRoute),
-                          style: AppTextStyles.headlineMd,
-                        ),
-                        // Top bar actions can go here
-                      ],
-                    ),
+                      // User Profile Box
+                      _buildProfileBox(context, profile, authViewModel),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  // Main Body
-                  Expanded(child: child),
-                ],
-              ),
+                ),
+                // Main content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Top Bar
+                      Container(
+                        height: 70,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: AppColors.surface,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit') ...[
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+                                onPressed: () {
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go('/admin/products');
+                                  }
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Text(
+                              _getPageTitle(currentRoute),
+                              style: AppTextStyles.headlineMd,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Main Body
+                      Expanded(child: childWidget ?? const SizedBox.shrink()),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    }
+          );
+        }
 
-    // Mobile layout
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          _getPageTitle(currentRoute),
-          style: AppTextStyles.headlineMd.copyWith(fontSize: 20),
-        ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.primary),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: AppColors.surface, height: 1),
-        ),
-      ),
-      drawer: Drawer(
-        backgroundColor: AppColors.background,
-        child: Column(
-          children: [
-            const SizedBox(height: 60),
-            Text(
-              'HAMSA STORE',
-              style: AppTextStyles.headlineMd.copyWith(letterSpacing: -1),
+        // Mobile layout
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            leading: (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit')
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/admin/products');
+                      }
+                    },
+                  )
+                : null,
+            title: Text(
+              _getPageTitle(currentRoute),
+              style: AppTextStyles.headlineMd.copyWith(fontSize: 20),
             ),
-            const SizedBox(height: 40),
-            Expanded(
-              child: ListView.builder(
-                itemCount: menuItems.length,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemBuilder: (context, index) {
-                  final item = menuItems[index];
-                  final isSelected = currentRoute.startsWith(item.route);
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: AppColors.primary),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(color: AppColors.surface, height: 1),
+            ),
+          ),
+          drawer: Drawer(
+            backgroundColor: AppColors.background,
+            child: Column(
+              children: [
+                const SizedBox(height: 60),
+                Text(
+                  'HAMSA STORE',
+                  style: AppTextStyles.headlineMd.copyWith(letterSpacing: -1),
+                ),
+                const SizedBox(height: 40),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: menuItems.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      final item = menuItems[index];
+                      final isSelected = currentRoute.startsWith(item.route);
 
-                  return _buildMenuItemTile(
-                    context: context,
-                    item: item,
-                    isSelected: isSelected,
-                    onTap: () => Navigator.pop(context),
-                  );
-                },
-              ),
+                      return _buildMenuItemTile(
+                        context: context,
+                        item: item,
+                        isSelected: isSelected,
+                        onTap: () => Navigator.pop(context),
+                      );
+                    },
+                  ),
+                ),
+                _buildProfileBox(context, profile, authViewModel),
+                const SizedBox(height: 20),
+              ],
             ),
-            _buildProfileBox(context, profile, authViewModel),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-      body: child,
+          ),
+          body: childWidget ?? const SizedBox.shrink(),
+        );
+      },
+      child: child,
     );
   }
 
@@ -280,6 +313,8 @@ class MainLayout extends StatelessWidget {
 
   String _getPageTitle(String route) {
     if (route.startsWith('/admin/dashboard')) return 'Dashboard';
+    if (route.startsWith('/admin/products/new')) return 'Thêm sản phẩm';
+    if (route.startsWith('/admin/products/edit')) return 'Chi tiết sản phẩm';
     if (route.startsWith('/admin/products')) return 'Quản lý sản phẩm';
     if (route.startsWith('/admin/categories')) return 'Quản lý danh mục';
     if (route.startsWith('/admin/brands')) return 'Quản lý nhãn hàng';

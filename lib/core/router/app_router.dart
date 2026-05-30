@@ -21,6 +21,8 @@ import '../../features/customer/orders/view/customer_order_list_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
 import '../../features/user/profile/view/profile_view.dart';
 import '../../features/admin/orders/view/admin_order_list_view.dart';
+import '../../features/admin/orders/view/order_detail_view.dart';
+import '../../data/models/order_model.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -117,6 +119,13 @@ class AppRouter {
             GoRoute(
               path: '/admin/orders',
               builder: (context, state) => const AdminOrderListView(),
+            ),
+            GoRoute(
+              path: '/admin/orders/detail',
+              builder: (context, state) {
+                final order = state.extra as OrderModel;
+                return AdminOrderDetailView(order: order);
+              },
             ),
             GoRoute(
               path: '/admin/users',

@@ -89,7 +89,7 @@ class MainLayout extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit') ...[
+                            if (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit' || currentRoute == '/admin/orders/detail') ...[
                               IconButton(
                                 icon: const Icon(Icons.arrow_back, color: AppColors.primary),
                                 onPressed: () {
@@ -100,8 +100,10 @@ class MainLayout extends StatelessWidget {
                                       context.go('/admin/products');
                                     } else if (currentRoute.contains('/categories')) {
                                       context.go('/admin/categories');
-                                    } else {
+                                    } else if (currentRoute.contains('/brands')) {
                                       context.go('/admin/brands');
+                                    } else {
+                                      context.go('/admin/orders');
                                     }
                                   }
                                 },
@@ -129,7 +131,7 @@ class MainLayout extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit')
+            leading: (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit' || currentRoute == '/admin/orders/detail')
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
@@ -140,8 +142,10 @@ class MainLayout extends StatelessWidget {
                           context.go('/admin/products');
                         } else if (currentRoute.contains('/categories')) {
                           context.go('/admin/categories');
-                        } else {
+                        } else if (currentRoute.contains('/brands')) {
                           context.go('/admin/brands');
+                        } else {
+                          context.go('/admin/orders');
                         }
                       }
                     },
@@ -334,6 +338,7 @@ class MainLayout extends StatelessWidget {
     if (route.startsWith('/admin/brands/new')) return 'Thêm nhãn hàng';
     if (route.startsWith('/admin/brands/edit')) return 'Chi tiết nhãn hàng';
     if (route.startsWith('/admin/brands')) return 'Quản lý nhãn hàng';
+    if (route.startsWith('/admin/orders/detail')) return 'Chi tiết đơn hàng';
     if (route.startsWith('/admin/orders')) return 'Quản lý đơn hàng';
     if (route.startsWith('/admin/users')) return 'Quản lý người dùng';
     if (route.startsWith('/profile')) return 'Trang cá nhân';

@@ -463,6 +463,17 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
       );
     }
   }
+
+  @override
+  Future<void> requestReturnOrder(String orderId, String userId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId && o.customerId == userId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'return_requested',
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
 }
 
 class _FakeAdminOrderRepository implements AdminOrderDataSource {
@@ -496,6 +507,54 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
         status: 'cancelled',
         cancelledBy: adminId,
         cancelledAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  @override
+  Future<void> deliverOrderSuccess(String orderId, String adminId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'delivered',
+        paymentStatus: orders[idx].paymentMethod == 'cash' ? 'paid' : orders[idx].paymentStatus,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  @override
+  Future<void> deliverOrderFailed(String orderId, String adminId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'delivery_failed',
+        paymentStatus: orders[idx].paymentMethod == 'wallet' ? 'refunded' : orders[idx].paymentStatus,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  @override
+  Future<void> approveReturnOrder(String orderId, String adminId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'returned',
+        paymentStatus: orders[idx].paymentStatus == 'paid' ? 'refunded' : orders[idx].paymentStatus,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  @override
+  Future<void> cancelPendingOrder(String orderId, String adminId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'cancelled',
+        paymentStatus: orders[idx].paymentMethod == 'wallet' && orders[idx].paymentStatus == 'paid' ? 'refunded' : orders[idx].paymentStatus,
         updatedAt: DateTime.now(),
       );
     }

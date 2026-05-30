@@ -5,6 +5,10 @@ abstract class AdminOrderDataSource {
   Future<List<OrderModel>> getAllOrders();
   Future<void> confirmOrder(String orderId, String adminId);
   Future<void> approveCancelOrder(String orderId, String adminId);
+  Future<void> deliverOrderSuccess(String orderId, String adminId);
+  Future<void> deliverOrderFailed(String orderId, String adminId);
+  Future<void> approveReturnOrder(String orderId, String adminId);
+  Future<void> cancelPendingOrder(String orderId, String adminId);
 }
 
 class AdminOrderRepository implements AdminOrderDataSource {
@@ -49,6 +53,70 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_approve_cancel_order',
+        params: {
+          'p_order_id': orderId,
+          'p_admin_id': adminId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> deliverOrderSuccess(String orderId, String adminId) async {
+    try {
+      await _client.rpc(
+        'admin_deliver_order_success',
+        params: {
+          'p_order_id': orderId,
+          'p_admin_id': adminId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> deliverOrderFailed(String orderId, String adminId) async {
+    try {
+      await _client.rpc(
+        'admin_deliver_order_failed',
+        params: {
+          'p_order_id': orderId,
+          'p_admin_id': adminId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> approveReturnOrder(String orderId, String adminId) async {
+    try {
+      await _client.rpc(
+        'admin_approve_return_order',
+        params: {
+          'p_order_id': orderId,
+          'p_admin_id': adminId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> cancelPendingOrder(String orderId, String adminId) async {
+    try {
+      await _client.rpc(
+        'admin_cancel_pending_order',
         params: {
           'p_order_id': orderId,
           'p_admin_id': adminId,

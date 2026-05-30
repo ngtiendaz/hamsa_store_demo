@@ -66,4 +66,76 @@ class AdminOrderListViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> deliverOrderSuccess(String orderId, String adminId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.deliverOrderSuccess(orderId, adminId);
+      await loadOrders();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deliverOrderFailed(String orderId, String adminId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.deliverOrderFailed(orderId, adminId);
+      await loadOrders();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> approveReturn(String orderId, String adminId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.approveReturnOrder(orderId, adminId);
+      await loadOrders();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> cancelPending(String orderId, String adminId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.cancelPendingOrder(orderId, adminId);
+      await loadOrders();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

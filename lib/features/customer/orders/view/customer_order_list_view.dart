@@ -42,58 +42,108 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Đơn hàng của tôi', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+    return DefaultTabController(
+      length: 6,
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: Consumer<CustomerOrderListViewModel>(
-        builder: (context, viewModel, child) {
-          if (viewModel.isLoading && viewModel.orders.isEmpty) {
-            return const AppLoading();
-          }
+        body: Consumer<CustomerOrderListViewModel>(
+          builder: (context, viewModel, child) {
+            if (viewModel.isLoading && viewModel.orders.isEmpty) {
+              return const AppLoading();
+            }
 
-          if (viewModel.orders.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () async => _refresh(),
-              child: const CustomScrollView(
-                slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
-                          SizedBox(height: 12),
-                          Text('Bạn chưa có đơn hàng nào.'),
-                        ],
-                      ),
-                    ),
+            return Column(
+              children: [
+                TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicatorColor: AppColors.primary,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.detail,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  tabs: const [
+                    Tab(text: 'Tất cả'),
+                    Tab(text: 'Chờ xác nhận'),
+                    Tab(text: 'Chờ xác nhận hủy'),
+                    Tab(text: 'Đang giao'),
+                    Tab(text: 'Đã giao'),
+                    Tab(text: 'Đã hủy'),
+                  ],
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _buildOrderList(context, viewModel, userId, null),
+                      _buildOrderList(context, viewModel, userId, 'pending_confirmation'),
+                      _buildOrderList(context, viewModel, userId, 'cancel_requested'),
+                      _buildOrderList(context, viewModel, userId, 'shipping_or_confirmed'),
+                      _buildOrderList(context, viewModel, userId, 'delivered'),
+                      _buildOrderList(context, viewModel, userId, 'cancelled_or_failed'),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             );
-          }
+          },
+        ),
+      ),
+    );
+  }
 
-          return RefreshIndicator(
-            onRefresh: () async => _refresh(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: viewModel.orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final order = viewModel.orders[index];
-                return _OrderCard(
-                  order: order,
-                  userId: userId,
-                  viewModel: viewModel,
-                );
-              },
+  Widget _buildOrderList(
+    BuildContext context,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+    String? filterStatus,
+  ) {
+    final filteredOrders = viewModel.orders.where((order) {
+      if (filterStatus == null) return true;
+      if (filterStatus == 'shipping_or_confirmed') {
+        return order.status == 'shipping' || order.status == 'confirmed';
+      }
+      if (filterStatus == 'cancelled_or_failed') {
+        return order.status == 'cancelled' || order.status == 'delivery_failed';
+      }
+      return order.status == filterStatus;
+    }).toList();
+
+    if (filteredOrders.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: () async => _refresh(),
+        child: const CustomScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
+                    SizedBox(height: 12),
+                    Text('Không có đơn hàng nào.'),
+                  ],
+                ),
+              ),
             ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => _refresh(),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: filteredOrders.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final order = filteredOrders[index];
+          return _OrderCard(
+            order: order,
+            userId: userId,
+            viewModel: viewModel,
           );
         },
       ),
@@ -116,6 +166,8 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final double amountPaid = order.paymentStatus == 'paid' ? order.totalAmount : 0.0;
+    final double amountDue = order.paymentStatus == 'unpaid' ? order.totalAmount : 0.0;
 
     Color statusColor;
     String statusText = order.statusLabel;
@@ -200,24 +252,35 @@ class _OrderCard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: order.items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, __) => const Divider(height: 16),
               itemBuilder: (context, idx) {
                 final item = order.items[idx];
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        '${item.productNameSnapshot} x${item.quantity}',
-                        style: const TextStyle(fontSize: 14),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     Text(
-                      currencyFormat.format(item.subtotal),
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      item.productNameSnapshot,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Đơn giá: ${currencyFormat.format(item.priceSnapshot)}',
+                          style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                        ),
+                        Text(
+                          'Số lượng: ${item.quantity}',
+                          style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                        ),
+                        Text(
+                          'Thành tiền: ${currencyFormat.format(item.subtotal)}',
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                        ),
+                      ],
                     ),
                   ],
                 );
@@ -257,7 +320,7 @@ class _OrderCard extends StatelessWidget {
                 ],
               ),
             ],
-            const SizedBox(height: 12),
+            const Divider(height: 24),
 
             // Footer: Payment Method + Total
             Row(
@@ -269,19 +332,29 @@ class _OrderCard extends StatelessWidget {
                       : 'Thanh toán khi nhận hàng (COD)',
                   style: const TextStyle(color: AppColors.detail, fontSize: 13),
                 ),
-                Text(
-                  currencyFormat.format(order.totalAmount),
-                  style: const TextStyle(
-                    color: AppColors.error,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Đã thanh toán: ${currencyFormat.format(amountPaid)}',
+                      style: const TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Cần thanh toán: ${currencyFormat.format(amountDue)}',
+                      style: const TextStyle(
+                        color: AppColors.error,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
 
             // Actions Buttons
-            if (order.status == 'pending_confirmation' || order.status == 'cancel_requested') ...[
+            if (order.status == 'pending_confirmation' || order.status == 'cancel_requested' || order.status == 'delivered') ...[
               const Divider(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -306,6 +379,16 @@ class _OrderCard extends StatelessWidget {
                       ),
                       onPressed: () => _onWithdrawCancel(context),
                       child: const Text('Rút yêu cầu hủy'),
+                    ),
+                  if (order.status == 'delivered')
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: const BorderSide(color: Colors.orange),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => _showReturnDialog(context),
+                      child: const Text('Yêu cầu đổi trả'),
                     ),
                 ],
               ),
@@ -340,6 +423,36 @@ class _OrderCard extends StatelessWidget {
               }
             },
             child: const Text('Gửi yêu cầu', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReturnDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Yêu cầu đổi trả đơn hàng'),
+        content: const Text('Bạn có chắc chắn muốn gửi yêu cầu đổi trả cho đơn hàng này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final success = await viewModel.requestReturn(order.id, userId);
+              if (context.mounted) {
+                if (success) {
+                  AppToast.showSuccess(context, 'Đã gửi yêu cầu đổi trả đơn hàng.');
+                } else if (viewModel.errorMessage != null) {
+                  AppToast.showError(context, viewModel.errorMessage!);
+                }
+              }
+            },
+            child: const Text('Gửi yêu cầu', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

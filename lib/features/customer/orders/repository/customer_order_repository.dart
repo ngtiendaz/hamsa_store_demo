@@ -15,6 +15,7 @@ abstract class CustomerOrderDataSource {
   });
   Future<void> requestCancelOrder(String orderId, String userId);
   Future<void> cancelRequestCancelOrder(String orderId, String userId);
+  Future<void> requestReturnOrder(String orderId, String userId);
 }
 
 class CustomerOrderRepository implements CustomerOrderDataSource {
@@ -92,6 +93,22 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       await _client.rpc(
         'cancel_request_cancel_order',
+        params: {
+          'p_order_id': orderId,
+          'p_user_id': userId,
+        },
+      );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> requestReturnOrder(String orderId, String userId) async {
+    try {
+      await _client.rpc(
+        'customer_request_return_order',
         params: {
           'p_order_id': orderId,
           'p_user_id': userId,

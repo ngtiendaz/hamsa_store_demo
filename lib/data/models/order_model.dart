@@ -72,9 +72,9 @@ class OrderModel {
       case 'cancel_requested':
         return 'Chờ xác nhận hủy';
       case 'return_requested':
-        return 'Yêu cầu trả hàng';
+        return 'Chờ xác nhận đổi trả';
       case 'returned':
-        return 'Đã trả hàng';
+        return 'Đã hoàn trả';
       default:
         return status;
     }

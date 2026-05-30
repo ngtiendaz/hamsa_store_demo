@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -116,6 +117,7 @@ class _DashboardContent extends StatelessWidget {
                     detail: 'Đơn hàng đang vận chuyển',
                     icon: Icons.local_shipping_outlined,
                     color: const Color(0xFF2878D0),
+                    onTap: () => context.go('/admin/orders?status=shipping'),
                   ),
                 ),
                 SizedBox(
@@ -126,6 +128,7 @@ class _DashboardContent extends StatelessWidget {
                     detail: 'Đơn hàng đã giao',
                     icon: Icons.task_alt_outlined,
                     color: const Color(0xFF3A9A54),
+                    onTap: () => context.go('/admin/orders?status=delivered'),
                   ),
                 ),
                 SizedBox(
@@ -136,6 +139,7 @@ class _DashboardContent extends StatelessWidget {
                     detail: 'Đơn hàng đã hủy',
                     icon: Icons.cancel_outlined,
                     color: const Color(0xFFC33D3D),
+                    onTap: () => context.go('/admin/orders?status=cancelled'),
                   ),
                 ),
                 SizedBox(
@@ -146,6 +150,7 @@ class _DashboardContent extends StatelessWidget {
                     detail: currency.format(stats.refundedAmount),
                     icon: Icons.currency_exchange_outlined,
                     color: const Color(0xFF9A6A18),
+                    onTap: () => context.go('/admin/orders?status=refunded'),
                   ),
                 ),
               ],

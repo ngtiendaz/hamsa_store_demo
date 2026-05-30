@@ -310,6 +310,10 @@ lib/
   - Cho phép chọn tháng và năm cụ thể bằng dropdown.
   - Cho phép chọn năm cụ thể bằng dropdown.
   - Truyền ngày tham chiếu vào RPC để tính đúng ranh giới kỳ theo múi giờ Việt Nam.
+- [x] 12.9. Điều hướng nhanh từ card trạng thái dashboard sang quản lý đơn hàng:
+  - Card đang giao, giao thành công và đã hủy mở tab đơn hàng với trạng thái tương ứng.
+  - Card đã hoàn tiền mở tab đơn hàng và lọc theo `payment_status` hoàn tiền toàn phần hoặc một phần.
+  - Trạng thái lọc được truyền qua query parameter và đồng bộ với dropdown danh sách đơn hàng.
 
 ---
 

@@ -124,7 +124,9 @@ class AppRouter {
             ),
             GoRoute(
               path: '/admin/orders',
-              builder: (context, state) => const AdminOrderListView(),
+              builder: (context, state) => AdminOrderListView(
+                initialStatus: state.uri.queryParameters['status'],
+              ),
             ),
             GoRoute(
               path: '/admin/orders/detail',

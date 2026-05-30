@@ -11,14 +11,29 @@ import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/admin_order_list_view_model.dart';
 
 class AdminOrderListView extends StatefulWidget {
-  const AdminOrderListView({super.key});
+  final String? initialStatus;
+
+  const AdminOrderListView({super.key, this.initialStatus});
 
   @override
   State<AdminOrderListView> createState() => _AdminOrderListViewState();
 }
 
 class _AdminOrderListViewState extends State<AdminOrderListView> {
-  String _statusFilter = 'all'; 
+  static const _allowedStatusFilters = {
+    'all',
+    'pending_confirmation',
+    'cancel_requested',
+    'shipping',
+    'delivered',
+    'delivery_failed',
+    'return_requested',
+    'returned',
+    'cancelled',
+    'refunded',
+  };
+
+  late String _statusFilter;
   String _searchQuery = '';
 
   late final Debounce _debounce;
@@ -27,10 +42,25 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
   @override
   void initState() {
     super.initState();
+    _statusFilter = _normalizeStatusFilter(widget.initialStatus);
     _debounce = Debounce(delay: const Duration(milliseconds: 300));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AdminOrderListViewModel>().loadOrders();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant AdminOrderListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialStatus != oldWidget.initialStatus) {
+      setState(() {
+        _statusFilter = _normalizeStatusFilter(widget.initialStatus);
+      });
+    }
+  }
+
+  String _normalizeStatusFilter(String? status) {
+    return _allowedStatusFilters.contains(status) ? status! : 'all';
   }
 
   @override
@@ -65,27 +95,37 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
 
           // Lọc danh sách theo status và tìm kiếm
           final filteredOrders = viewModel.orders.where((order) {
-            final matchesStatus = _statusFilter == 'all' || order.status == _statusFilter;
+            final matchesStatus =
+                _statusFilter == 'all' ||
+                (_statusFilter == 'refunded'
+                    ? order.paymentStatus == 'refunded' ||
+                          order.paymentStatus == 'partially_refunded'
+                    : order.status == _statusFilter);
             final query = _searchQuery.trim().toLowerCase();
             if (query.isEmpty) return matchesStatus;
 
             final matchesCode = order.orderCode.toLowerCase().contains(query);
-            final matchesCustomer = order.customerName.toLowerCase().contains(query);
-            final matchesPhone = (order.customerPhone ?? '').toLowerCase().contains(query);
+            final matchesCustomer = order.customerName.toLowerCase().contains(
+              query,
+            );
+            final matchesPhone = (order.customerPhone ?? '')
+                .toLowerCase()
+                .contains(query);
 
-            return matchesStatus && (matchesCode || matchesCustomer || matchesPhone);
+            return matchesStatus &&
+                (matchesCode || matchesCustomer || matchesPhone);
           }).toList();
 
           return LayoutBuilder(
             builder: (context, constraints) {
               final isDesktop = constraints.maxWidth >= 900;
-              
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Search & Filter header
                   _buildHeader(),
-                  
+
                   // Main Content
                   Expanded(
                     child: RefreshIndicator(
@@ -95,15 +135,29 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
+                                  Icon(
+                                    Icons.receipt_long_outlined,
+                                    size: 56,
+                                    color: AppColors.detail,
+                                  ),
                                   SizedBox(height: 12),
                                   Text('Không tìm thấy đơn hàng nào.'),
                                 ],
                               ),
                             )
                           : isDesktop
-                              ? _buildDesktopTable(filteredOrders, profile.id, isSystemAdmin, viewModel)
-                              : _buildMobileList(filteredOrders, profile.id, isSystemAdmin, viewModel),
+                          ? _buildDesktopTable(
+                              filteredOrders,
+                              profile.id,
+                              isSystemAdmin,
+                              viewModel,
+                            )
+                          : _buildMobileList(
+                              filteredOrders,
+                              profile.id,
+                              isSystemAdmin,
+                              viewModel,
+                            ),
                     ),
                   ),
                 ],
@@ -126,6 +180,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
       {'value': 'return_requested', 'label': 'Chờ xác nhận đổi trả'},
       {'value': 'returned', 'label': 'Đã hoàn trả'},
       {'value': 'cancelled', 'label': 'Đã hủy'},
+      {'value': 'refunded', 'label': 'Đã hoàn tiền'},
     ];
 
     return Padding(
@@ -133,7 +188,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isLarge = constraints.maxWidth >= 700;
-          
+
           final searchField = SizedBox(
             width: isLarge ? 320 : double.infinity,
             height: 40,
@@ -148,23 +203,42 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
               },
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm mã đơn, khách hàng, SĐT...',
-                hintStyle: const TextStyle(color: AppColors.detail, fontSize: 13),
-                prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.detail),
+                hintStyle: const TextStyle(
+                  color: AppColors.detail,
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 18,
+                  color: AppColors.detail,
+                ),
                 fillColor: AppColors.surface,
                 filled: true,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.border,
+                    width: 1.0,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.border,
+                    width: 1.0,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -182,8 +256,16 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _statusFilter,
-                icon: const Icon(Icons.filter_list, size: 18, color: AppColors.detail),
-                style: const TextStyle(color: AppColors.onSurface, fontSize: 13, fontWeight: FontWeight.w500),
+                icon: const Icon(
+                  Icons.filter_list,
+                  size: 18,
+                  color: AppColors.detail,
+                ),
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
                 dropdownColor: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 onChanged: (String? newValue) {
@@ -216,11 +298,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              searchField,
-              const SizedBox(height: 12),
-              filterDropdown,
-            ],
+            children: [searchField, const SizedBox(height: 12), filterDropdown],
           );
         },
       ),
@@ -246,12 +324,12 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
         color: AppColors.surface,
         child: Table(
           columnWidths: const {
-            0: FlexColumnWidth(1.5), 
-            1: FlexColumnWidth(2.0), 
-            2: FlexColumnWidth(2.8), 
-            3: FlexColumnWidth(1.2), 
-            4: FlexColumnWidth(1.5), 
-            5: FlexColumnWidth(1.7), 
+            0: FlexColumnWidth(1.5),
+            1: FlexColumnWidth(2.0),
+            2: FlexColumnWidth(2.8),
+            3: FlexColumnWidth(1.2),
+            4: FlexColumnWidth(1.5),
+            5: FlexColumnWidth(1.7),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
@@ -259,20 +337,34 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             ...orders.map((order) {
               return TableRow(
                 decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.border, width: 0.5),
+                  ),
                 ),
                 children: [
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(order.orderCode, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              order.orderCode,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text(formatVietnamDateTime(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
+                            Text(
+                              formatVietnamDateTime(order.createdAt),
+                              style: const TextStyle(
+                                color: AppColors.detail,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -280,15 +372,27 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   ),
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text(
+                              order.customerName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text(order.customerPhone ?? 'Không có SĐT', style: const TextStyle(color: AppColors.detail, fontSize: 13)),
+                            Text(
+                              order.customerPhone ?? 'Không có SĐT',
+                              style: const TextStyle(
+                                color: AppColors.detail,
+                                fontSize: 13,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -296,7 +400,8 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   ),
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -304,7 +409,10 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                           children: order.items.map<Widget>((item) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 4),
-                              child: Text('${item.productNameSnapshot} x${item.quantity}', style: const TextStyle(fontSize: 13)),
+                              child: Text(
+                                '${item.productNameSnapshot} x${item.quantity}',
+                                style: const TextStyle(fontSize: 13),
+                              ),
                             );
                           }).toList(),
                         ),
@@ -313,38 +421,51 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   ),
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
                           currencyFormat.format(order.totalAmount),
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
                         ),
                       ),
                     ),
                   ),
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(order.paymentMethod == 'wallet' ? 'Ví HamsaPay' : 'COD', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                            Text(
+                              order.paymentMethod == 'wallet'
+                                  ? 'Ví HamsaPay'
+                                  : 'COD',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               order.paymentStatus == 'paid'
                                   ? 'Đã thu tiền'
                                   : order.paymentStatus == 'refunded'
-                                      ? 'Đã hoàn tiền'
-                                      : 'Chưa thu tiền',
+                                  ? 'Đã hoàn tiền'
+                                  : 'Chưa thu tiền',
                               style: TextStyle(
                                 color: order.paymentStatus == 'paid'
                                     ? Colors.green
                                     : order.paymentStatus == 'refunded'
-                                        ? Colors.blue
-                                        : Colors.orange,
+                                    ? Colors.blue
+                                    : Colors.orange,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -356,7 +477,8 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   ),
                   TableCell(
                     child: InkWell(
-                      onTap: () => context.go('/admin/orders/detail', extra: order),
+                      onTap: () =>
+                          context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Center(child: _buildStatusBadge(order)),
@@ -373,17 +495,31 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
   }
 
   TableRow _buildTableHeaderRow() {
-    final headers = ['ĐƠN HÀNG', 'KHÁCH HÀNG', 'SẢN PHẨM', 'TỔNG TIỀN', 'THANH TOÁN', 'TRẠNG THÁI'];
+    final headers = [
+      'ĐƠN HÀNG',
+      'KHÁCH HÀNG',
+      'SẢN PHẨM',
+      'TỔNG TIỀN',
+      'THANH TOÁN',
+      'TRẠNG THÁI',
+    ];
     return TableRow(
       decoration: const BoxDecoration(
         color: AppColors.border,
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
       ),
       children: headers.map((header) {
         final isStatus = header == 'TRẠNG THÁI';
         final textWidget = Text(
           header,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            color: Colors.black87,
+          ),
         );
         return Padding(
           padding: const EdgeInsets.all(16),
@@ -404,7 +540,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      separatorBuilder: (_, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final order = orders[index];
         return Card(
@@ -425,17 +561,38 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(order.orderCode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text(
+                        order.orderCode,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                       _buildStatusBadge(order),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(formatVietnamDateTime(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
+                  Text(
+                    formatVietnamDateTime(order.createdAt),
+                    style: const TextStyle(
+                      color: AppColors.detail,
+                      fontSize: 12,
+                    ),
+                  ),
                   const Divider(height: 24),
-                  
-                  Text('Người nhận: ${order.customerName} - ${order.customerPhone ?? "N/A"}', style: const TextStyle(fontSize: 14)),
+
+                  Text(
+                    'Người nhận: ${order.customerName} - ${order.customerPhone ?? "N/A"}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
                   const SizedBox(height: 4),
-                  Text('Địa chỉ: ${order.customerAddress ?? "N/A"}', style: const TextStyle(color: AppColors.detail, fontSize: 13)),
+                  Text(
+                    'Địa chỉ: ${order.customerAddress ?? "N/A"}',
+                    style: const TextStyle(
+                      color: AppColors.detail,
+                      fontSize: 13,
+                    ),
+                  ),
                   const Divider(height: 24),
 
                   Column(
@@ -446,8 +603,16 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(child: Text('${item.productNameSnapshot} x${item.quantity}', style: const TextStyle(fontSize: 13))),
-                            Text(currencyFormat.format(item.subtotal), style: const TextStyle(fontSize: 13)),
+                            Expanded(
+                              child: Text(
+                                '${item.productNameSnapshot} x${item.quantity}',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ),
+                            Text(
+                              currencyFormat.format(item.subtotal),
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           ],
                         ),
                       );
@@ -461,20 +626,28 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(order.paymentMethod == 'wallet' ? 'Ví HamsaPay' : 'COD', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          Text(
+                            order.paymentMethod == 'wallet'
+                                ? 'Ví HamsaPay'
+                                : 'COD',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             order.paymentStatus == 'paid'
                                 ? 'Đã thanh toán'
                                 : order.paymentStatus == 'refunded'
-                                    ? 'Đã hoàn tiền'
-                                    : 'Chưa thanh toán',
+                                ? 'Đã hoàn tiền'
+                                : 'Chưa thanh toán',
                             style: TextStyle(
                               color: order.paymentStatus == 'paid'
                                   ? Colors.green
                                   : order.paymentStatus == 'refunded'
-                                      ? Colors.blue
-                                      : Colors.orange,
+                                  ? Colors.blue
+                                  : Colors.orange,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -483,7 +656,11 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                       ),
                       Text(
                         currencyFormat.format(order.totalAmount),
-                        style: const TextStyle(color: AppColors.error, fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -530,15 +707,19 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
       width: 140,
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Text(
           order.statusLabel,
           textAlign: TextAlign.center,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
       ),
     );

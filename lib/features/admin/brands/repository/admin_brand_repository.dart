@@ -58,41 +58,9 @@ class AdminBrandRepository {
   }
 
   Future<void> deleteBrand(String brandId) async {
-    // 1. Tìm hoặc tự động tạo nhãn hàng "Khác" làm mặc định
-    final defaultBrandQuery = await _client
-        .from('brands')
-        .select()
-        .eq('name', 'Khác')
-        .maybeSingle();
-
-    String defaultBrandId;
-    if (defaultBrandQuery == null) {
-      final insertResult = await _client
-          .from('brands')
-          .insert({
-            'name': 'Khác',
-            'description': 'Nhãn hàng mặc định',
-            'is_active': true,
-          })
-          .select()
-          .single();
-      defaultBrandId = insertResult['id'] as String;
-    } else {
-      defaultBrandId = defaultBrandQuery['id'] as String;
-    }
-
-    // Nếu nhãn hàng muốn xóa chính là nhãn hàng "Khác", chặn lại
-    if (brandId == defaultBrandId) {
-      throw Exception('Không thể xóa nhãn hàng mặc định "Khác".');
-    }
-
-    // 2. Chuyển tất cả sản phẩm của nhãn hàng cần xóa sang nhãn hàng "Khác"
-    await _client
-        .from('products')
-        .update({'brand_id': defaultBrandId})
-        .eq('brand_id', brandId);
-
-    // 3. Tiến hành xóa nhãn hàng
-    await _client.from('brands').delete().eq('id', brandId);
+    await _client.rpc(
+      'admin_delete_brand',
+      params: {'p_brand_id': brandId},
+    );
   }
 }

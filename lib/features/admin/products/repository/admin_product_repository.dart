@@ -65,12 +65,12 @@ class AdminProductRepository {
     await _client.from('products').update(data).eq('id', id);
   }
 
-  Future<void> deleteProduct(String id, String userId) async {
-    await _client.from('products').update({
-      'status': 'inactive',
-      'deleted_at': DateTime.now().toIso8601String(),
-      'deleted_by': userId,
-    }).eq('id', id);
+  Future<String> deleteProduct(String id, String userId) async {
+    final result = await _client.rpc(
+      'admin_delete_or_deactivate_product',
+      params: {'p_product_id': id, 'p_admin_id': userId},
+    );
+    return result as String;
   }
 
   Future<String> uploadProductImage(String fileName, Uint8List bytes) async {

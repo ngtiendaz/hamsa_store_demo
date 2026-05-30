@@ -185,10 +185,15 @@ class _ProductFormViewState extends State<ProductFormView> {
 
                       // Trade Name
                       AppTextField(
-                        label: 'Tên thương mại',
+                        label: 'Tên thương mại (Bắt buộc)',
                         hintText: 'Nhập tên hiển thị thương mại...',
                         controller: _tradeNameController,
                         onChanged: viewModel.setTradeName,
+                        errorText:
+                            (viewModel.tradeName ?? '').trim().isEmpty &&
+                                viewModel.errorMessage != null
+                            ? 'Tên thương mại là bắt buộc.'
+                            : null,
                       ),
                       const SizedBox(height: 20),
 
@@ -521,7 +526,7 @@ class _ProductFormViewState extends State<ProductFormView> {
               ),
             )
           : const Text(
-              'Ngừng bán',
+              'Xóa sản phẩm',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
     );
@@ -593,10 +598,12 @@ class _ProductFormViewState extends State<ProductFormView> {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
-          'Xác nhận ngừng bán',
+          'Xác nhận xóa sản phẩm',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: const Text('Bạn có chắc chắn muốn ngừng bán sản phẩm này?'),
+        content: const Text(
+          'Nếu sản phẩm đã có trong giỏ hàng hoặc đơn hàng, hệ thống chỉ chuyển sang ngừng bán. Nếu chưa có dữ liệu liên quan, sản phẩm sẽ bị xóa vĩnh viễn.',
+        ),
         actions: [
           TextButton(
             child: const Text('Hủy', style: TextStyle(color: AppColors.detail)),
@@ -613,7 +620,9 @@ class _ProductFormViewState extends State<ProductFormView> {
               if (success && context.mounted) {
                 AppToast.showSuccess(
                   context,
-                  'Đã chuyển trạng thái sản phẩm thành ngừng bán.',
+                  viewModel.deleteResult == 'deleted'
+                      ? 'Đã xóa sản phẩm vĩnh viễn.'
+                      : 'Sản phẩm đã có dữ liệu liên quan nên chỉ được chuyển sang ngừng bán.',
                 );
                 context.pop(true); // quay lại danh sách
               } else if (context.mounted) {

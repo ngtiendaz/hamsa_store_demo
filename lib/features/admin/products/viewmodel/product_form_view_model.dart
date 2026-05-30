@@ -20,6 +20,7 @@ class ProductFormViewModel extends ChangeNotifier {
   ProductModel? _product;
   bool _isLoading = false;
   String? _errorMessage;
+  String? _deleteResult;
 
   List<CategoryModel> _categories = [];
   List<BrandModel> _brands = [];
@@ -40,6 +41,7 @@ class ProductFormViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String? get deleteResult => _deleteResult;
   bool get isEditing => _product != null;
 
   List<CategoryModel> get categories => _categories;
@@ -189,13 +191,18 @@ class ProductFormViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
-    if (_price < 0) {
-      _errorMessage = 'Giá sản phẩm phải lớn hơn hoặc bằng 0.';
+    if ((_tradeName ?? '').trim().isEmpty) {
+      _errorMessage = 'Tên thương mại không được để trống.';
       notifyListeners();
       return false;
     }
-    if (_stock < 0) {
-      _errorMessage = 'Số lượng tồn kho phải lớn hơn hoặc bằng 0.';
+    if (_price <= 0) {
+      _errorMessage = 'Đơn giá phải lớn hơn 0.';
+      notifyListeners();
+      return false;
+    }
+    if (_stock <= 0) {
+      _errorMessage = 'Số lượng tồn kho phải lớn hơn 0.';
       notifyListeners();
       return false;
     }
@@ -224,8 +231,8 @@ class ProductFormViewModel extends ChangeNotifier {
     final data = {
       'category_id': _categoryId,
       'brand_id': _brandId,
-      'internal_name': _internalName,
-      'trade_name': _tradeName,
+      'internal_name': _internalName.trim(),
+      'trade_name': _tradeName!.trim(),
       'barcode': _barcode,
       'description': _description,
       'price': _price,
@@ -281,14 +288,15 @@ class ProductFormViewModel extends ChangeNotifier {
     if (!isEditing) return false;
     _isLoading = true;
     _errorMessage = null;
+    _deleteResult = null;
     notifyListeners();
     try {
-      await _repository.deleteProduct(_product!.id, userId);
+      _deleteResult = await _repository.deleteProduct(_product!.id, userId);
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = 'Không thể xóa (ngừng bán) sản phẩm này: $e';
+      _errorMessage = 'Không thể xóa sản phẩm này: $e';
       _isLoading = false;
       notifyListeners();
       return false;

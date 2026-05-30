@@ -54,37 +54,9 @@ class AdminCategoryRepository {
   }
 
   Future<void> deleteCategory(String categoryId) async {
-    // 1. Tìm hoặc tự động tạo danh mục "Khác" làm mặc định
-    final defaultCatQuery = await _client
-        .from('categories')
-        .select()
-        .eq('name', 'Khác')
-        .maybeSingle();
-
-    String defaultCategoryId;
-    if (defaultCatQuery == null) {
-      final insertResult = await _client.from('categories').insert({
-        'name': 'Khác',
-        'description': 'Danh mục mặc định',
-        'is_active': true,
-      }).select().single();
-      defaultCategoryId = insertResult['id'] as String;
-    } else {
-      defaultCategoryId = defaultCatQuery['id'] as String;
-    }
-
-    // Nếu danh mục muốn xóa chính là danh mục "Khác", chặn lại
-    if (categoryId == defaultCategoryId) {
-      throw Exception('Không thể xóa danh mục mặc định "Khác".');
-    }
-
-    // 2. Chuyển tất cả sản phẩm của danh mục cần xóa sang danh mục "Khác"
-    await _client
-        .from('products')
-        .update({'category_id': defaultCategoryId})
-        .eq('category_id', categoryId);
-
-    // 3. Tiến hành xóa danh mục
-    await _client.from('categories').delete().eq('id', categoryId);
+    await _client.rpc(
+      'admin_delete_category',
+      params: {'p_category_id': categoryId},
+    );
   }
 }

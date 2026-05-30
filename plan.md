@@ -180,13 +180,16 @@ lib/
     - `employee`: **chỉ xem** danh sách và chi tiết, ẩn toàn bộ nút thêm/sửa/xóa.
 - [x] 6.4. Viết `ProductFormViewModel` & thiết kế `ProductFormView`:
   - Form thêm/sửa sản phẩm gồm các trường: Tên nội bộ (bắt buộc), Tên thương mại, Barcode, Giá, Tồn kho, Trạng thái.
-  - Validate form: Tên nội bộ bắt buộc, Giá >= 0, Tồn kho >= 0.
+  - Validate form: Tên nội bộ và tên thương mại bắt buộc, giá > 0, tồn kho > 0.
+  - Database vẫn cho phép tồn kho về `0` sau khi bán hết; điều kiện tồn kho `> 0` áp dụng khi admin lưu form sản phẩm.
+  - Khi xóa sản phẩm: xóa cứng nếu chưa có dữ liệu liên quan; nếu đã nằm trong giỏ hàng, đơn hàng hoặc lịch sử tồn kho thì chỉ chuyển trạng thái `inactive`.
 
 ### PHASE 6.5: Module — Quản lý Danh mục & Nhãn hàng (Category & Brand Management)
-- [ ] 6.5.1. Viết `AdminCategoryRepository` thực hiện CRUD danh mục với logic re-route về "Khác" khi xóa.
+- [x] 6.5.1. Viết `AdminCategoryRepository` thực hiện CRUD danh mục với logic re-route sản phẩm liên quan về "Khác" khi xóa.
 - [ ] 6.5.2. Viết `CategoryListViewModel` và `CategoryFormViewModel`.
 - [ ] 6.5.3. Thiết kế `CategoryListView` và `CategoryFormView` (giao diện tương tự Quản lý sản phẩm).
-- [ ] 6.5.4. Viết `AdminBrandRepository` thực hiện CRUD nhãn hàng với logic re-route về "Khác" khi xóa.
+- [x] 6.5.4. Viết `AdminBrandRepository` thực hiện CRUD nhãn hàng với logic re-route sản phẩm liên quan về "Khác" khi xóa.
+  - Xóa danh mục và nhãn hàng qua RPC transaction để chuyển toàn bộ sản phẩm liên quan về bản ghi `Khác` trước khi xóa.
 - [ ] 6.5.5. Viết `BrandListViewModel` và `BrandFormViewModel`.
 - [ ] 6.5.6. Thiết kế `BrandListView` và `BrandFormView` (giao diện tương tự Quản lý sản phẩm).
 - [ ] 6.5.7. Đăng ký router và cấu hình route cho Category & Brand trong `app_router.dart`.

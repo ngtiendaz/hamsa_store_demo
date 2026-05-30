@@ -47,10 +47,14 @@ class _CategoryListViewState extends State<CategoryListView> {
                         child: viewModel.isLoading
                             ? const AppLoading()
                             : viewModel.categories.isEmpty
-                                ? _buildEmptyState()
-                                : isDesktop
-                                    ? _buildCategoryTable(context, viewModel, isAdmin)
-                                    : _buildCategoryCardList(context, viewModel, isAdmin),
+                            ? _buildEmptyState()
+                            : isDesktop
+                            ? _buildCategoryTable(context, viewModel, isAdmin)
+                            : _buildCategoryCardList(
+                                context,
+                                viewModel,
+                                isAdmin,
+                              ),
                       ),
                       // Pagination
                       if (viewModel.categories.isNotEmpty)
@@ -118,14 +122,25 @@ class _CategoryListViewState extends State<CategoryListView> {
         searchField,
         if (isAdmin) ...[
           const SizedBox(height: 12),
-          AppButton(
-            text: 'Thêm danh mục',
-            onPressed: () async {
-              final result = await context.push('/admin/categories/new');
-              if (result == true) {
-                viewModel.loadCategories(refresh: true);
-              }
-            },
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                final result = await context.push('/admin/categories/new');
+                if (result == true) {
+                  viewModel.loadCategories(refresh: true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Thêm danh mục'),
+            ),
           ),
         ],
       ],
@@ -191,7 +206,10 @@ class _CategoryListViewState extends State<CategoryListView> {
                   color: AppColors.surface,
                   child: InkWell(
                     onTap: () async {
-                      final result = await context.push('/admin/categories/edit', extra: cat);
+                      final result = await context.push(
+                        '/admin/categories/edit',
+                        extra: cat,
+                      );
                       if (result == true) {
                         viewModel.loadCategories();
                       }
@@ -247,37 +265,50 @@ class _CategoryListViewState extends State<CategoryListView> {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           color: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
           borderOnForeground: false,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () async {
-              final result = await context.push('/admin/categories/edit', extra: cat);
-              if (result == true) {
-                viewModel.loadCategories();
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    cat.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+          child: SizedBox(
+            height: 112,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () async {
+                final result = await context.push(
+                  '/admin/categories/edit',
+                  extra: cat,
+                );
+                if (result == true) {
+                  viewModel.loadCategories();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cat.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    cat.description ?? 'Không có mô tả',
-                    style: const TextStyle(color: AppColors.detail, fontSize: 14),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      cat.description ?? 'Không có mô tả',
+                      style: const TextStyle(
+                        color: AppColors.detail,
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -302,7 +333,9 @@ class _CategoryListViewState extends State<CategoryListView> {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left),
-                onPressed: viewModel.hasPreviousPage ? viewModel.previousPage : null,
+                onPressed: viewModel.hasPreviousPage
+                    ? viewModel.previousPage
+                    : null,
               ),
               const SizedBox(width: 8),
               IconButton(

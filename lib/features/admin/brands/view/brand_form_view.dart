@@ -26,10 +26,15 @@ class _BrandFormViewState extends State<BrandFormView> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.brandToEdit?.name ?? '');
-    _descriptionController =
-        TextEditingController(text: widget.brandToEdit?.description ?? '');
-    _logoUrlController = TextEditingController(text: widget.brandToEdit?.logoUrl ?? '');
+    _nameController = TextEditingController(
+      text: widget.brandToEdit?.name ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.brandToEdit?.description ?? '',
+    );
+    _logoUrlController = TextEditingController(
+      text: widget.brandToEdit?.logoUrl ?? '',
+    );
   }
 
   @override
@@ -46,11 +51,15 @@ class _BrandFormViewState extends State<BrandFormView> {
       create: (_) => BrandFormViewModel()..init(widget.brandToEdit),
       child: Consumer<BrandFormViewModel>(
         builder: (context, viewModel, child) {
+          final isMobile = MediaQuery.sizeOf(context).width <= 600;
           return PopScope(
             canPop: !viewModel.isChanged,
             onPopInvokedWithResult: (didPop, result) async {
               if (didPop) return;
-              final action = await _showDiscardChangesDialog(context, viewModel);
+              final action = await _showDiscardChangesDialog(
+                context,
+                viewModel,
+              );
               if (action == null) return;
               if (action == false) {
                 if (context.mounted) {
@@ -101,87 +110,30 @@ class _BrandFormViewState extends State<BrandFormView> {
                         const SizedBox(height: 20),
                       ],
 
-                      // Header Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            viewModel.isEditing
-                                ? 'CHI TIẾT NHÃN HÀNG'
-                                : 'THÊM MỚI NHÃN HÀNG',
-                            style: AppTextStyles.headlineMd.copyWith(fontSize: 18),
+                      if (isMobile)
+                        Text(
+                          viewModel.isEditing
+                              ? 'CHI TIẾT NHÃN HÀNG'
+                              : 'THÊM MỚI NHÃN HÀNG',
+                          style: AppTextStyles.headlineMd.copyWith(
+                            fontSize: 18,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (viewModel.isEditing) ...[
-                                SizedBox(
-                                  width: 200,
-                                  child: ElevatedButton(
-                                    onPressed: viewModel.isLoading
-                                        ? null
-                                        : () => _confirmDelete(context, viewModel),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFEE2E2), // red-100
-                                      foregroundColor: AppColors.error,
-                                      elevation: 0,
-                                      shape: const StadiumBorder(),
-                                      padding: const EdgeInsets.symmetric(vertical: 18),
-                                    ),
-                                    child: viewModel.isLoading
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                AppColors.error,
-                                              ),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Xóa nhãn hàng',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                              ],
-                              SizedBox(
-                                width: 200,
-                                child: AppButton(
-                                  text: viewModel.isEditing ? 'Cập nhật' : 'Thêm mới',
-                                  isLoading: viewModel.isLoading,
-                                  onPressed: (!viewModel.isChanged || viewModel.isLoading)
-                                      ? null
-                                      : () async {
-                                          viewModel.setName(_nameController.text);
-                                          viewModel.setDescription(
-                                            _descriptionController.text,
-                                          );
-                                          viewModel.setLogoUrl(_logoUrlController.text);
-
-                                          final success = await viewModel.save();
-                                          if (success && context.mounted) {
-                                            AppToast.showSuccess(
-                                              context,
-                                              viewModel.isEditing
-                                                  ? 'Cập nhật nhãn hàng thành công!'
-                                                  : 'Thêm nhãn hàng mới thành công!',
-                                            );
-                                            context.pop(true);
-                                          }
-                                        },
-                                ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              viewModel.isEditing
+                                  ? 'CHI TIẾT NHÃN HÀNG'
+                                  : 'THÊM MỚI NHÃN HÀNG',
+                              style: AppTextStyles.headlineMd.copyWith(
+                                fontSize: 18,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            _buildBrandActions(context, viewModel),
+                          ],
+                        ),
                       const SizedBox(height: 24),
 
                       // Form Body
@@ -190,7 +142,10 @@ class _BrandFormViewState extends State<BrandFormView> {
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.surface, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.surface,
+                            width: 1.5,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,6 +155,7 @@ class _BrandFormViewState extends State<BrandFormView> {
                               hintText: 'Nhập tên nhãn hàng...',
                               controller: _nameController,
                               onChanged: viewModel.setName,
+                              showBorder: true,
                             ),
                             const SizedBox(height: 20),
                             AppTextField(
@@ -207,6 +163,7 @@ class _BrandFormViewState extends State<BrandFormView> {
                               hintText: 'Nhập đường dẫn logo nhãn hàng...',
                               controller: _logoUrlController,
                               onChanged: viewModel.setLogoUrl,
+                              showBorder: true,
                             ),
                             const SizedBox(height: 20),
                             AppTextField(
@@ -216,41 +173,15 @@ class _BrandFormViewState extends State<BrandFormView> {
                               onChanged: viewModel.setDescription,
                               minLines: 3,
                               maxLines: 5,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Trạng thái hoạt động',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      'Bật để cho phép nhãn hàng được sử dụng trong hệ thống.',
-                                      style: TextStyle(
-                                        color: AppColors.detail,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Switch(
-                                  value: viewModel.isActive,
-                                  activeColor: AppColors.primary,
-                                  onChanged: viewModel.setIsActive,
-                                ),
-                              ],
+                              showBorder: true,
                             ),
                           ],
                         ),
                       ),
+                      if (isMobile) ...[
+                        const SizedBox(height: 24),
+                        _buildBrandActions(context, viewModel, isMobile: true),
+                      ],
                     ],
                   ),
                 ),
@@ -260,6 +191,88 @@ class _BrandFormViewState extends State<BrandFormView> {
         },
       ),
     );
+  }
+
+  Widget _buildBrandActions(
+    BuildContext context,
+    BrandFormViewModel viewModel, {
+    bool isMobile = false,
+  }) {
+    final deleteButton = ElevatedButton(
+      onPressed: viewModel.isLoading
+          ? null
+          : () => _confirmDelete(context, viewModel),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFEE2E2),
+        foregroundColor: AppColors.error,
+        elevation: 0,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(vertical: 18),
+      ),
+      child: viewModel.isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.error),
+              ),
+            )
+          : const Text(
+              'Xóa nhãn hàng',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+    );
+    final saveButton = AppButton(
+      text: viewModel.isEditing ? 'Cập nhật' : 'Thêm mới',
+      isLoading: viewModel.isLoading,
+      onPressed: (!viewModel.isChanged || viewModel.isLoading)
+          ? null
+          : () => _saveBrand(context, viewModel),
+    );
+
+    if (isMobile) {
+      return Row(
+        children: [
+          if (viewModel.isEditing) ...[
+            Expanded(child: deleteButton),
+            const SizedBox(width: 12),
+          ],
+          Expanded(child: saveButton),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (viewModel.isEditing) ...[
+          SizedBox(width: 200, child: deleteButton),
+          const SizedBox(width: 12),
+        ],
+        SizedBox(width: 200, child: saveButton),
+      ],
+    );
+  }
+
+  Future<void> _saveBrand(
+    BuildContext context,
+    BrandFormViewModel viewModel,
+  ) async {
+    viewModel.setName(_nameController.text);
+    viewModel.setDescription(_descriptionController.text);
+    viewModel.setLogoUrl(_logoUrlController.text);
+
+    final success = await viewModel.save();
+    if (success && context.mounted) {
+      AppToast.showSuccess(
+        context,
+        viewModel.isEditing
+            ? 'Cập nhật nhãn hàng thành công!'
+            : 'Thêm nhãn hàng mới thành công!',
+      );
+      context.pop(true);
+    }
   }
 
   Future<bool?> _showDiscardChangesDialog(
@@ -275,12 +288,17 @@ class _BrandFormViewState extends State<BrandFormView> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(null), // Hủy thao tác thoát
+            onPressed: () =>
+                Navigator.of(context).pop(null), // Hủy thao tác thoát
             child: const Text('Hủy', style: TextStyle(color: AppColors.detail)),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Thoát không lưu
-            child: const Text('Thoát', style: TextStyle(color: AppColors.error)),
+            onPressed: () =>
+                Navigator.of(context).pop(false), // Thoát không lưu
+            child: const Text(
+              'Thoát',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true), // Lưu rồi thoát

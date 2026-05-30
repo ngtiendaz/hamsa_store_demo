@@ -47,10 +47,10 @@ class _BrandListViewState extends State<BrandListView> {
                         child: viewModel.isLoading
                             ? const AppLoading()
                             : viewModel.brands.isEmpty
-                                ? _buildEmptyState()
-                                : isDesktop
-                                    ? _buildBrandTable(context, viewModel, isAdmin)
-                                    : _buildBrandCardList(context, viewModel, isAdmin),
+                            ? _buildEmptyState()
+                            : isDesktop
+                            ? _buildBrandTable(context, viewModel, isAdmin)
+                            : _buildBrandCardList(context, viewModel, isAdmin),
                       ),
                       // Pagination
                       if (viewModel.brands.isNotEmpty)
@@ -118,14 +118,25 @@ class _BrandListViewState extends State<BrandListView> {
         searchField,
         if (isAdmin) ...[
           const SizedBox(height: 12),
-          AppButton(
-            text: 'Thêm nhãn hàng',
-            onPressed: () async {
-              final result = await context.push('/admin/brands/new');
-              if (result == true) {
-                viewModel.loadBrands(refresh: true);
-              }
-            },
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                final result = await context.push('/admin/brands/new');
+                if (result == true) {
+                  viewModel.loadBrands(refresh: true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Thêm nhãn hàng'),
+            ),
           ),
         ],
       ],
@@ -165,7 +176,7 @@ class _BrandListViewState extends State<BrandListView> {
                   ),
                 ),
                 Expanded(
-                  flex: 5,
+                  flex: 7,
                   child: Text(
                     'MÔ TẢ',
                     style: TextStyle(
@@ -173,15 +184,6 @@ class _BrandListViewState extends State<BrandListView> {
                       color: AppColors.detail,
                       fontSize: 12,
                     ),
-                  ),
-                ),
-                WidthBox(100), // Khoảng trống cho trạng thái
-                Text(
-                  'TRẠNG THÁI',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.detail,
-                    fontSize: 12,
                   ),
                 ),
               ],
@@ -200,7 +202,10 @@ class _BrandListViewState extends State<BrandListView> {
                   color: AppColors.surface,
                   child: InkWell(
                     onTap: () async {
-                      final result = await context.push('/admin/brands/edit', extra: brand);
+                      final result = await context.push(
+                        '/admin/brands/edit',
+                        extra: brand,
+                      );
                       if (result == true) {
                         viewModel.loadBrands();
                       }
@@ -216,7 +221,8 @@ class _BrandListViewState extends State<BrandListView> {
                             flex: 3,
                             child: Row(
                               children: [
-                                if (brand.logoUrl != null && brand.logoUrl!.trim().isNotEmpty) ...[
+                                if (brand.logoUrl != null &&
+                                    brand.logoUrl!.trim().isNotEmpty) ...[
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(4),
                                     child: Image.network(
@@ -224,8 +230,13 @@ class _BrandListViewState extends State<BrandListView> {
                                       width: 28,
                                       height: 28,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.stars, size: 28, color: AppColors.detail),
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.stars,
+                                                size: 28,
+                                                color: AppColors.detail,
+                                              ),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -243,7 +254,7 @@ class _BrandListViewState extends State<BrandListView> {
                             ),
                           ),
                           Expanded(
-                            flex: 5,
+                            flex: 7,
                             child: Text(
                               brand.description ?? '-',
                               maxLines: 1,
@@ -251,8 +262,6 @@ class _BrandListViewState extends State<BrandListView> {
                               style: const TextStyle(color: AppColors.detail),
                             ),
                           ),
-                          const SizedBox(width: 100),
-                          _buildStatusBadge(brand.isActive),
                         ],
                       ),
                     ),
@@ -278,92 +287,80 @@ class _BrandListViewState extends State<BrandListView> {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           color: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
           borderOnForeground: false,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () async {
-              final result = await context.push('/admin/brands/edit', extra: brand);
-              if (result == true) {
-                viewModel.loadBrands();
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            if (brand.logoUrl != null && brand.logoUrl!.trim().isNotEmpty) ...[
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: Image.network(
-                                  brand.logoUrl!,
-                                  width: 24,
-                                  height: 24,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.stars, size: 24, color: AppColors.detail),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                            Expanded(
-                              child: Text(
-                                brand.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
+          child: SizedBox(
+            height: 112,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () async {
+                final result = await context.push(
+                  '/admin/brands/edit',
+                  extra: brand,
+                );
+                if (result == true) {
+                  viewModel.loadBrands();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (brand.logoUrl != null &&
+                            brand.logoUrl!.trim().isNotEmpty) ...[
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Image.network(
+                              brand.logoUrl!,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.stars,
+                                    size: 24,
+                                    color: AppColors.detail,
+                                  ),
                             ),
-                          ],
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: Text(
+                            brand.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      brand.description ?? 'Không có mô tả',
+                      style: const TextStyle(
+                        color: AppColors.detail,
+                        fontSize: 14,
                       ),
-                      _buildStatusBadge(brand.isActive),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    brand.description ?? 'Không có mô tả',
-                    style: const TextStyle(color: AppColors.detail, fontSize: 14),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildStatusBadge(bool isActive) {
-    return Container(
-      width: 100, // Chiều rộng cố định để thẳng hàng
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.primary.withOpacity(0.1)
-            : AppColors.error.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        isActive ? 'Hoạt động' : 'Tạm khóa',
-        style: TextStyle(
-          color: isActive ? AppColors.primary : AppColors.error,
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 
@@ -381,7 +378,9 @@ class _BrandListViewState extends State<BrandListView> {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left),
-                onPressed: viewModel.hasPreviousPage ? viewModel.previousPage : null,
+                onPressed: viewModel.hasPreviousPage
+                    ? viewModel.previousPage
+                    : null,
               ),
               const SizedBox(width: 8),
               IconButton(
@@ -403,11 +402,4 @@ class _BrandListViewState extends State<BrandListView> {
       ),
     );
   }
-}
-
-class WidthBox extends StatelessWidget {
-  final double width;
-  const WidthBox(this.width, {super.key});
-  @override
-  Widget build(BuildContext context) => SizedBox(width: width);
 }

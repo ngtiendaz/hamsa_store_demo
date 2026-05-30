@@ -3,7 +3,11 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class AppToast {
-  static void show(BuildContext context, {required String message, bool isError = false}) {
+  static void show(
+    BuildContext context, {
+    required String message,
+    bool isError = false,
+  }) {
     final overlayState = Overlay.of(context);
     late OverlayEntry overlayEntry;
 
@@ -44,7 +48,8 @@ class _ToastWidget extends StatefulWidget {
   State<_ToastWidget> createState() => _ToastWidgetState();
 }
 
-class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderStateMixin {
+class _ToastWidgetState extends State<_ToastWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
@@ -59,10 +64,7 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(1.5, 0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
 
@@ -95,15 +97,19 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
               constraints: const BoxConstraints(maxWidth: 320),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: widget.isError ? const Color(0xFFFEE2E2) : const Color(0xFFE2FBE9),
+                color: widget.isError
+                    ? const Color(0xFFFEE2E2)
+                    : const Color(0xFFE2FBE9),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
+                  color: widget.isError
+                      ? AppColors.error
+                      : const Color(0xFF0F8644),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -113,8 +119,12 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    widget.isError ? Icons.error_outline : Icons.check_circle_outline,
-                    color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
+                    widget.isError
+                        ? Icons.error_outline
+                        : Icons.check_circle_outline,
+                    color: widget.isError
+                        ? AppColors.error
+                        : const Color(0xFF0F8644),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -124,7 +134,9 @@ class _ToastWidgetState extends State<_ToastWidget> with SingleTickerProviderSta
                       style: AppTextStyles.bodyMd.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: widget.isError ? AppColors.error : const Color(0xFF0F8644),
+                        color: widget.isError
+                            ? AppColors.error
+                            : const Color(0xFF0F8644),
                       ),
                     ),
                   ),

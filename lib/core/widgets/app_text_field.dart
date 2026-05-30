@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 class AppTextField extends StatelessWidget {
@@ -12,6 +13,7 @@ class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
   final int? maxLines;
   final int? minLines;
+  final bool showBorder;
 
   const AppTextField({
     super.key,
@@ -25,6 +27,7 @@ class AppTextField extends StatelessWidget {
     this.controller,
     this.maxLines,
     this.minLines,
+    this.showBorder = false,
   });
 
   @override
@@ -32,10 +35,7 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: AppTextStyles.labelMd,
-        ),
+        Text(label.toUpperCase(), style: AppTextStyles.labelMd),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -48,6 +48,12 @@ class AppTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             errorText: errorText,
+            enabledBorder: showBorder
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  )
+                : null,
           ),
         ),
       ],

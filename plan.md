@@ -219,6 +219,12 @@ lib/
 - [ ] 9.3. Viết và chạy seed data test trên database Supabase để có sẵn dữ liệu demo.
 - [ ] 9.4. Kiểm tra toàn bộ luồng nghiệp vụ trên cả giao diện Web và Mobile.
 - [ ] 9.5. Tạo file báo cáo kết quả kiểm thử `walkthrough.md`.
+- [x] 9.6. Polish responsive UI app:
+  - Đưa nút `Ngừng bán` và `Cập nhật` xuống cuối form chi tiết sản phẩm trên mobile, cho phép co giãn theo chiều rộng màn hình.
+  - Lược bỏ trạng thái hoạt động khỏi giao diện quản lý nhãn hàng.
+  - Thu gọn nút thêm mới trên mobile của danh mục và nhãn hàng để giao diện đồng nhất.
+  - Đưa nút `Xóa` và `Cập nhật` xuống cuối form chi tiết danh mục, nhãn hàng trên mobile; sửa hàng trạng thái danh mục không overflow.
+  - Thêm viền mặc định cho text field của danh mục, nhãn hàng; dãn đều nút thêm mới trên mobile và cố định chiều cao card kèm ellipsis.
 
 ---
 

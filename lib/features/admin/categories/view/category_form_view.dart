@@ -25,9 +25,12 @@ class _CategoryFormViewState extends State<CategoryFormView> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.categoryToEdit?.name ?? '');
-    _descriptionController =
-        TextEditingController(text: widget.categoryToEdit?.description ?? '');
+    _nameController = TextEditingController(
+      text: widget.categoryToEdit?.name ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.categoryToEdit?.description ?? '',
+    );
   }
 
   @override
@@ -43,11 +46,15 @@ class _CategoryFormViewState extends State<CategoryFormView> {
       create: (_) => CategoryFormViewModel()..init(widget.categoryToEdit),
       child: Consumer<CategoryFormViewModel>(
         builder: (context, viewModel, child) {
+          final isMobile = MediaQuery.sizeOf(context).width <= 600;
           return PopScope(
             canPop: !viewModel.isChanged,
             onPopInvokedWithResult: (didPop, result) async {
               if (didPop) return;
-              final action = await _showDiscardChangesDialog(context, viewModel);
+              final action = await _showDiscardChangesDialog(
+                context,
+                viewModel,
+              );
               if (action == null) return;
               if (action == false) {
                 if (context.mounted) {
@@ -97,86 +104,30 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                         const SizedBox(height: 20),
                       ],
 
-                      // Header Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            viewModel.isEditing
-                                ? 'CHI TIẾT DANH MỤC'
-                                : 'THÊM MỚI DANH MỤC',
-                            style: AppTextStyles.headlineMd.copyWith(fontSize: 18),
+                      if (isMobile)
+                        Text(
+                          viewModel.isEditing
+                              ? 'CHI TIẾT DANH MỤC'
+                              : 'THÊM MỚI DANH MỤC',
+                          style: AppTextStyles.headlineMd.copyWith(
+                            fontSize: 18,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (viewModel.isEditing) ...[
-                                SizedBox(
-                                  width: 200,
-                                  child: ElevatedButton(
-                                    onPressed: viewModel.isLoading
-                                        ? null
-                                        : () => _confirmDelete(context, viewModel),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFEE2E2), // red-100
-                                      foregroundColor: AppColors.error,
-                                      elevation: 0,
-                                      shape: const StadiumBorder(),
-                                      padding: const EdgeInsets.symmetric(vertical: 18),
-                                    ),
-                                    child: viewModel.isLoading
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                AppColors.error,
-                                              ),
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Xóa danh mục',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                              ],
-                              SizedBox(
-                                width: 200,
-                                child: AppButton(
-                                  text: viewModel.isEditing ? 'Cập nhật' : 'Thêm mới',
-                                  isLoading: viewModel.isLoading,
-                                  onPressed: (!viewModel.isChanged || viewModel.isLoading)
-                                      ? null
-                                      : () async {
-                                          viewModel.setName(_nameController.text);
-                                          viewModel.setDescription(
-                                            _descriptionController.text,
-                                          );
-
-                                          final success = await viewModel.save();
-                                          if (success && context.mounted) {
-                                            AppToast.showSuccess(
-                                              context,
-                                              viewModel.isEditing
-                                                  ? 'Cập nhật danh mục thành công!'
-                                                  : 'Thêm danh mục mới thành công!',
-                                            );
-                                            context.pop(true);
-                                          }
-                                        },
-                                ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              viewModel.isEditing
+                                  ? 'CHI TIẾT DANH MỤC'
+                                  : 'THÊM MỚI DANH MỤC',
+                              style: AppTextStyles.headlineMd.copyWith(
+                                fontSize: 18,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            _buildCategoryActions(context, viewModel),
+                          ],
+                        ),
                       const SizedBox(height: 24),
 
                       // Form Body
@@ -185,7 +136,10 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.surface, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.surface,
+                            width: 1.5,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,6 +149,7 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                               hintText: 'Nhập tên danh mục...',
                               controller: _nameController,
                               onChanged: viewModel.setName,
+                              showBorder: true,
                             ),
                             const SizedBox(height: 20),
                             AppTextField(
@@ -204,34 +159,39 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                               onChanged: viewModel.setDescription,
                               minLines: 3,
                               maxLines: 5,
+                              showBorder: true,
                             ),
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Trạng thái hoạt động',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Trạng thái hoạt động',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      'Bật để cho phép danh mục được sử dụng trong hệ thống.',
-                                      style: TextStyle(
-                                        color: AppColors.detail,
-                                        fontSize: 12,
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Bật để cho phép danh mục được sử dụng trong hệ thống.',
+                                        style: TextStyle(
+                                          color: AppColors.detail,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
+                                const SizedBox(width: 12),
                                 Switch(
                                   value: viewModel.isActive,
-                                  activeColor: AppColors.primary,
+                                  activeThumbColor: AppColors.primary,
                                   onChanged: viewModel.setIsActive,
                                 ),
                               ],
@@ -239,6 +199,14 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                           ],
                         ),
                       ),
+                      if (isMobile) ...[
+                        const SizedBox(height: 24),
+                        _buildCategoryActions(
+                          context,
+                          viewModel,
+                          isMobile: true,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -248,6 +216,87 @@ class _CategoryFormViewState extends State<CategoryFormView> {
         },
       ),
     );
+  }
+
+  Widget _buildCategoryActions(
+    BuildContext context,
+    CategoryFormViewModel viewModel, {
+    bool isMobile = false,
+  }) {
+    final deleteButton = ElevatedButton(
+      onPressed: viewModel.isLoading
+          ? null
+          : () => _confirmDelete(context, viewModel),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFEE2E2),
+        foregroundColor: AppColors.error,
+        elevation: 0,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(vertical: 18),
+      ),
+      child: viewModel.isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.error),
+              ),
+            )
+          : const Text(
+              'Xóa danh mục',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+    );
+    final saveButton = AppButton(
+      text: viewModel.isEditing ? 'Cập nhật' : 'Thêm mới',
+      isLoading: viewModel.isLoading,
+      onPressed: (!viewModel.isChanged || viewModel.isLoading)
+          ? null
+          : () => _saveCategory(context, viewModel),
+    );
+
+    if (isMobile) {
+      return Row(
+        children: [
+          if (viewModel.isEditing) ...[
+            Expanded(child: deleteButton),
+            const SizedBox(width: 12),
+          ],
+          Expanded(child: saveButton),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (viewModel.isEditing) ...[
+          SizedBox(width: 200, child: deleteButton),
+          const SizedBox(width: 12),
+        ],
+        SizedBox(width: 200, child: saveButton),
+      ],
+    );
+  }
+
+  Future<void> _saveCategory(
+    BuildContext context,
+    CategoryFormViewModel viewModel,
+  ) async {
+    viewModel.setName(_nameController.text);
+    viewModel.setDescription(_descriptionController.text);
+
+    final success = await viewModel.save();
+    if (success && context.mounted) {
+      AppToast.showSuccess(
+        context,
+        viewModel.isEditing
+            ? 'Cập nhật danh mục thành công!'
+            : 'Thêm danh mục mới thành công!',
+      );
+      context.pop(true);
+    }
   }
 
   Future<bool?> _showDiscardChangesDialog(
@@ -263,12 +312,17 @@ class _CategoryFormViewState extends State<CategoryFormView> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(null), // Hủy thao tác thoát
+            onPressed: () =>
+                Navigator.of(context).pop(null), // Hủy thao tác thoát
             child: const Text('Hủy', style: TextStyle(color: AppColors.detail)),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Thoát không lưu
-            child: const Text('Thoát', style: TextStyle(color: AppColors.error)),
+            onPressed: () =>
+                Navigator.of(context).pop(false), // Thoát không lưu
+            child: const Text(
+              'Thoát',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true), // Lưu rồi thoát

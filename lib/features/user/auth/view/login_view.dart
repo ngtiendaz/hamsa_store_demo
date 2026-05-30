@@ -65,12 +65,16 @@ class _LoginViewState extends State<LoginView> {
                 children: [
                   Text(
                     'HAMSA\nSTORE',
-                    style: AppTextStyles.displayLg.copyWith(color: Colors.white),
+                    style: AppTextStyles.displayLg.copyWith(
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Hệ thống quản lý bán hàng tối giản và hiệu quả.',
-                    style: AppTextStyles.bodyLg.copyWith(color: AppColors.detail),
+                    style: AppTextStyles.bodyLg.copyWith(
+                      color: AppColors.detail,
+                    ),
                   ),
                 ],
               ),
@@ -155,7 +159,8 @@ class _LoginViewState extends State<LoginView> {
               isLoading: viewModel.isLoading,
               onPressed: () async {
                 final success = await viewModel.login();
-                if (success && mounted) {
+                if (!context.mounted) return;
+                if (success) {
                   final profile = viewModel.authViewModel.currentProfile;
                   if (profile != null) {
                     if (profile.isAdmin || profile.isEmployee) {

@@ -180,17 +180,10 @@ class _ProductListViewState extends State<ProductListView> {
                   spacing: 16,
                   runSpacing: 16,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    searchField,
-                    categoryFilter,
-                    brandFilter,
-                  ],
+                  children: [searchField, categoryFilter, brandFilter],
                 ),
               ),
-              if (isAdmin) ...[
-                const SizedBox(width: 16),
-                addButton,
-              ],
+              if (isAdmin) ...[const SizedBox(width: 16), addButton],
             ],
           );
         } else {
@@ -202,10 +195,7 @@ class _ProductListViewState extends State<ProductListView> {
               categoryFilter,
               const SizedBox(height: 12),
               brandFilter,
-              if (isAdmin) ...[
-                const SizedBox(height: 16),
-                addButton,
-              ],
+              if (isAdmin) ...[const SizedBox(height: 16), addButton],
             ],
           );
         }
@@ -251,7 +241,10 @@ class _ProductListViewState extends State<ProductListView> {
           // Table Header
           Container(
             color: AppColors.surface,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 16.0,
+              horizontal: 12.0,
+            ),
             child: const Row(
               children: [
                 SizedBox(
@@ -344,7 +337,6 @@ class _ProductListViewState extends State<ProductListView> {
                 final product = viewModel.products[index];
                 return InkWell(
                   onTap: () async {
-                    print('Selected product: ${product.toJson()}');
                     final result = await context.push(
                       '/admin/products/edit',
                       extra: product,
@@ -353,14 +345,17 @@ class _ProductListViewState extends State<ProductListView> {
                       viewModel.loadProducts(refresh: true);
                     }
                   },
-                  hoverColor: AppColors.surface.withOpacity(0.5),
+                  hoverColor: AppColors.surface.withValues(alpha: 0.5),
                   child: Container(
                     decoration: const BoxDecoration(
                       border: Border(
                         bottom: BorderSide(color: AppColors.surface, width: 1),
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12.0,
+                      horizontal: 12.0,
+                    ),
                     child: Row(
                       children: [
                         // Image (centered)
@@ -368,7 +363,9 @@ class _ProductListViewState extends State<ProductListView> {
                           width: 80,
                           child: Center(
                             child: ProductImageWidget(
-                              imageUrl: product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
+                              imageUrl: product.imageUrls.isNotEmpty
+                                  ? product.imageUrls.first
+                                  : null,
                               size: 50,
                             ),
                           ),
@@ -377,7 +374,9 @@ class _ProductListViewState extends State<ProductListView> {
                         Expanded(
                           flex: 4,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -476,7 +475,6 @@ class _ProductListViewState extends State<ProductListView> {
           child: ListTile(
             contentPadding: const EdgeInsets.all(12),
             onTap: () async {
-              print('Selected product: ${product.toJson()}');
               final result = await context.push(
                 '/admin/products/edit',
                 extra: product,
@@ -486,7 +484,9 @@ class _ProductListViewState extends State<ProductListView> {
               }
             },
             leading: ProductImageWidget(
-              imageUrl: product.imageUrls.isNotEmpty ? product.imageUrls.first : null,
+              imageUrl: product.imageUrls.isNotEmpty
+                  ? product.imageUrls.first
+                  : null,
               size: 60,
             ),
             title: Text(
@@ -569,6 +569,4 @@ class _ProductListViewState extends State<ProductListView> {
       ),
     );
   }
-
-
 }

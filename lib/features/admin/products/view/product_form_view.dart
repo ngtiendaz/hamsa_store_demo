@@ -67,9 +67,10 @@ class _ProductFormViewState extends State<ProductFormView> {
       create: (_) => ProductFormViewModel()..init(widget.productToEdit),
       child: Consumer<ProductFormViewModel>(
         builder: (context, viewModel, child) {
+          final isMobile = MediaQuery.sizeOf(context).width <= 600;
           return PopScope(
             canPop: !viewModel.isChanged,
-            onPopInvoked: (didPop) async {
+            onPopInvokedWithResult: (didPop, result) async {
               if (didPop) return;
               final action = await _showDiscardChangesDialog(
                 context,
@@ -112,361 +113,285 @@ class _ProductFormViewState extends State<ProductFormView> {
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (viewModel.errorMessage != null) ...[
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.errorContainer,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.error),
-                              ),
-                              child: Text(
-                                viewModel.errorMessage!,
-                                style: const TextStyle(
-                                  color: AppColors.error,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                    children: [
+                      if (viewModel.errorMessage != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.errorContainer,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.error),
+                          ),
+                          child: Text(
+                            viewModel.errorMessage!,
+                            style: const TextStyle(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+
+                      // Web giữ nút trên header; mobile đưa nút xuống cuối form.
+                      if (isMobile)
+                        Text(
+                          viewModel.isEditing
+                              ? 'THÔNG TIN CHI TIẾT'
+                              : 'THÊM MỚI SẢN PHẨM',
+                          style: AppTextStyles.headlineMd.copyWith(
+                            fontSize: 18,
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              viewModel.isEditing
+                                  ? 'THÔNG TIN CHI TIẾT'
+                                  : 'THÊM MỚI SẢN PHẨM',
+                              style: AppTextStyles.headlineMd.copyWith(
+                                fontSize: 18,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            _buildProductActions(
+                              context,
+                              viewModel,
+                              userId,
+                              isAdmin,
+                            ),
                           ],
+                        ),
+                      const SizedBox(height: 24),
 
-                          // Header Row (tiêu đề + nút chức năng ở trên cùng góc phải)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                viewModel.isEditing
-                                    ? 'THÔNG TIN CHI TIẾT'
-                                    : 'THÊM MỚI SẢN PHẨM',
-                                style: AppTextStyles.headlineMd.copyWith(
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (viewModel.isEditing && isAdmin) ...[
-                                    SizedBox(
-                                      width: 200,
-                                      child: ElevatedButton(
-                                        onPressed: viewModel.isLoading
-                                            ? null
-                                            : () => _confirmDelete(
-                                                context,
-                                                viewModel,
-                                                userId,
-                                              ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(
-                                            0xFFFEE2E2,
-                                          ), // red-100
-                                          foregroundColor: AppColors.error,
-                                          elevation: 0,
-                                          shape: const StadiumBorder(),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 18,
-                                          ),
-                                        ),
-                                        child: viewModel.isLoading
-                                            ? const SizedBox(
-                                                width: 18,
-                                                height: 18,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                        Color
-                                                      >(AppColors.error),
-                                                ),
-                                              )
-                                            : const Text(
-                                                'Ngừng bán',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                  ],
-                                  SizedBox(
-                                    width: 200,
-                                    child: AppButton(
-                                      text: viewModel.isEditing
-                                          ? 'Cập nhật'
-                                          : 'Thêm sản phẩm',
-                                      isLoading: viewModel.isLoading,
-                                      onPressed:
-                                          (!viewModel.isChanged ||
-                                              viewModel.isLoading)
-                                          ? null
-                                          : () async {
-                                              viewModel.setInternalName(
-                                                _internalNameController.text,
-                                              );
-                                              viewModel.setTradeName(
-                                                _tradeNameController.text,
-                                              );
-                                              viewModel.setBarcode(
-                                                _barcodeController.text,
-                                              );
-                                              viewModel.setPrice(
-                                                double.tryParse(
-                                                      _priceController.text,
-                                                    ) ??
-                                                    0.0,
-                                              );
-                                              viewModel.setStock(
-                                                int.tryParse(
-                                                      _stockController.text,
-                                                    ) ??
-                                                    0,
-                                              );
-                                              viewModel.setDescription(
-                                                _descriptionController.text,
-                                              );
+                      // Lưới hiển thị nhiều ảnh
+                      _buildImageSelector(viewModel),
+                      const SizedBox(height: 24),
 
-                                              final success = await viewModel
-                                                  .save(userId);
-                                              if (success && context.mounted) {
-                                                AppToast.showSuccess(
-                                                  context,
-                                                  viewModel.isEditing
-                                                      ? 'Cập nhật sản phẩm thành công!'
-                                                      : 'Thêm sản phẩm mới thành công!',
-                                                );
-                                                context.pop(true);
-                                              }
-                                            },
-                                    ),
+                      // Internal Name
+                      AppTextField(
+                        label: 'Tên nội bộ (Bắt buộc)',
+                        hintText: 'Nhập tên sử dụng nội bộ...',
+                        controller: _internalNameController,
+                        onChanged: viewModel.setInternalName,
+                        errorText:
+                            viewModel.internalName.trim().isEmpty &&
+                                viewModel.errorMessage != null
+                            ? 'Tên nội bộ là bắt buộc.'
+                            : null,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Trade Name
+                      AppTextField(
+                        label: 'Tên thương mại',
+                        hintText: 'Nhập tên hiển thị thương mại...',
+                        controller: _tradeNameController,
+                        onChanged: viewModel.setTradeName,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Barcode
+                      AppTextField(
+                        label: 'Barcode',
+                        hintText: 'Mã vạch sản phẩm...',
+                        controller: _barcodeController,
+                        onChanged: viewModel.setBarcode,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Row for Price and Stock
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppTextField(
+                              label: 'Đơn giá',
+                              hintText: '0.00',
+                              controller: _priceController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
                                   ),
-                                ],
+                              onChanged: (val) => viewModel.setPrice(
+                                double.tryParse(val) ?? 0.0,
                               ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 24),
-
-                          // Lưới hiển thị nhiều ảnh
-                          _buildImageSelector(viewModel),
-                          const SizedBox(height: 24),
-
-                          // Internal Name
-                          AppTextField(
-                            label: 'Tên nội bộ (Bắt buộc)',
-                            hintText: 'Nhập tên sử dụng nội bộ...',
-                            controller: _internalNameController,
-                            onChanged: viewModel.setInternalName,
-                            errorText:
-                                viewModel.internalName.trim().isEmpty &&
-                                    viewModel.errorMessage != null
-                                ? 'Tên nội bộ là bắt buộc.'
-                                : null,
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Trade Name
-                          AppTextField(
-                            label: 'Tên thương mại',
-                            hintText: 'Nhập tên hiển thị thương mại...',
-                            controller: _tradeNameController,
-                            onChanged: viewModel.setTradeName,
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Barcode
-                          AppTextField(
-                            label: 'Barcode',
-                            hintText: 'Mã vạch sản phẩm...',
-                            controller: _barcodeController,
-                            onChanged: viewModel.setBarcode,
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Row for Price and Stock
-                          Row(
-                            children: [
-                              Expanded(
-                                child: AppTextField(
-                                  label: 'Đơn giá',
-                                  hintText: '0.00',
-                                  controller: _priceController,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  onChanged: (val) => viewModel.setPrice(
-                                    double.tryParse(val) ?? 0.0,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: AppTextField(
-                                  label: 'Số lượng tồn kho',
-                                  hintText: '0',
-                                  controller: _stockController,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (val) => viewModel.setStock(
-                                    int.tryParse(val) ?? 0,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Row for Category and Brand Dropdowns
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'DANH MỤC',
-                                      style: AppTextStyles.labelMd,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          value: viewModel.categoryId.isEmpty
-                                              ? null
-                                              : viewModel.categoryId,
-                                          isExpanded: true,
-                                          items: viewModel.categories
-                                              .map(
-                                                (cat) => DropdownMenuItem(
-                                                  value: cat.id,
-                                                  child: Text(cat.name),
-                                                ),
-                                              )
-                                              .toList(),
-                                          onChanged: (val) {
-                                            if (val != null)
-                                              viewModel.setCategoryId(val);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'NHÃN HÀNG',
-                                      style: AppTextStyles.labelMd,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton<String>(
-                                          value: viewModel.brandId.isEmpty
-                                              ? null
-                                              : viewModel.brandId,
-                                          isExpanded: true,
-                                          items: viewModel.brands
-                                              .map(
-                                                (brand) => DropdownMenuItem(
-                                                  value: brand.id,
-                                                  child: Text(brand.name),
-                                                ),
-                                              )
-                                              .toList(),
-                                          onChanged: (val) {
-                                            if (val != null)
-                                              viewModel.setBrandId(val);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Status Selector
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'TRẠNG THÁI KINH DOANH',
-                                style: AppTextStyles.labelMd,
-                              ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surface,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: viewModel.status,
-                                    isExpanded: true,
-                                    items: const [
-                                      DropdownMenuItem(
-                                        value: 'active',
-                                        child: Text('Đang hoạt động'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 'inactive',
-                                        child: Text('Ngừng bán'),
-                                      ),
-                                    ],
-                                    onChanged: (val) {
-                                      if (val != null) viewModel.setStatus(val);
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Description
-                          AppTextField(
-                            label: 'Mô tả chi tiết',
-                            hintText: 'Nhập mô tả sản phẩm...',
-                            controller: _descriptionController,
-                            keyboardType: TextInputType.multiline,
-                            minLines: 5,
-                            onChanged: viewModel.setDescription,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: AppTextField(
+                              label: 'Số lượng tồn kho',
+                              hintText: '0',
+                              controller: _stockController,
+                              keyboardType: TextInputType.number,
+                              onChanged: (val) =>
+                                  viewModel.setStock(int.tryParse(val) ?? 0),
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 20),
+
+                      // Row for Category and Brand Dropdowns
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'DANH MỤC',
+                                  style: AppTextStyles.labelMd,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: viewModel.categoryId.isEmpty
+                                          ? null
+                                          : viewModel.categoryId,
+                                      isExpanded: true,
+                                      items: viewModel.categories
+                                          .map(
+                                            (cat) => DropdownMenuItem(
+                                              value: cat.id,
+                                              child: Text(cat.name),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          viewModel.setCategoryId(val);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'NHÃN HÀNG',
+                                  style: AppTextStyles.labelMd,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: viewModel.brandId.isEmpty
+                                          ? null
+                                          : viewModel.brandId,
+                                      isExpanded: true,
+                                      items: viewModel.brands
+                                          .map(
+                                            (brand) => DropdownMenuItem(
+                                              value: brand.id,
+                                              child: Text(brand.name),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          viewModel.setBrandId(val);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Status Selector
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'TRẠNG THÁI KINH DOANH',
+                            style: AppTextStyles.labelMd,
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: viewModel.status,
+                                isExpanded: true,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'active',
+                                    child: Text('Đang hoạt động'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'inactive',
+                                    child: Text('Ngừng bán'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) viewModel.setStatus(val);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Description
+                      AppTextField(
+                        label: 'Mô tả chi tiết',
+                        hintText: 'Nhập mô tả sản phẩm...',
+                        controller: _descriptionController,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 5,
+                        onChanged: viewModel.setDescription,
+                      ),
+                      if (isMobile) ...[
+                        const SizedBox(height: 24),
+                        _buildProductActions(
+                          context,
+                          viewModel,
+                          userId,
+                          isAdmin,
+                          isMobile: true,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
-        );
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildImageSelector(ProductFormViewModel viewModel) {
@@ -566,6 +491,94 @@ class _ProductFormViewState extends State<ProductFormView> {
         ),
       ],
     );
+  }
+
+  Widget _buildProductActions(
+    BuildContext context,
+    ProductFormViewModel viewModel,
+    String userId,
+    bool isAdmin, {
+    bool isMobile = false,
+  }) {
+    final deleteButton = ElevatedButton(
+      onPressed: viewModel.isLoading
+          ? null
+          : () => _confirmDelete(context, viewModel, userId),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFEE2E2),
+        foregroundColor: AppColors.error,
+        elevation: 0,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(vertical: 18),
+      ),
+      child: viewModel.isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.error),
+              ),
+            )
+          : const Text(
+              'Ngừng bán',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+    );
+    final saveButton = AppButton(
+      text: viewModel.isEditing ? 'Cập nhật' : 'Thêm sản phẩm',
+      isLoading: viewModel.isLoading,
+      onPressed: (!viewModel.isChanged || viewModel.isLoading)
+          ? null
+          : () => _saveProduct(context, viewModel, userId),
+    );
+
+    if (isMobile) {
+      return Row(
+        children: [
+          if (viewModel.isEditing && isAdmin) ...[
+            Expanded(child: deleteButton),
+            const SizedBox(width: 12),
+          ],
+          Expanded(child: saveButton),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (viewModel.isEditing && isAdmin) ...[
+          SizedBox(width: 200, child: deleteButton),
+          const SizedBox(width: 12),
+        ],
+        SizedBox(width: 200, child: saveButton),
+      ],
+    );
+  }
+
+  Future<void> _saveProduct(
+    BuildContext context,
+    ProductFormViewModel viewModel,
+    String userId,
+  ) async {
+    viewModel.setInternalName(_internalNameController.text);
+    viewModel.setTradeName(_tradeNameController.text);
+    viewModel.setBarcode(_barcodeController.text);
+    viewModel.setPrice(double.tryParse(_priceController.text) ?? 0.0);
+    viewModel.setStock(int.tryParse(_stockController.text) ?? 0);
+    viewModel.setDescription(_descriptionController.text);
+
+    final success = await viewModel.save(userId);
+    if (success && context.mounted) {
+      AppToast.showSuccess(
+        context,
+        viewModel.isEditing
+            ? 'Cập nhật sản phẩm thành công!'
+            : 'Thêm sản phẩm mới thành công!',
+      );
+      context.pop(true);
+    }
   }
 
   void _confirmDelete(

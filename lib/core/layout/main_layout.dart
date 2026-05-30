@@ -43,7 +43,9 @@ class MainLayout extends StatelessWidget {
                       const SizedBox(height: 40),
                       Text(
                         'HAMSA STORE',
-                        style: AppTextStyles.headlineMd.copyWith(letterSpacing: -1),
+                        style: AppTextStyles.headlineMd.copyWith(
+                          letterSpacing: -1,
+                        ),
                       ),
                       const SizedBox(height: 40),
                       Expanded(
@@ -52,7 +54,9 @@ class MainLayout extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemBuilder: (context, index) {
                             final item = menuItems[index];
-                            final isSelected = currentRoute.startsWith(item.route);
+                            final isSelected = currentRoute.startsWith(
+                              item.route,
+                            );
 
                             return _buildMenuItemTile(
                               context: context,
@@ -89,19 +93,38 @@ class MainLayout extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit' || currentRoute == '/admin/orders/detail') ...[
+                            if (currentRoute == '/admin/products/new' ||
+                                currentRoute == '/admin/products/edit' ||
+                                currentRoute == '/admin/categories/new' ||
+                                currentRoute == '/admin/categories/edit' ||
+                                currentRoute == '/admin/brands/new' ||
+                                currentRoute == '/admin/brands/edit' ||
+                                currentRoute == '/admin/orders/detail' ||
+                                currentRoute == '/admin/users/new' ||
+                                currentRoute == '/admin/users/edit') ...[
                               IconButton(
-                                icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+                                icon: const Icon(
+                                  Icons.arrow_back,
+                                  color: AppColors.primary,
+                                ),
                                 onPressed: () {
                                   if (context.canPop()) {
                                     context.pop();
                                   } else {
                                     if (currentRoute.contains('/products')) {
                                       context.go('/admin/products');
-                                    } else if (currentRoute.contains('/categories')) {
+                                    } else if (currentRoute.contains(
+                                      '/categories',
+                                    )) {
                                       context.go('/admin/categories');
-                                    } else if (currentRoute.contains('/brands')) {
+                                    } else if (currentRoute.contains(
+                                      '/brands',
+                                    )) {
                                       context.go('/admin/brands');
+                                    } else if (currentRoute.contains(
+                                      '/users',
+                                    )) {
+                                      context.go('/admin/users');
                                     } else {
                                       context.go('/admin/orders');
                                     }
@@ -131,7 +154,16 @@ class MainLayout extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            leading: (currentRoute == '/admin/products/new' || currentRoute == '/admin/products/edit' || currentRoute == '/admin/categories/new' || currentRoute == '/admin/categories/edit' || currentRoute == '/admin/brands/new' || currentRoute == '/admin/brands/edit' || currentRoute == '/admin/orders/detail')
+            leading:
+                (currentRoute == '/admin/products/new' ||
+                    currentRoute == '/admin/products/edit' ||
+                    currentRoute == '/admin/categories/new' ||
+                    currentRoute == '/admin/categories/edit' ||
+                    currentRoute == '/admin/brands/new' ||
+                    currentRoute == '/admin/brands/edit' ||
+                    currentRoute == '/admin/orders/detail' ||
+                    currentRoute == '/admin/users/new' ||
+                    currentRoute == '/admin/users/edit')
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
@@ -144,6 +176,8 @@ class MainLayout extends StatelessWidget {
                           context.go('/admin/categories');
                         } else if (currentRoute.contains('/brands')) {
                           context.go('/admin/brands');
+                        } else if (currentRoute.contains('/users')) {
+                          context.go('/admin/users');
                         } else {
                           context.go('/admin/orders');
                         }
@@ -309,7 +343,7 @@ class MainLayout extends StatelessWidget {
         _MenuItem('Danh mục', '/admin/categories', Icons.category_outlined),
         _MenuItem('Nhãn hàng', '/admin/brands', Icons.stars_outlined),
         _MenuItem('Đơn hàng', '/admin/orders', Icons.receipt_long_outlined),
-        _MenuItem('Người dùng', '/admin/users', Icons.people_outline),
+        _MenuItem('Nhân viên', '/admin/users', Icons.people_outline),
         _MenuItem('Trang cá nhân', '/profile', Icons.person_outline),
       ];
     } else if (role == 'employee') {
@@ -340,7 +374,9 @@ class MainLayout extends StatelessWidget {
     if (route.startsWith('/admin/brands')) return 'Quản lý nhãn hàng';
     if (route.startsWith('/admin/orders/detail')) return 'Chi tiết đơn hàng';
     if (route.startsWith('/admin/orders')) return 'Quản lý đơn hàng';
-    if (route.startsWith('/admin/users')) return 'Quản lý người dùng';
+    if (route.startsWith('/admin/users/new')) return 'Thêm nhân viên';
+    if (route.startsWith('/admin/users/edit')) return 'Chi tiết nhân viên';
+    if (route.startsWith('/admin/users')) return 'Quản lý nhân viên';
     if (route.startsWith('/profile')) return 'Trang cá nhân';
     return 'Hamsa Store';
   }

@@ -23,6 +23,9 @@ import '../../features/user/profile/view/profile_view.dart';
 import '../../features/admin/orders/view/admin_order_list_view.dart';
 import '../../features/admin/orders/view/order_detail_view.dart';
 import '../../data/models/order_model.dart';
+import '../../features/admin/users/view/admin_user_list_view.dart';
+import '../../features/admin/users/view/admin_user_form_view.dart';
+import '../../data/models/profiles_model.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -52,6 +55,12 @@ class AppRouter {
 
         if (state.matchedLocation == '/admin') {
           return '/admin/dashboard';
+        }
+
+        final profile = authViewModel.currentProfile;
+        if (state.matchedLocation.startsWith('/admin/users') &&
+            profile?.isAdmin != true) {
+          return profile?.isCustomer == true ? '/shop' : '/admin/products';
         }
 
         return null;
@@ -129,10 +138,18 @@ class AppRouter {
             ),
             GoRoute(
               path: '/admin/users',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text('Quản lý người dùng (Mockup)')),
-              ),
+              builder: (context, state) => const AdminUserListView(),
+            ),
+            GoRoute(
+              path: '/admin/users/new',
+              builder: (context, state) => const AdminUserFormView(),
+            ),
+            GoRoute(
+              path: '/admin/users/edit',
+              builder: (context, state) {
+                final user = state.extra as ProfileModel?;
+                return AdminUserFormView(userToEdit: user);
+              },
             ),
             GoRoute(
               path: '/profile',

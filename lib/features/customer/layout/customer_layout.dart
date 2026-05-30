@@ -12,62 +12,70 @@ class CustomerLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = GoRouterState.of(context).matchedLocation;
+    final router = GoRouter.of(context);
     final isDesktop = MediaQuery.sizeOf(context).width >= 900;
 
-    if (isDesktop) {
-      return Scaffold(
-        body: Row(
-          children: [
-            Container(
-              width: 230,
-              decoration: const BoxDecoration(
-                border: Border(right: BorderSide(color: AppColors.border)),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 36),
-                  const Text(
-                    'HAMSA STORE',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 28),
-                  Expanded(child: _CustomerNavigation(currentPath: path)),
-                  const _LogoutButton(),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  _DesktopTopBar(path: path),
-                  Expanded(child: child),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    return AnimatedBuilder(
+      animation: router.routerDelegate,
+      builder: (context, childWidget) {
+        final path = router.routeInformationProvider.value.uri.path;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_titleForPath(path)),
-        centerTitle: true,
-        leading: path.startsWith('/shop/products/')
-            ? IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_back),
-              )
-            : null,
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1),
-        ),
-      ),
-      body: child,
-      bottomNavigationBar: _CustomerBottomNavigation(currentPath: path),
+        if (isDesktop) {
+          return Scaffold(
+            body: Row(
+              children: [
+                Container(
+                  width: 230,
+                  decoration: const BoxDecoration(
+                    border: Border(right: BorderSide(color: AppColors.border)),
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 36),
+                      const Text(
+                        'HAMSA STORE',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 28),
+                      Expanded(child: _CustomerNavigation(currentPath: path)),
+                      const _LogoutButton(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _DesktopTopBar(path: path),
+                      Expanded(child: childWidget ?? const SizedBox.shrink()),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_titleForPath(path)),
+            centerTitle: true,
+            leading: (path.startsWith('/shop/products/') || path == '/checkout')
+                ? IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back),
+                  )
+                : null,
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(height: 1),
+            ),
+          ),
+          body: childWidget ?? const SizedBox.shrink(),
+          bottomNavigationBar: _CustomerBottomNavigation(currentPath: path),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -87,7 +95,7 @@ class _DesktopTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (path.startsWith('/shop/products/')) ...[
+          if (path.startsWith('/shop/products/') || path == '/checkout') ...[
             IconButton(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back),
@@ -211,12 +219,14 @@ const _items = [
 
 bool _isSelected(String route, String currentPath) {
   if (route == '/shop') return currentPath == '/shop';
+  if (route == '/cart' && currentPath == '/checkout') return true;
   return currentPath.startsWith(route);
 }
 
 String _titleForPath(String path) {
   if (path.startsWith('/shop/products/')) return 'Chi tiết sản phẩm';
   if (path == '/cart') return 'Giỏ hàng';
+  if (path == '/checkout') return 'Thanh toán đơn hàng';
   if (path == '/shop/orders') return 'Đơn hàng';
   if (path == '/shop/profile') return 'Cá nhân';
   return 'Hamsa Store';

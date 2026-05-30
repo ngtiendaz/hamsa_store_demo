@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../viewmodel/customer_cart_view_model.dart';
 
 class CustomerCartView extends StatefulWidget {
@@ -228,47 +230,60 @@ class _CartSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasSelection = viewModel.selectedItemCount > 0;
+    
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
         color: AppColors.background,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              '${viewModel.selectedItemCount}/${viewModel.itemCount} sản phẩm đã chọn',
-              style: const TextStyle(color: AppColors.detail),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${viewModel.selectedItemCount}/${viewModel.itemCount} sản phẩm đã chọn',
+                    style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 160),
+                    child: !hasSelection
+                        ? const Text(
+                            'Chọn sản phẩm để tính tổng',
+                            key: ValueKey('empty-selection'),
+                            style: TextStyle(color: AppColors.detail, fontSize: 14),
+                          )
+                        : Text(
+                            _formatPrice(viewModel.selectedTotalAmount),
+                            key: ValueKey(viewModel.selectedTotalAmount),
+                            style: const TextStyle(
+                              color: AppColors.error,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 160),
-              child: viewModel.selectedItemCount == 0
-                  ? const Text(
-                      'Chọn sản phẩm để tính tổng',
-                      key: ValueKey('empty-selection'),
-                      maxLines: 2,
-                      textAlign: TextAlign.end,
-                      style: TextStyle(color: AppColors.detail),
-                    )
-                  : Text(
-                      _formatPrice(viewModel.selectedTotalAmount),
-                      key: ValueKey(viewModel.selectedTotalAmount),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.error,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ),
-        ],
+            if (hasSelection) ...[
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 130,
+                child: AppButton(
+                  text: 'Thanh toán',
+                  onPressed: () => context.push('/checkout'),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -43,6 +43,9 @@ class CustomerCartViewModel extends ChangeNotifier {
     : _repository = repository ?? CustomerCartRepository();
 
   List<CustomerCartEntry> get entries => _entries.values.toList();
+  List<CustomerCartEntry> get selectedEntries => _entries.values
+      .where((entry) => _selectedProductIds.contains(entry.product.id))
+      .toList();
   bool get isLoading => _isLoading;
   bool get isRefreshing => _isRefreshing;
   String? get errorMessage => _errorMessage;

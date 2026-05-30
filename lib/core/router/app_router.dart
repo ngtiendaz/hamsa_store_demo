@@ -13,12 +13,14 @@ import '../../../data/models/products_model.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/brand_model.dart';
 import '../../features/customer/cart/view/customer_cart_view.dart';
+import '../../features/customer/checkout/view/checkout_view.dart';
 import '../../features/customer/catalog/view/customer_home_view.dart';
 import '../../features/customer/catalog/view/customer_product_detail_view.dart';
 import '../../features/customer/layout/customer_layout.dart';
 import '../../features/customer/orders/view/customer_order_list_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
 import '../../features/user/profile/view/profile_view.dart';
+import '../../features/admin/orders/view/admin_order_list_view.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -114,10 +116,7 @@ class AppRouter {
             ),
             GoRoute(
               path: '/admin/orders',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text('Quản lý đơn hàng (Mockup)')),
-              ),
+              builder: (context, state) => const AdminOrderListView(),
             ),
             GoRoute(
               path: '/admin/users',
@@ -158,6 +157,10 @@ class AppRouter {
               path: '/cart',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: CustomerCartView()),
+            ),
+            GoRoute(
+              path: '/checkout',
+              builder: (context, state) => const CheckoutView(),
             ),
             GoRoute(
               path: '/shop/orders',

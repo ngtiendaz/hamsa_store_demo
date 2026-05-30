@@ -69,6 +69,8 @@ class OrderModel {
         return 'Giao thất bại';
       case 'cancelled':
         return 'Đã hủy';
+      case 'cancel_requested':
+        return 'Chờ xác nhận hủy';
       case 'return_requested':
         return 'Yêu cầu trả hàng';
       case 'returned':

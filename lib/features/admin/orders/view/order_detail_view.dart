@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../../data/models/order_item_model.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
@@ -37,7 +38,6 @@ class AdminOrderDetailView extends StatelessWidget {
         );
 
         final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-        final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
         final double amountPaid = currentOrder.paymentStatus == 'paid' ? currentOrder.totalAmount : 0.0;
         final double amountDue = currentOrder.paymentStatus == 'unpaid' ? currentOrder.totalAmount : 0.0;
 
@@ -48,7 +48,7 @@ class AdminOrderDetailView extends StatelessWidget {
               const Text('THÔNG TIN ĐƠN HÀNG', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13, letterSpacing: 0.5)),
               const SizedBox(height: 12),
               _buildInfoRow('Mã đơn hàng', currentOrder.orderCode),
-              _buildInfoRow('Ngày đặt', dateFormat.format(currentOrder.createdAt)),
+              _buildInfoRow('Ngày đặt', formatVietnamDateTime(currentOrder.createdAt)),
               _buildInfoRow('Phương thức thanh toán', currentOrder.paymentMethod == 'wallet' ? 'Ví HamsaPay' : 'COD'),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

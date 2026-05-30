@@ -97,7 +97,7 @@ class _BrandListViewState extends State<BrandListView> {
           searchField,
           if (isAdmin)
             SizedBox(
-              width: 180,
+              width: 220,
               child: AppButton(
                 text: 'Thêm nhãn hàng',
                 onPressed: () async {

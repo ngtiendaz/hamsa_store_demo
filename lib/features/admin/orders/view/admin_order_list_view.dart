@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/utils/debounce.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/admin_order_list_view_model.dart';
@@ -233,7 +234,6 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     AdminOrderListViewModel viewModel,
   ) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -272,7 +272,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                           children: [
                             Text(order.orderCode, style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(dateFormat.format(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
+                            Text(formatVietnamDateTime(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -400,7 +400,6 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     AdminOrderListViewModel viewModel,
   ) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -431,7 +430,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(dateFormat.format(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
+                  Text(formatVietnamDateTime(order.createdAt), style: const TextStyle(color: AppColors.detail, fontSize: 12)),
                   const Divider(height: 24),
                   
                   Text('Người nhận: ${order.customerName} - ${order.customerPhone ?? "N/A"}', style: const TextStyle(fontSize: 14)),

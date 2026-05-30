@@ -206,6 +206,7 @@ lib/
 - [ ] 7.5. Xử lý chức năng Hủy đơn hàng:
   - Chỉ cho phép hủy khi đơn hàng ở trạng thái `pending_confirmation`.
   - Khi hủy đơn, cập nhật trạng thái đơn thành `cancelled`, đồng thời cộng lại số lượng tồn kho cho các sản phẩm trong đơn hàng.
+  - Chuẩn hóa hiển thị thời gian đơn hàng theo múi giờ Việt Nam UTC+7 từ dữ liệu `timestamptz`.
 
 ### PHASE 8: Module 5 — Trang cá nhân (Profile)
 - [x] 8.1. Viết `ProfileRepository` để cập nhật dữ liệu của user hiện tại.

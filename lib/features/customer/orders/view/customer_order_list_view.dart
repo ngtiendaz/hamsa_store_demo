@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/utils/debounce.dart';
+import '../../../../core/utils/formatters.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/customer_order_list_view_model.dart';
 
@@ -248,7 +249,6 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final double amountPaid = order.paymentStatus == 'paid' ? order.totalAmount : 0.0;
     final double amountDue = order.paymentStatus == 'unpaid' ? order.totalAmount : 0.0;
 
@@ -313,7 +313,7 @@ class _OrderCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        dateFormat.format(order.createdAt),
+                        formatVietnamDateTime(order.createdAt),
                         style: const TextStyle(color: AppColors.detail, fontSize: 12),
                       ),
                     ],

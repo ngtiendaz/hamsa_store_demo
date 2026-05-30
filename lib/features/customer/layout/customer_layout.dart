@@ -206,7 +206,7 @@ const _items = [
   _NavigationItem('/shop', 'Trang chủ', Icons.home_outlined),
   _NavigationItem('/cart', 'Giỏ hàng', Icons.shopping_cart_outlined),
   _NavigationItem('/shop/orders', 'Đơn hàng', Icons.receipt_long_outlined),
-  _NavigationItem('/shop/profile', 'Profile', Icons.person_outline),
+  _NavigationItem('/shop/profile', 'Cá nhân', Icons.person_outline),
 ];
 
 bool _isSelected(String route, String currentPath) {
@@ -218,6 +218,6 @@ String _titleForPath(String path) {
   if (path.startsWith('/shop/products/')) return 'Chi tiết sản phẩm';
   if (path == '/cart') return 'Giỏ hàng';
   if (path == '/shop/orders') return 'Đơn hàng';
-  if (path == '/shop/profile') return 'Profile';
+  if (path == '/shop/profile') return 'Cá nhân';
   return 'Hamsa Store';
 }

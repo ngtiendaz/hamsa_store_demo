@@ -204,11 +204,17 @@ lib/
   - Khi hủy đơn, cập nhật trạng thái đơn thành `cancelled`, đồng thời cộng lại số lượng tồn kho cho các sản phẩm trong đơn hàng.
 
 ### PHASE 8: Module 5 — Trang cá nhân (Profile)
-- [ ] 8.1. Viết `ProfileRepository` để cập nhật dữ liệu của user hiện tại.
-- [ ] 8.2. Viết `ProfileViewModel` & thiết kế `ProfileView`:
+- [x] 8.1. Viết `ProfileRepository` để cập nhật dữ liệu của user hiện tại.
+- [x] 8.2. Viết `ProfileViewModel` & thiết kế `ProfileView`:
   - Hiển thị email (read-only), role (read-only).
   - Cho phép sửa: tên, số điện thoại, avatar (tải ảnh lên Supabase Storage hoặc nhập link URL văn bản).
   - Không cho phép người dùng tự đổi role của chính mình.
+  - Dùng chung giao diện responsive cho customer và route profile nội bộ.
+  - Tối ưu giao diện web toàn chiều rộng, căn trái nội dung và đưa vai trò lên gần tên người dùng.
+  - Đổi nhãn customer `Profile` thành `Cá nhân`.
+  - Thêm migration tạo bucket `avatars`, giới hạn loại ảnh và policy chỉ cho phép user ghi avatar của chính mình.
+  - Thêm RLS policy cập nhật profile chính chủ và trigger chặn user tự sửa `email`, `role`, `is_active`.
+  - Khắc phục cache avatar khi upload đè file: gắn version vào URL public, khai báo MIME type và tắt cache Storage cho file mới.
 - [ ] 8.3. Viết `ChangePasswordViewModel` & thiết kế `ChangePasswordView`:
   - Đổi mật khẩu thông qua hàm `updatePassword` của Supabase Auth.
   - Validate mật khẩu mới >= 6 ký tự và xác nhận mật khẩu phải khớp.
@@ -230,7 +236,7 @@ lib/
 - [x] 10.1. Tạo `CustomerProductRepository` chỉ đọc sản phẩm đang hoạt động, hỗ trợ tìm kiếm, lọc danh mục, lọc nhãn hàng và phân trang lazy load.
 - [x] 10.2. Tạo `CustomerHomeViewModel`, `CustomerProductDetailViewModel` và `CustomerCartViewModel` theo MVVM + Provider.
 - [x] 10.3. Xây dựng `CustomerLayout` responsive:
-  - App dùng bottom menu gồm Trang chủ, Giỏ hàng, Đơn hàng, Profile.
+  - App dùng bottom menu gồm Trang chủ, Giỏ hàng, Đơn hàng, Cá nhân.
   - Web dùng thanh điều hướng bên trái và vùng nội dung responsive.
 - [x] 10.4. Xây dựng trang chủ customer:
   - Grid sản phẩm active, app hiển thị 2 card mỗi dòng.
@@ -238,7 +244,7 @@ lib/
   - Card hiển thị ảnh, tên, giá và nút thêm vào giỏ hàng.
   - Lazy load sản phẩm khi cuộn gần cuối danh sách.
 - [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có ảnh, thông tin chi tiết và nút thêm vào giỏ hàng.
-- [x] 10.6. Xây dựng trang giỏ hàng local state và màn hình customer cho tab Đơn hàng, Profile.
+- [x] 10.6. Xây dựng trang giỏ hàng local state và màn hình customer cho tab Đơn hàng, Cá nhân.
 - [x] 10.7. Thay test counter template bằng test `CustomerCartViewModel` kiểm tra thêm, giới hạn tồn kho, giảm và xóa sản phẩm.
 
 ### PHASE 11: Đồng bộ giỏ hàng Customer với Supabase

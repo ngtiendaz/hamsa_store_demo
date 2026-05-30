@@ -18,6 +18,7 @@ import '../../features/customer/catalog/view/customer_product_detail_view.dart';
 import '../../features/customer/layout/customer_layout.dart';
 import '../../features/customer/orders/view/customer_order_list_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
+import '../../features/user/profile/view/profile_view.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -127,10 +128,7 @@ class AppRouter {
             ),
             GoRoute(
               path: '/profile',
-              builder: (context, state) => const Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text('Thông tin cá nhân (Mockup)')),
-              ),
+              builder: (context, state) => const ProfileView(),
             ),
           ],
         ),

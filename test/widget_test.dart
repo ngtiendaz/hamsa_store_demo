@@ -1,9 +1,13 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hamsa_store_demo/data/models/cart_item_model.dart';
 import 'package:hamsa_store_demo/data/models/cart_model.dart';
 import 'package:hamsa_store_demo/data/models/products_model.dart';
+import 'package:hamsa_store_demo/data/models/profiles_model.dart';
 import 'package:hamsa_store_demo/features/customer/cart/repository/customer_cart_repository.dart';
 import 'package:hamsa_store_demo/features/customer/cart/viewmodel/customer_cart_view_model.dart';
+import 'package:hamsa_store_demo/features/user/profile/repository/profile_repository.dart';
+import 'package:hamsa_store_demo/features/user/profile/viewmodel/profile_viewmodel.dart';
 
 void main() {
   test(
@@ -47,6 +51,34 @@ void main() {
       expect(viewModel.selectedItemCount, 0);
     },
   );
+
+  test('ProfileViewModel updates editable profile fields', () async {
+    final repository = _FakeProfileRepository();
+    final viewModel = ProfileViewModel(
+      profile: _buildProfile(),
+      repository: repository,
+    );
+
+    viewModel.setName('Nguyễn Văn A');
+    viewModel.setPhone('0909123456');
+
+    expect(await viewModel.save(), isTrue);
+    expect(viewModel.profile.name, 'Nguyễn Văn A');
+    expect(viewModel.profile.phone, '0909123456');
+    expect(repository.updatedUserId, 'user-1');
+  });
+
+  test('ProfileViewModel rejects an empty name', () async {
+    final viewModel = ProfileViewModel(
+      profile: _buildProfile(),
+      repository: _FakeProfileRepository(),
+    );
+
+    viewModel.setName(' ');
+
+    expect(await viewModel.save(), isFalse);
+    expect(viewModel.errorMessage, 'Họ tên không được để trống.');
+  });
 }
 
 class _FakeCustomerCartRepository implements CustomerCartDataSource {
@@ -111,6 +143,50 @@ ProductModel _buildProduct({required int stock}) {
     stock: stock,
     status: 'active',
     isFeatured: false,
+    createdAt: now,
+    updatedAt: now,
+  );
+}
+
+class _FakeProfileRepository implements ProfileDataSource {
+  String? updatedUserId;
+
+  @override
+  Future<ProfileModel> updateProfile({
+    required String userId,
+    required String name,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    updatedUserId = userId;
+    return _buildProfile().copyWith(
+      name: name,
+      phone: phone,
+      avatarUrl: avatarUrl,
+      updatedAt: DateTime(2026, 5, 30),
+    );
+  }
+
+  @override
+  Future<String> uploadAvatar({
+    required String userId,
+    required String fileName,
+    required Uint8List bytes,
+  }) async {
+    return 'https://example.com/avatar.jpg';
+  }
+}
+
+ProfileModel _buildProfile() {
+  final now = DateTime(2026);
+  return ProfileModel(
+    id: 'user-1',
+    email: 'customer@example.com',
+    name: 'Khách hàng',
+    phone: null,
+    avatarUrl: null,
+    role: 'customer',
+    isActive: true,
     createdAt: now,
     updatedAt: now,
   );

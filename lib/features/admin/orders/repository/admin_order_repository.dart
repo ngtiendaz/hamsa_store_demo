@@ -9,6 +9,7 @@ abstract class AdminOrderDataSource {
   Future<void> deliverOrderFailed(String orderId, String adminId);
   Future<void> approveReturnOrder(String orderId, String adminId);
   Future<void> cancelPendingOrder(String orderId, String adminId);
+  Future<void> rejectCancelOrder(String orderId, String adminId);
 }
 
 class AdminOrderRepository implements AdminOrderDataSource {
@@ -22,7 +23,7 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       final response = await _client
           .from('orders')
-          .select('*, order_items(*)')
+          .select('*, order_items(*, products(*, product_images(image_url)))')
           .order('created_at', ascending: false);
       
       final data = response as List<dynamic>;
@@ -122,6 +123,22 @@ class AdminOrderRepository implements AdminOrderDataSource {
           'p_admin_id': adminId,
         },
       );
+    } catch (e) {
+      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      throw Exception(msg);
+    }
+  }
+
+  @override
+  Future<void> rejectCancelOrder(String orderId, String adminId) async {
+    try {
+      await _client
+          .from('orders')
+          .update({
+            'status': 'pending_confirmation',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', orderId);
     } catch (e) {
       final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
       throw Exception(msg);

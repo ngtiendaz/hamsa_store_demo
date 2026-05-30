@@ -138,4 +138,22 @@ class AdminOrderListViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> rejectCancel(String orderId, String adminId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _orderRepository.rejectCancelOrder(orderId, adminId);
+      await loadOrders();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

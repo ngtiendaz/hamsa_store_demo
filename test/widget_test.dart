@@ -559,4 +559,15 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
       );
     }
   }
+
+  @override
+  Future<void> rejectCancelOrder(String orderId, String adminId) async {
+    final idx = orders.indexWhere((o) => o.id == orderId);
+    if (idx != -1) {
+      orders[idx] = orders[idx].copyWith(
+        status: 'pending_confirmation',
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
 }

@@ -29,7 +29,7 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       final response = await _client
           .from('orders')
-          .select('*, order_items(*)')
+          .select('*, order_items(*, products(*, product_images(image_url)))')
           .eq('customer_id', userId)
           .order('created_at', ascending: false);
       

@@ -277,14 +277,14 @@ lib/
 
 ### PHASE 11.7: Thanh toán & Quản lý Vòng đời Đơn hàng (Customer Checkout & Order Lifecycle)
 - [x] 11.7.1. Deploy các RPC database (`create_order`, `request_cancel_order`, `cancel_request_cancel_order`, `admin_confirm_order`, `admin_approve_cancel_order`) để quản lý đặt hàng, hoàn kho, hoàn tiền ví đồng bộ.
-- [ ] 11.7.2. Tạo `CustomerOrderRepository` thực hiện đặt hàng, yêu cầu hủy đơn, rút yêu cầu hủy đơn.
-- [ ] 11.7.3. Tạo `AdminOrderRepository` để lấy danh sách đơn hàng, xác nhận giao hàng và phê duyệt yêu cầu hủy đơn.
-- [ ] 11.7.4. Tạo `CheckoutViewModel` và thiết kế màn hình `CheckoutView` (điền thông tin nhận hàng, chọn ví HamsaPay hoặc COD).
-- [ ] 11.7.5. Tích hợp nút thanh toán vào widget `_CartSummary` trong `CustomerCartView` khi có sản phẩm được chọn.
-- [ ] 11.7.6. Thiết kế màn hình đơn hàng của Khách hàng (`CustomerOrderListView`, `CustomerOrderListViewModel`) hiển thị danh sách đơn hàng thực tế kèm nút yêu cầu hủy/rút yêu cầu hủy.
-- [ ] 11.7.7. Thiết kế màn hình đơn hàng của Admin/Employee (`AdminOrderListView`, `AdminOrderListViewModel`) cho phép lọc trạng thái, xác nhận giao hàng (Admin/Employee) và phê duyệt hủy đơn (Chỉ Admin).
-- [ ] 11.7.8. Đăng ký các routes (`/checkout`, `/admin/orders`) trong `app_router.dart` và đăng ký các ViewModels trong `main.dart`.
-- [ ] 11.7.9. Viết unit tests kiểm chứng toàn bộ luồng thanh toán và cập nhật trạng thái đơn hàng trong `widget_test.dart`.
+- [x] 11.7.2. Tạo `CustomerOrderRepository` thực hiện đặt hàng, yêu cầu hủy đơn, rút yêu cầu hủy đơn.
+- [x] 11.7.3. Tạo `AdminOrderRepository` để lấy danh sách đơn hàng, xác nhận giao hàng và phê duyệt yêu cầu hủy đơn.
+- [x] 11.7.4. Tạo `CheckoutViewModel` và thiết kế màn hình `CheckoutView` (điền thông tin nhận hàng, chọn ví HamsaPay hoặc COD).
+- [x] 11.7.5. Tích hợp nút thanh toán vào widget `_CartSummary` trong `CustomerCartView` khi có sản phẩm được chọn.
+- [x] 11.7.6. Thiết kế màn hình đơn hàng của Khách hàng (`CustomerOrderListView`, `CustomerOrderListViewModel`) hiển thị danh sách đơn hàng thực tế kèm nút yêu cầu hủy/rút yêu cầu hủy.
+- [x] 11.7.7. Thiết kế màn hình đơn hàng của Admin/Employee (`AdminOrderListView`, `AdminOrderListViewModel`) cho phép lọc trạng thái, xác nhận giao hàng (Admin/Employee) và phê duyệt hủy đơn (Chỉ Admin).
+- [x] 11.7.8. Đăng ký các routes (`/checkout`, `/admin/orders`) trong `app_router.dart` và đăng ký các ViewModels trong `main.dart`.
+- [x] 11.7.9. Viết unit tests kiểm chứng toàn bộ luồng thanh toán và cập nhật trạng thái đơn hàng trong `widget_test.dart`.
 
 ---
 

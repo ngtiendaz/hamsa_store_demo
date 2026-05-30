@@ -8,6 +8,7 @@ class OrderItemModel {
   final int quantity;
   final double subtotal;
   final DateTime createdAt;
+  final String? productImageUrl;
 
   OrderItemModel({
     required this.id,
@@ -19,9 +20,17 @@ class OrderItemModel {
     required this.quantity,
     required this.subtotal,
     required this.createdAt,
+    this.productImageUrl,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    String? imageUrl;
+    if (json['products'] != null && json['products']['product_images'] != null) {
+      final list = json['products']['product_images'] as List;
+      if (list.isNotEmpty) {
+        imageUrl = list.first['image_url'] as String?;
+      }
+    }
     return OrderItemModel(
       id: json['id'] as String,
       orderId: json['order_id'] as String,
@@ -36,6 +45,7 @@ class OrderItemModel {
           ? (json['subtotal'] as num).toDouble()
           : double.parse(json['subtotal'].toString()),
       createdAt: DateTime.parse(json['created_at'] as String),
+      productImageUrl: imageUrl,
     );
   }
 
@@ -63,6 +73,7 @@ class OrderItemModel {
     int? quantity,
     double? subtotal,
     DateTime? createdAt,
+    String? productImageUrl,
   }) {
     return OrderItemModel(
       id: id ?? this.id,
@@ -74,6 +85,7 @@ class OrderItemModel {
       quantity: quantity ?? this.quantity,
       subtotal: subtotal ?? this.subtotal,
       createdAt: createdAt ?? this.createdAt,
+      productImageUrl: productImageUrl ?? this.productImageUrl,
     );
   }
 }

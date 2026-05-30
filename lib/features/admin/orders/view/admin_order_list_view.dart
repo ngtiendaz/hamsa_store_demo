@@ -115,63 +115,6 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isLarge = constraints.maxWidth >= 700;
-          
-          final searchField = Container(
-            width: isLarge ? 320 : double.infinity,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (val) {
-                _debounce.run(() {
-                  setState(() {
-                    _searchQuery = val;
-                  });
-                });
-              },
-              decoration: const InputDecoration(
-                hintText: 'Tìm kiếm mã đơn, khách hàng, SĐT...',
-                hintStyle: TextStyle(color: AppColors.detail, fontSize: 13),
-                prefixIcon: Icon(Icons.search, size: 18, color: AppColors.detail),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
-              ),
-            ),
-          );
-
-          if (isLarge) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                searchField,
-                const SizedBox(width: 16),
-                Expanded(child: _buildFilterBar()),
-              ],
-            );
-          }
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              searchField,
-              const SizedBox(height: 12),
-              _buildFilterBar(),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildFilterBar() {
     final filters = [
       {'value': 'all', 'label': 'Tất cả'},
       {'value': 'pending_confirmation', 'label': 'Chờ xác nhận'},
@@ -184,35 +127,99 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
       {'value': 'cancelled', 'label': 'Đã hủy'},
     ];
 
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = _statusFilter == filter['value'];
-          return ChoiceChip(
-            label: Text(
-              filter['label']!,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isLarge = constraints.maxWidth >= 700;
+          
+          final searchField = SizedBox(
+            width: isLarge ? 320 : double.infinity,
+            height: 40,
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) {
+                _debounce.run(() {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm mã đơn, khách hàng, SĐT...',
+                hintStyle: const TextStyle(color: AppColors.detail, fontSize: 13),
+                prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.detail),
+                fillColor: AppColors.surface,
+                filled: true,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.0),
+                ),
               ),
             ),
-            selected: isSelected,
-            onSelected: (selected) {
-              if (selected) {
-                setState(() {
-                  _statusFilter = filter['value']!;
-                });
-              }
-            },
-            selectedColor: AppColors.primary,
-            backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          );
+
+          final filterDropdown = Container(
+            width: isLarge ? 220 : double.infinity,
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border, width: 0.5),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _statusFilter,
+                icon: const Icon(Icons.filter_list, size: 18, color: AppColors.detail),
+                style: const TextStyle(color: AppColors.onSurface, fontSize: 13, fontWeight: FontWeight.w500),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _statusFilter = newValue;
+                    });
+                  }
+                },
+                items: filters.map<DropdownMenuItem<String>>((filter) {
+                  return DropdownMenuItem<String>(
+                    value: filter['value'],
+                    child: Text(filter['label']!),
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+
+          if (isLarge) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                searchField,
+                const SizedBox(width: 16),
+                filterDropdown,
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              filterDropdown,
+            ],
           );
         },
       ),
@@ -244,7 +251,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             2: FlexColumnWidth(2.8), 
             3: FlexColumnWidth(1.2), 
             4: FlexColumnWidth(1.5), 
-            5: FlexColumnWidth(1.5), 
+            5: FlexColumnWidth(1.7), 
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
@@ -352,7 +359,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                       onTap: () => context.go('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: _buildStatusBadge(order),
+                        child: Center(child: _buildStatusBadge(order)),
                       ),
                     ),
                   ),
@@ -373,12 +380,14 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
         borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
       ),
       children: headers.map((header) {
+        final isStatus = header == 'TRẠNG THÁI';
+        final textWidget = Text(
+          header,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87),
+        );
         return Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            header,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.black87),
-          ),
+          child: isStatus ? Center(child: textWidget) : textWidget,
         );
       }).toList(),
     );
@@ -503,6 +512,9 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
       case 'delivered':
         color = Colors.green;
         break;
+      case 'delivery_failed':
+        color = Colors.red;
+        break;
       case 'cancelled':
         color = Colors.grey;
         break;
@@ -516,15 +528,19 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
         color = AppColors.detail;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      width: 140,
+      padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: Text(
-        order.statusLabel,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+      child: Center(
+        child: Text(
+          order.statusLabel,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+        ),
       ),
     );
   }

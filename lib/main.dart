@@ -4,10 +4,11 @@ import 'core/services/supabase_service.dart';
 import 'features/user/auth/viewmodel/auth_viewmodel.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/customer/cart/viewmodel/customer_cart_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Khởi tạo kết nối Supabase
   await SupabaseService.initialize();
 
@@ -19,6 +20,14 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: authViewModel),
+        ChangeNotifierProxyProvider<AuthViewModel, CustomerCartViewModel>(
+          create: (_) => CustomerCartViewModel(),
+          update: (context, authViewModel, cartViewModel) {
+            final viewModel = cartViewModel ?? CustomerCartViewModel();
+            viewModel.syncForUser(authViewModel.currentProfile?.id);
+            return viewModel;
+          },
+        ),
       ],
       child: const MyApp(),
     ),

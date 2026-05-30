@@ -12,6 +12,12 @@ import '../layout/main_layout.dart';
 import '../../../data/models/products_model.dart';
 import '../../../data/models/category_model.dart';
 import '../../../data/models/brand_model.dart';
+import '../../features/customer/cart/view/customer_cart_view.dart';
+import '../../features/customer/catalog/view/customer_home_view.dart';
+import '../../features/customer/catalog/view/customer_product_detail_view.dart';
+import '../../features/customer/layout/customer_layout.dart';
+import '../../features/customer/orders/view/customer_order_list_view.dart';
+import '../../features/customer/profile/view/customer_profile_view.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -27,7 +33,7 @@ class AppRouter {
         if (!loggedIn && !loggingIn) {
           return '/login';
         }
-        
+
         if (loggedIn && loggingIn) {
           final profile = authViewModel.currentProfile;
           if (profile != null) {
@@ -42,14 +48,11 @@ class AppRouter {
         if (state.matchedLocation == '/admin') {
           return '/admin/dashboard';
         }
-        
+
         return null;
       },
       routes: [
-        GoRoute(
-          path: '/login',
-          builder: (context, state) => const LoginView(),
-        ),
+        GoRoute(path: '/login', builder: (context, state) => const LoginView()),
         // ShellRoute for Admin pages
         ShellRoute(
           builder: (context, state, child) => MainLayout(child: child),
@@ -58,7 +61,9 @@ class AppRouter {
               path: '/admin/dashboard',
               builder: (context, state) => const Scaffold(
                 backgroundColor: Colors.white,
-                body: Center(child: Text('Trang Bảng Điều Khiển (Dashboard Mockup)')),
+                body: Center(
+                  child: Text('Trang Bảng Điều Khiển (Dashboard Mockup)'),
+                ),
               ),
             ),
             GoRoute(
@@ -129,35 +134,44 @@ class AppRouter {
             ),
           ],
         ),
-        // Shop route for Customer
-        GoRoute(
-          path: '/shop',
-          builder: (context, state) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Hamsa Store'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () async {
-                    await authViewModel.logout();
-                    if (context.mounted) {
-                      context.go('/login');
-                    }
-                  },
+        ShellRoute(
+          builder: (context, state, child) => CustomerLayout(child: child),
+          routes: [
+            GoRoute(
+              path: '/shop',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: CustomerHomeView()),
+            ),
+            GoRoute(
+              path: '/shop/products/:id',
+              pageBuilder: (context, state) => CustomTransitionPage(
+                transitionDuration: const Duration(milliseconds: 180),
+                reverseTransitionDuration: const Duration(milliseconds: 140),
+                child: CustomerProductDetailView(
+                  productId: state.pathParameters['id']!,
                 ),
-              ],
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+              ),
             ),
-            body: const Center(
-              child: Text('Trang Khách hàng (User/Customer)'),
+            GoRoute(
+              path: '/cart',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: CustomerCartView()),
             ),
-          ),
-        ),
-        GoRoute(
-          path: '/cart',
-          builder: (context, state) => Scaffold(
-            appBar: AppBar(title: const Text('Giỏ hàng')),
-            body: const Center(child: Text('Trang Giỏ hàng (Mockup)')),
-          ),
+            GoRoute(
+              path: '/shop/orders',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: CustomerOrderListView()),
+            ),
+            GoRoute(
+              path: '/shop/profile',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: CustomerProfileView()),
+            ),
+          ],
         ),
       ],
     );

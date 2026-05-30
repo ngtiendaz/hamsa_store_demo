@@ -226,6 +226,41 @@ lib/
   - Đưa nút `Xóa` và `Cập nhật` xuống cuối form chi tiết danh mục, nhãn hàng trên mobile; sửa hàng trạng thái danh mục không overflow.
   - Thêm viền mặc định cho text field của danh mục, nhãn hàng; dãn đều nút thêm mới trên mobile và cố định chiều cao card kèm ellipsis.
 
+### PHASE 10: Trang chủ Customer & Catalog
+- [x] 10.1. Tạo `CustomerProductRepository` chỉ đọc sản phẩm đang hoạt động, hỗ trợ tìm kiếm, lọc danh mục, lọc nhãn hàng và phân trang lazy load.
+- [x] 10.2. Tạo `CustomerHomeViewModel`, `CustomerProductDetailViewModel` và `CustomerCartViewModel` theo MVVM + Provider.
+- [x] 10.3. Xây dựng `CustomerLayout` responsive:
+  - App dùng bottom menu gồm Trang chủ, Giỏ hàng, Đơn hàng, Profile.
+  - Web dùng thanh điều hướng bên trái và vùng nội dung responsive.
+- [x] 10.4. Xây dựng trang chủ customer:
+  - Grid sản phẩm active, app hiển thị 2 card mỗi dòng.
+  - Có tìm kiếm, bộ lọc danh mục, nhãn hàng.
+  - Card hiển thị ảnh, tên, giá và nút thêm vào giỏ hàng.
+  - Lazy load sản phẩm khi cuộn gần cuối danh sách.
+- [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có ảnh, thông tin chi tiết và nút thêm vào giỏ hàng.
+- [x] 10.6. Xây dựng trang giỏ hàng local state và màn hình customer cho tab Đơn hàng, Profile.
+- [x] 10.7. Thay test counter template bằng test `CustomerCartViewModel` kiểm tra thêm, giới hạn tồn kho, giảm và xóa sản phẩm.
+
+### PHASE 11: Đồng bộ giỏ hàng Customer với Supabase
+- [x] 11.1. Xác minh schema thật qua Supabase REST do phiên làm việc không có Supabase MCP hoặc Stitch MCP:
+  - `carts`: `id`, `user_id`, `status`, `created_at`, `updated_at`.
+  - `cart_items`: `id`, `cart_id`, `product_id`, `quantity`, `price_snapshot`, `created_at`, `updated_at`.
+  - Quan hệ đọc: `carts -> cart_items -> products -> product_images`.
+- [x] 11.2. Tạo `CustomerCartRepository` CRUD cart và cart item trên Supabase.
+  - Tối ưu thao tác thêm sản phẩm chỉ query `cart.id` trước khi ghi để giảm payload.
+- [x] 11.3. Chuyển `CustomerCartViewModel` từ local state sang persisted state:
+  - Tự tải cart theo user đăng nhập và xóa state khi logout.
+  - Optimistic update, rollback khi lỗi và khóa thao tác theo từng sản phẩm.
+  - Đồng bộ lại khi mở tab cart và hỗ trợ pull-to-refresh.
+- [x] 11.4. Tối ưu UI cart, catalog, detail:
+  - Hiển thị loading theo item, animation nhẹ và tránh thao tác ghi chồng nhau.
+  - Tab customer chuyển view không animation để tránh trễ đè view; trang chi tiết dùng fade ngắn.
+- [x] 11.5. Cập nhật test `CustomerCartViewModel` dùng fake repository để kiểm tra CRUD persisted state.
+- [x] 11.6. Hoàn thiện cách hiển thị và tính tổng giỏ hàng:
+  - Badge giỏ hàng đếm số dòng sản phẩm khác nhau, không cộng dồn số lượng từng sản phẩm.
+  - Thêm checkbox chọn từng item và chỉ tính tổng tiền của các item đã chọn.
+  - Giữ lựa chọn ổn định khi cập nhật số lượng, tự loại bỏ lựa chọn khi item bị xóa hoặc không còn tồn tại sau khi đồng bộ.
+
 ---
 
 ## 🚦 Quy tắc cập nhật checklist

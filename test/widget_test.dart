@@ -8,6 +8,8 @@ import 'package:hamsa_store_demo/features/customer/cart/repository/customer_cart
 import 'package:hamsa_store_demo/features/customer/cart/viewmodel/customer_cart_view_model.dart';
 import 'package:hamsa_store_demo/features/user/profile/repository/profile_repository.dart';
 import 'package:hamsa_store_demo/features/user/profile/viewmodel/profile_viewmodel.dart';
+import 'package:hamsa_store_demo/data/models/wallet_model.dart';
+import 'package:hamsa_store_demo/data/models/wallet_transaction_model.dart';
 
 void main() {
   test(
@@ -174,6 +176,33 @@ class _FakeProfileRepository implements ProfileDataSource {
     required Uint8List bytes,
   }) async {
     return 'https://example.com/avatar.jpg';
+  }
+
+  @override
+  Future<WalletModel?> getWallet(String userId) async {
+    return WalletModel(
+      id: 'wallet-1',
+      userId: userId,
+      balance: 100000.0,
+      currency: 'VND',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+  }
+
+  @override
+  Future<List<WalletTransactionModel>> getWalletTransactions(String userId) async {
+    return [];
+  }
+
+  @override
+  Future<void> processWalletTransaction({
+    required String userId,
+    required String type,
+    required double amount,
+    String? note,
+  }) async {
+    // Fake success
   }
 }
 

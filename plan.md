@@ -219,6 +219,14 @@ lib/
   - Đổi mật khẩu thông qua hàm `updatePassword` của Supabase Auth.
   - Validate mật khẩu mới >= 6 ký tự và xác nhận mật khẩu phải khớp.
 
+### PHASE 8.5: Module — Ví điện tử HamsaPay (HamsaPay Wallet)
+- [ ] 8.5.1. Tạo model `wallet_model.dart` và `wallet_transaction_model.dart` để ánh xạ ví và lịch sử giao dịch.
+- [ ] 8.5.2. Cập nhật `ProfileRepository` các hàm lấy số dư ví, lấy lịch sử và nạp/rút tiền qua Postgres RPC.
+- [ ] 8.5.3. Cập nhật `ProfileViewModel` quản lý trạng thái số dư ví, tải lịch sử và thực hiện nạp/rút.
+- [ ] 8.5.4. Thiết kế `HamsapayCard` sang trọng hiển thị số dư, có nút nạp, rút và mở dialog lịch sử.
+- [ ] 8.5.5. Thiết kế `WalletHistoryDialog` hiển thị lịch sử giao dịch của ví với phân loại trạng thái nạp, rút, thanh toán, hoàn tiền.
+- [ ] 8.5.6. Tích hợp `HamsapayCard` vào `ProfileForm` trong trang Cá nhân.
+
 ### PHASE 9: Polish UI & Test luồng (Final Review)
 - [ ] 9.1. Tạo bộ widget dùng chung (`AppButton`, `AppTextField`, `AppTable`, `LoadingWidget`, `ErrorStateWidget`, `EmptyStateWidget`).
 - [ ] 9.2. Chuẩn hóa hiển thị trạng thái và nhãn bằng tiếng Việt.

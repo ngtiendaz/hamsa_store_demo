@@ -5,6 +5,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_text_field.dart';
 import '../../viewmodel/profile_viewmodel.dart';
 import 'avatar_picker.dart';
+import 'hamsapay_card.dart';
 
 class ProfileForm extends StatelessWidget {
   final ProfileViewModel viewModel;
@@ -27,6 +28,8 @@ class ProfileForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _ProfileHeader(viewModel: viewModel),
+            const SizedBox(height: 20),
+            HamsapayCard(viewModel: viewModel),
             const SizedBox(height: 20),
             Container(
               padding: EdgeInsets.all(isDesktop ? 28 : 20),

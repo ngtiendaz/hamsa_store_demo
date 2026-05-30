@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../data/models/profiles_model.dart';
+import '../../../../data/models/wallet_model.dart';
+import '../../../../data/models/wallet_transaction_model.dart';
 import '../repository/profile_repository.dart';
 
 class ProfileViewModel extends ChangeNotifier {
@@ -17,6 +19,12 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isPickingAvatar = false;
   String? _errorMessage;
 
+  // Wallet states
+  WalletModel? _wallet;
+  List<WalletTransactionModel> _transactions = [];
+  bool _isLoadingWallet = false;
+  bool _isProcessingWallet = false;
+
   ProfileViewModel({
     required ProfileModel profile,
     ProfileDataSource? repository,
@@ -25,7 +33,9 @@ class ProfileViewModel extends ChangeNotifier {
        _name = profile.name,
        _phone = profile.phone ?? '',
        _repository = repository ?? ProfileRepository(),
-       _imagePicker = imagePicker ?? ImagePicker();
+       _imagePicker = imagePicker ?? ImagePicker() {
+    loadWalletInfo();
+  }
 
   ProfileModel get profile => _profile;
   String get name => _name;
@@ -34,6 +44,11 @@ class ProfileViewModel extends ChangeNotifier {
   bool get isSaving => _isSaving;
   bool get isPickingAvatar => _isPickingAvatar;
   String? get errorMessage => _errorMessage;
+
+  WalletModel? get wallet => _wallet;
+  List<WalletTransactionModel> get transactions => _transactions;
+  bool get isLoadingWallet => _isLoadingWallet;
+  bool get isProcessingWallet => _isProcessingWallet;
 
   void setName(String value) {
     _name = value;
@@ -104,6 +119,92 @@ class ProfileViewModel extends ChangeNotifier {
       return false;
     } finally {
       _isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadWalletInfo() async {
+    _isLoadingWallet = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final w = await _repository.getWallet(_profile.id);
+      _wallet = w ?? WalletModel(
+        id: '',
+        userId: _profile.id,
+        balance: 0.0,
+        currency: 'VND',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      _transactions = await _repository.getWalletTransactions(_profile.id);
+    } catch (e) {
+      _errorMessage = 'Không thể tải thông tin ví. Vui lòng thử lại.';
+      debugPrint('Error loading wallet: $e');
+    } finally {
+      _isLoadingWallet = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deposit(double amount) async {
+    if (amount <= 0) {
+      _errorMessage = 'Số tiền nạp phải lớn hơn 0.';
+      notifyListeners();
+      return false;
+    }
+    _isProcessingWallet = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.processWalletTransaction(
+        userId: _profile.id,
+        type: 'deposit',
+        amount: amount,
+        note: 'Nạp tiền vào ví HamsaPay',
+      );
+      await loadWalletInfo();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isProcessingWallet = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> withdraw(double amount) async {
+    if (amount <= 0) {
+      _errorMessage = 'Số tiền rút phải lớn hơn 0.';
+      notifyListeners();
+      return false;
+    }
+    if (_wallet == null || _wallet!.balance < amount) {
+      _errorMessage = 'Số dư ví không đủ để thực hiện giao dịch.';
+      notifyListeners();
+      return false;
+    }
+    _isProcessingWallet = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.processWalletTransaction(
+        userId: _profile.id,
+        type: 'manual_adjustment',
+        amount: amount,
+        note: 'Rút tiền khỏi ví HamsaPay',
+      );
+      await loadWalletInfo();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isProcessingWallet = false;
       notifyListeners();
     }
   }

@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../data/models/profiles_model.dart';
+import '../../../../data/models/wallet_model.dart';
+import '../../../../data/models/wallet_transaction_model.dart';
 
 abstract class ProfileDataSource {
   Future<ProfileModel> updateProfile({
@@ -15,6 +17,17 @@ abstract class ProfileDataSource {
     required String userId,
     required String fileName,
     required Uint8List bytes,
+  });
+
+  Future<WalletModel?> getWallet(String userId);
+
+  Future<List<WalletTransactionModel>> getWalletTransactions(String userId);
+
+  Future<void> processWalletTransaction({
+    required String userId,
+    required String type,
+    required double amount,
+    String? note,
   });
 }
 
@@ -58,5 +71,42 @@ class ProfileRepository implements ProfileDataSource {
       fileName: fileName,
       bytes: bytes,
     );
+  }
+
+  @override
+  Future<WalletModel?> getWallet(String userId) async {
+    final response = await _client
+        .from('wallets')
+        .select()
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (response == null) return null;
+    return WalletModel.fromJson(response);
+  }
+
+  @override
+  Future<List<WalletTransactionModel>> getWalletTransactions(String userId) async {
+    final response = await _client
+        .from('wallet_transactions')
+        .select()
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
+    final list = response as List<dynamic>;
+    return list.map((json) => WalletTransactionModel.fromJson(json)).toList();
+  }
+
+  @override
+  Future<void> processWalletTransaction({
+    required String userId,
+    required String type,
+    required double amount,
+    String? note,
+  }) async {
+    await _client.rpc('process_wallet_transaction', params: {
+      'p_user_id': userId,
+      'p_type': type,
+      'p_amount': amount,
+      'p_note': note,
+    });
   }
 }

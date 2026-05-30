@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/user/auth/view/login_view.dart';
+import '../../features/user/auth/view/register_view.dart';
 import '../../features/user/auth/viewmodel/auth_viewmodel.dart';
 import '../../features/admin/products/view/product_list_view.dart';
 import '../../features/admin/products/view/product_form_view.dart';
@@ -38,12 +39,13 @@ class AppRouter {
       redirect: (context, state) {
         final loggedIn = authViewModel.isAuthenticated;
         final loggingIn = state.matchedLocation == '/login';
+        final registering = state.matchedLocation == '/register';
 
-        if (!loggedIn && !loggingIn) {
+        if (!loggedIn && !loggingIn && !registering) {
           return '/login';
         }
 
-        if (loggedIn && loggingIn) {
+        if (loggedIn && (loggingIn || registering)) {
           final profile = authViewModel.currentProfile;
           if (profile != null) {
             if (profile.isAdmin || profile.isEmployee) {
@@ -69,6 +71,7 @@ class AppRouter {
       },
       routes: [
         GoRoute(path: '/login', builder: (context, state) => const LoginView()),
+        GoRoute(path: '/register', builder: (context, state) => const RegisterView()),
         // ShellRoute for Admin pages
         ShellRoute(
           builder: (context, state, child) => MainLayout(child: child),

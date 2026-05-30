@@ -16,6 +16,9 @@ import 'package:hamsa_store_demo/features/customer/orders/repository/customer_or
 import 'package:hamsa_store_demo/features/customer/orders/viewmodel/customer_order_list_view_model.dart';
 import 'package:hamsa_store_demo/features/admin/orders/repository/admin_order_repository.dart';
 import 'package:hamsa_store_demo/features/admin/orders/viewmodel/admin_order_list_view_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hamsa_store_demo/features/user/auth/viewmodel/register_view_model.dart';
+import 'package:hamsa_store_demo/features/user/auth/viewmodel/auth_viewmodel.dart';
 import 'package:hamsa_store_demo/data/models/admin_dashboard_stats_model.dart';
 import 'package:hamsa_store_demo/features/admin/dashboard/repository/admin_dashboard_repository.dart';
 import 'package:hamsa_store_demo/features/admin/dashboard/viewmodel/admin_dashboard_view_model.dart';
@@ -308,6 +311,121 @@ void main() {
     ]);
     expect(repository.referenceDates.last, DateTime(2025, 3));
   });
+
+  group('Auth & Registration Tests', () {
+    test('RegisterViewModel validation and registration flow', () async {
+      final authViewModel = _FakeAuthViewModel();
+      final viewModel = RegisterViewModel(authViewModel: authViewModel);
+
+      // Initial state
+      expect(viewModel.email, isEmpty);
+      expect(viewModel.password, isEmpty);
+
+      // Validate empty
+      expect(viewModel.validate(), isFalse);
+      expect(viewModel.errorMessage, contains('Email không được để trống'));
+
+      // Validate invalid email
+      viewModel.setEmail('invalid_email');
+      expect(viewModel.validate(), isFalse);
+      expect(viewModel.errorMessage, contains('Email không đúng định dạng'));
+
+      // Validate short password
+      viewModel.setEmail('test@example.com');
+      viewModel.setPassword('123');
+      expect(viewModel.validate(), isFalse);
+      expect(viewModel.errorMessage, contains('Mật khẩu phải chứa ít nhất 6 ký tự'));
+
+      // Validate password mismatch
+      viewModel.setPassword('123456');
+      viewModel.setConfirmPassword('1234567');
+      expect(viewModel.validate(), isFalse);
+      expect(viewModel.errorMessage, contains('Mật khẩu xác nhận không khớp'));
+
+      // Successful validation
+      viewModel.setConfirmPassword('123456');
+      expect(viewModel.validate(), isTrue);
+
+      // Registration call
+      final success = await viewModel.register();
+      expect(success, isTrue);
+      expect(authViewModel.registeredEmail, 'test@example.com');
+      expect(authViewModel.registeredName, 'test'); // derived from email local-part since name is empty
+    });
+
+    test('AuthViewModel recent accounts logic', () async {
+      SharedPreferences.setMockInitialValues({});
+      final authViewModel = _FakeAuthViewModelForRecentAccounts();
+
+      final profile1 = ProfileModel(
+        id: 'user-1',
+        email: 'user1@example.com',
+        name: 'User One',
+        role: 'customer',
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final profile2 = ProfileModel(
+        id: 'user-2',
+        email: 'user2@example.com',
+        name: 'User Two',
+        role: 'customer',
+        isActive: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Initially empty
+      var recent = await authViewModel.getRecentAccounts();
+      expect(recent, isEmpty);
+
+      // Save user 1
+      await authViewModel.saveRecentAccount(profile1);
+      recent = await authViewModel.getRecentAccounts();
+      expect(recent.length, 1);
+      expect(recent[0].email, 'user1@example.com');
+
+      // Save user 2 (should be at top)
+      await authViewModel.saveRecentAccount(profile2);
+      recent = await authViewModel.getRecentAccounts();
+      expect(recent.length, 2);
+      expect(recent[0].email, 'user2@example.com');
+      expect(recent[1].email, 'user1@example.com');
+
+      // Save user 1 again (should move to top)
+      await authViewModel.saveRecentAccount(profile1);
+      recent = await authViewModel.getRecentAccounts();
+      expect(recent.length, 2);
+      expect(recent[0].email, 'user1@example.com');
+      expect(recent[1].email, 'user2@example.com');
+
+      // Remove user 2
+      await authViewModel.removeRecentAccount('user2@example.com');
+      recent = await authViewModel.getRecentAccounts();
+      expect(recent.length, 1);
+      expect(recent[0].email, 'user1@example.com');
+    });
+  });
+}
+
+class _FakeAuthViewModel extends AuthViewModel {
+  String? registeredEmail;
+  String? registeredName;
+
+  _FakeAuthViewModel() : super();
+
+  @override
+  Future<bool> register(String email, String password, String name) async {
+    registeredEmail = email;
+    registeredName = name;
+    return true;
+  }
+}
+
+class _FakeAuthViewModelForRecentAccounts extends AuthViewModel {
+  _FakeAuthViewModelForRecentAccounts() : super();
 }
 
 class _FakeCustomerCartRepository implements CustomerCartDataSource {

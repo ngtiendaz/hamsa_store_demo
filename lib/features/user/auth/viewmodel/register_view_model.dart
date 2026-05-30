@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_viewmodel.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class RegisterViewModel extends ChangeNotifier {
   final AuthViewModel authViewModel;
 
   String _email = '';
+  String _name = '';
   String _password = '';
-  bool _rememberMe = true;
+  String _confirmPassword = '';
   bool _isLoading = false;
   String? _errorMessage;
 
   String get email => _email;
+  String get name => _name;
   String get password => _password;
-  bool get rememberMe => _rememberMe;
+  String get confirmPassword => _confirmPassword;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage ?? authViewModel.errorMessage;
 
-  LoginViewModel({required this.authViewModel});
+  RegisterViewModel({required this.authViewModel});
 
   void setEmail(String value) {
     _email = value;
+    notifyListeners();
+  }
+
+  void setName(String value) {
+    _name = value;
     notifyListeners();
   }
 
@@ -29,8 +35,8 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRememberMe(bool value) {
-    _rememberMe = value;
+  void setConfirmPassword(String value) {
+    _confirmPassword = value;
     notifyListeners();
   }
 
@@ -50,12 +56,27 @@ class LoginViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+    if (_password.length < 6) {
+      _errorMessage = 'Mật khẩu phải chứa ít nhất 6 ký tự.';
+      notifyListeners();
+      return false;
+    }
+    if (_confirmPassword.isEmpty) {
+      _errorMessage = 'Vui lòng xác nhận lại mật khẩu.';
+      notifyListeners();
+      return false;
+    }
+    if (_password != _confirmPassword) {
+      _errorMessage = 'Mật khẩu xác nhận không khớp.';
+      notifyListeners();
+      return false;
+    }
     _errorMessage = null;
     notifyListeners();
     return true;
   }
 
-  Future<bool> login() async {
+  Future<bool> register() async {
     if (!validate()) return false;
 
     _isLoading = true;
@@ -63,23 +84,21 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await authViewModel.login(_email.trim(), _password);
-      if (success) {
-        // Save remember_me state in SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('remember_me', _rememberMe);
+      // If name is empty, default it to email local-part
+      final displayName = _name.trim().isNotEmpty
+          ? _name.trim()
+          : _email.trim().split('@')[0];
 
-        // Save account to recent accounts
-        final profile = authViewModel.currentProfile;
-        if (profile != null) {
-          await authViewModel.saveRecentAccount(profile);
-        }
-      }
+      final success = await authViewModel.register(
+        _email.trim(),
+        _password,
+        displayName,
+      );
       _isLoading = false;
       notifyListeners();
       return success;
     } catch (e) {
-      _errorMessage = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+      _errorMessage = 'Đã có lỗi xảy ra trong quá trình đăng ký.';
       _isLoading = false;
       notifyListeners();
       return false;

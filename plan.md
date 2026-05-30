@@ -134,13 +134,19 @@ lib/
 - [x] 2.4. Xây dựng `order_model.dart` và `order_item_model.dart` chứa thông tin đơn hàng và snapshot sản phẩm.
 - [x] 2.5. Xây dựng `pagination_result.dart` để tái sử dụng cấu trúc phân trang.
 
-### PHASE 3: Module 1 — Auth & User Management (Phần Đăng nhập/Đăng xuất)
+### PHASE 3: Module 1 — Auth & User Management (Phần Đăng nhập/Đăng xuất & Đăng ký)
 - [x] 3.1. Viết `AuthRepository` giao tiếp với Supabase Auth.
 - [x] 3.2. Viết `LoginViewModel` xử lý logic login.
-- [x] 3.3. Thiết kế `LoginView` cho phép nhập email/password.
-  - Kiểm tra `is_active` của profile sau đăng nhập. Nếu `is_active = false` thì đăng xuất ngay và báo lỗi "Tài khoản đã bị vô hiệu hóa".
-- [ ] 3.4. Viết `ForgotPasswordViewModel` và thiết kế `ForgotPasswordView` (gửi mail reset password - optional).
-- [ ] 3.5. Xử lý chức năng Logout (xóa session và clear profile state).
+- [x] 3.3. Thiết kế lại `LoginView` đẹp mắt hơn, hỗ trợ:
+  - Checkbox "Ghi nhớ đăng nhập" (lưu token session).
+  - Hiển thị danh sách tối đa 3 tài khoản đã đăng nhập gần đây.
+  - Nút dẫn tới màn hình Đăng ký.
+- [x] 3.4. Thêm chức năng đăng ký cho khách hàng:
+  - Cập nhật `AuthRepository` và `AuthViewModel` hỗ trợ đăng ký.
+  - Tạo `RegisterViewModel` và màn hình `RegisterView` (email, mật khẩu, xác nhận mật khẩu).
+  - Tự động gán role `'customer'` và tạo hồ sơ profile sau khi đăng ký thành công.
+- [ ] 3.5. Viết `ForgotPasswordViewModel` và thiết kế `ForgotPasswordView` (gửi mail reset password - optional).
+- [ ] 3.6. Xử lý chức năng Logout (xóa session và clear profile state).
 
 ### PHASE 4: Module 2 — Phân quyền & Navigation
 - [x] 4.1. Xây dựng `RouteGuard` để chặn truy cập trái phép ở cấp router (dựa vào role và trạng thái active).

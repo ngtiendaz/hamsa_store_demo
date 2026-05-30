@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../data/models/profiles_model.dart';
 
 class AuthRepository {
-  final SupabaseClient _client = Supabase.instance.client;
+  SupabaseClient get _client => Supabase.instance.client;
 
   Future<User?> login(String email, String password) async {
     final response = await _client.auth.signInWithPassword(
@@ -33,5 +33,35 @@ class AuthRepository {
     final user = currentUser;
     if (user == null) return null;
     return getProfile(user.id);
+  }
+
+  Future<User?> register({
+    required String email,
+    required String password,
+    required String name,
+  }) async {
+    final response = await _client.functions.invoke(
+      'create-user',
+      body: {
+        'email': email,
+        'password': password,
+        'name': name,
+      },
+    );
+
+    if (response.status < 200 || response.status >= 300) {
+      final data = response.data;
+      throw Exception(
+        data is Map && data['error'] != null
+            ? data['error'].toString()
+            : 'Đăng ký thất bại. Vui lòng thử lại.',
+      );
+    }
+
+    final loginResponse = await _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+    return loginResponse.user;
   }
 }

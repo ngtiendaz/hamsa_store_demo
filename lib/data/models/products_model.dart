@@ -16,6 +16,7 @@ class ProductModel {
   final String? deletedBy;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<String> imageUrls;
 
   ProductModel({
     required this.id,
@@ -35,12 +36,19 @@ class ProductModel {
     this.deletedBy,
     required this.createdAt,
     required this.updatedAt,
+    this.imageUrls = const [],
   });
 
   bool get isActive => status == 'active';
   String get displayName => tradeName ?? internalName;
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    List<String> urls = [];
+    if (json['product_images'] != null) {
+      final images = json['product_images'] as List;
+      urls = images.map((img) => img['image_url'] as String).toList();
+    }
+
     return ProductModel(
       id: json['id'] as String,
       categoryId: json['category_id'] as String,
@@ -63,6 +71,7 @@ class ProductModel {
       deletedBy: json['deleted_by'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      imageUrls: urls,
     );
   }
 
@@ -106,6 +115,7 @@ class ProductModel {
     String? deletedBy,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<String>? imageUrls,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -125,6 +135,7 @@ class ProductModel {
       deletedBy: deletedBy ?? this.deletedBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      imageUrls: imageUrls ?? this.imageUrls,
     );
   }
 }

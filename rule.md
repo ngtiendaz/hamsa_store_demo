@@ -1410,6 +1410,7 @@ Trước khi báo hoàn thành, AI phải tự kiểm tra:
 - Có debounce search nếu cần không?
 - Có transaction/batch cho nghiệp vụ quan trọng không?
 - Có trả lời bằng tiếng Việt không?
+- Bắt buộc phải chạy lệnh phân tích tĩnh (ví dụ: `flutter analyze`) để tự kiểm tra xem có lỗi cú pháp hoặc kiểu dữ liệu nào không, và sửa đổi triệt để trước khi báo hoàn thành hoặc làm tiếp.
 
 ---
 

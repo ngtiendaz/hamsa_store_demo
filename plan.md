@@ -122,7 +122,7 @@ lib/
   - `cached_network_image` (load ảnh avatar/sản phẩm)
   - `image_picker` (chọn ảnh upload)
 - [x] 1.2. Chạy lệnh cài đặt: `flutter pub get`
-- [ ] 1.3. Cấu hình Supabase Service & Config:
+- [x] 1.3. Cấu hình Supabase Service & Config:
   - Tạo `supabase_config.dart` chứa URL và Anon Key
   - Tạo `supabase_service.dart` khởi tạo client kết nối
 
@@ -135,17 +135,17 @@ lib/
 - [x] 2.5. Xây dựng `pagination_result.dart` để tái sử dụng cấu trúc phân trang.
 
 ### PHASE 3: Module 1 — Auth & User Management (Phần Đăng nhập/Đăng xuất)
-- [ ] 3.1. Viết `AuthRepository` giao tiếp với Supabase Auth.
-- [ ] 3.2. Viết `LoginViewModel` xử lý logic login.
-- [ ] 3.3. Thiết kế `LoginView` cho phép nhập email/password.
+- [x] 3.1. Viết `AuthRepository` giao tiếp với Supabase Auth.
+- [x] 3.2. Viết `LoginViewModel` xử lý logic login.
+- [x] 3.3. Thiết kế `LoginView` cho phép nhập email/password.
   - Kiểm tra `is_active` của profile sau đăng nhập. Nếu `is_active = false` thì đăng xuất ngay và báo lỗi "Tài khoản đã bị vô hiệu hóa".
 - [ ] 3.4. Viết `ForgotPasswordViewModel` và thiết kế `ForgotPasswordView` (gửi mail reset password - optional).
 - [ ] 3.5. Xử lý chức năng Logout (xóa session và clear profile state).
 
 ### PHASE 4: Module 2 — Phân quyền & Navigation
-- [ ] 4.1. Xây dựng `RouteGuard` để chặn truy cập trái phép ở cấp router (dựa vào role và trạng thái active).
-- [ ] 4.2. Cấu hình `AppRouter` sử dụng `GoRouter` để định vị tất cả các trang và gắn Guard.
-- [ ] 4.3. Thiết kế `MainLayout`:
+- [x] 4.1. Xây dựng `RouteGuard` để chặn truy cập trái phép ở cấp router (dựa vào role và trạng thái active).
+- [x] 4.2. Cấu hình `AppRouter` sử dụng `GoRouter` để định vị tất cả các trang và gắn Guard.
+- [x] 4.3. Thiết kế `MainLayout`:
   - Nhận `userRole` hiện tại từ Auth state.
   - Ẩn/hiển thị menu tương ứng:
     - `admin`: hiển thị Dashboard (nếu có), Quản lý user, Quản lý sản phẩm, Quản lý đơn hàng, Trang cá nhân.
@@ -166,15 +166,15 @@ lib/
   - Vô hiệu hóa người dùng bằng cách gán `is_active = false` (không xóa cứng Auth).
 
 ### PHASE 6: Module 3 — Quản lý sản phẩm (Product Management)
-- [ ] 6.1. Viết `AdminProductRepository` thực hiện các thao tác CRUD sản phẩm.
-- [ ] 6.2. Viết `ProductListViewModel` xử lý logic tìm kiếm, phân trang và tải danh sách sản phẩm.
-- [ ] 6.3. Thiết kế `ProductListView`:
+- [x] 6.1. Viết `AdminProductRepository` thực hiện các thao tác CRUD sản phẩm.
+- [x] 6.2. Viết `ProductListViewModel` xử lý logic tìm kiếm, phân trang và tải danh sách sản phẩm.
+- [x] 6.3. Thiết kế `ProductListView`:
   - Danh sách sản phẩm phân trang (20 sản phẩm/trang).
   - Ô tìm kiếm theo tên sản phẩm hoặc barcode.
   - Phân quyền hiển thị:
     - `admin`: hiển thị các nút Thêm mới, Sửa, Xóa mềm (chuyển `status = inactive`).
     - `employee`: **chỉ xem** danh sách và chi tiết, ẩn toàn bộ nút thêm/sửa/xóa.
-- [ ] 6.4. Viết `ProductFormViewModel` & thiết kế `ProductFormView`:
+- [x] 6.4. Viết `ProductFormViewModel` & thiết kế `ProductFormView`:
   - Form thêm/sửa sản phẩm gồm các trường: Tên nội bộ (bắt buộc), Tên thương mại, Barcode, Giá, Tồn kho, Trạng thái.
   - Validate form: Tên nội bộ bắt buộc, Giá >= 0, Tồn kho >= 0.
 

@@ -95,6 +95,7 @@ class CheckoutViewModel extends ChangeNotifier {
   Future<bool> submitOrder({
     required String userId,
     required List<CustomerCartEntry> selectedEntries,
+    String? walletPassword,
   }) async {
     if (_customerName.trim().isEmpty) {
       _errorMessage = 'Vui lòng nhập họ và tên người nhận.';
@@ -122,6 +123,12 @@ class CheckoutViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+    if (_paymentMethod == 'wallet' &&
+        (walletPassword == null || walletPassword.isEmpty)) {
+      _errorMessage = 'Vui lòng nhập mật khẩu để xác nhận thanh toán.';
+      notifyListeners();
+      return false;
+    }
 
     _isLoading = true;
     _errorMessage = null;
@@ -129,6 +136,10 @@ class CheckoutViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (_paymentMethod == 'wallet') {
+        await _profileRepository.verifyCurrentPassword(walletPassword!);
+      }
+
       final cartItemIds = selectedEntries.map((e) => e.id).toList();
       final orderCode = 'ORD-${DateTime.now().millisecondsSinceEpoch}';
 

@@ -113,8 +113,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: selectedEntries.length,
-                          separatorBuilder: (_, __) =>
-                              const Divider(height: 20),
+                          separatorBuilder: (_, _) => const Divider(height: 20),
                           itemBuilder: (context, index) {
                             final entry = selectedEntries[index];
                             return Row(
@@ -240,78 +239,80 @@ class _CheckoutViewState extends State<CheckoutView> {
                       // 3. Phương thức thanh toán
                       _SectionContainer(
                         title: 'Phương thức thanh toán',
-                        child: Column(
-                          children: [
-                            RadioListTile<String>(
-                              value: 'wallet',
-                              groupValue: checkoutVM.paymentMethod,
-                              onChanged: (val) =>
-                                  checkoutVM.setPaymentMethod(val!),
-                              activeColor: AppColors.primary,
-                              title: const Text(
-                                'Ví điện tử HamsaPay',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: checkoutVM.isLoadingWallet
-                                  ? const Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: SizedBox(
-                                        width: 14,
-                                        height: 14,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1.5,
+                        child: RadioGroup<String>(
+                          groupValue: checkoutVM.paymentMethod,
+                          onChanged: (value) {
+                            if (value != null) {
+                              checkoutVM.setPaymentMethod(value);
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              RadioListTile<String>(
+                                value: 'wallet',
+                                activeColor: AppColors.primary,
+                                title: const Text(
+                                  'Ví điện tử HamsaPay',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: checkoutVM.isLoadingWallet
+                                    ? const Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: SizedBox(
+                                          width: 14,
+                                          height: 14,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 1.5,
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        'Số dư khả dụng: ${currencyFormat.format(checkoutVM.walletBalance)}',
+                                        style: TextStyle(
+                                          color:
+                                              checkoutVM.walletBalance <
+                                                  totalAmount
+                                              ? AppColors.error
+                                              : AppColors.detail,
+                                          fontWeight:
+                                              checkoutVM.walletBalance <
+                                                  totalAmount
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         ),
                                       ),
-                                    )
-                                  : Text(
-                                      'Số dư khả dụng: ${currencyFormat.format(checkoutVM.walletBalance)}',
-                                      style: TextStyle(
-                                        color:
-                                            checkoutVM.walletBalance <
-                                                totalAmount
-                                            ? AppColors.error
-                                            : AppColors.detail,
-                                        fontWeight:
-                                            checkoutVM.walletBalance <
-                                                totalAmount
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
+                              ),
+                              if (checkoutVM.paymentMethod == 'wallet' &&
+                                  !checkoutVM.isLoadingWallet &&
+                                  checkoutVM.walletBalance < totalAmount)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 24,
+                                    right: 16,
+                                    bottom: 8,
+                                  ),
+                                  child: Text(
+                                    'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức thanh toán COD.',
+                                    style: TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12,
                                     ),
-                            ),
-                            if (checkoutVM.paymentMethod == 'wallet' &&
-                                !checkoutVM.isLoadingWallet &&
-                                checkoutVM.walletBalance < totalAmount)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 24,
-                                  right: 16,
-                                  bottom: 8,
-                                ),
-                                child: Text(
-                                  'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức thanh toán COD.',
-                                  style: TextStyle(
-                                    color: AppColors.error,
-                                    fontSize: 12,
                                   ),
                                 ),
+                              const Divider(height: 1),
+                              RadioListTile<String>(
+                                value: 'cash',
+                                activeColor: AppColors.primary,
+                                title: const Text(
+                                  'Thanh toán sau khi nhận hàng (COD)',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: const Text(
+                                  'Thanh toán bằng tiền mặt khi shipper giao hàng.',
+                                ),
                               ),
-                            const Divider(height: 1),
-                            RadioListTile<String>(
-                              value: 'cash',
-                              groupValue: checkoutVM.paymentMethod,
-                              onChanged: (val) =>
-                                  checkoutVM.setPaymentMethod(val!),
-                              activeColor: AppColors.primary,
-                              title: const Text(
-                                'Thanh toán sau khi nhận hàng (COD)',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: const Text(
-                                'Thanh toán bằng tiền mặt khi shipper giao hàng.',
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ];
@@ -365,7 +366,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
+                        color: Colors.black.withValues(alpha: 0.06),
                         blurRadius: 10,
                         offset: const Offset(0, -4),
                       ),
@@ -375,51 +376,68 @@ class _CheckoutViewState extends State<CheckoutView> {
                     ),
                   ),
                   child: SafeArea(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final buttonWidth = constraints.maxWidth < 520
+                            ? constraints.maxWidth * 0.48
+                            : 220.0;
+
+                        return Row(
                           children: [
-                            const Text(
-                              'TỔNG THANH TOÁN',
-                              style: TextStyle(
-                                color: AppColors.detail,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'TỔNG THANH TOÁN',
+                                    style: TextStyle(
+                                      color: AppColors.detail,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        currencyFormat.format(totalAmount),
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          color: AppColors.error,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              currencyFormat.format(totalAmount),
-                              style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: buttonWidth,
+                              child: AppButton(
+                                text: 'Xác nhận đặt hàng',
+                                isLoading: checkoutVM.isLoading,
+                                onPressed:
+                                    (checkoutVM.paymentMethod == 'wallet' &&
+                                        checkoutVM.walletBalance < totalAmount)
+                                    ? null
+                                    : () => _onOrderSubmit(
+                                        context,
+                                        checkoutVM,
+                                        profile.id,
+                                        selectedEntries,
+                                        cartVM,
+                                      ),
                               ),
                             ),
                           ],
-                        ),
-                        SizedBox(
-                          width: 200,
-                          child: AppButton(
-                            text: 'Xác nhận đặt hàng',
-                            isLoading: checkoutVM.isLoading,
-                            onPressed:
-                                (checkoutVM.paymentMethod == 'wallet' &&
-                                    checkoutVM.walletBalance < totalAmount)
-                                ? null
-                                : () => _onOrderSubmit(
-                                    context,
-                                    checkoutVM,
-                                    profile.id,
-                                    selectedEntries,
-                                    cartVM,
-                                  ),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -454,9 +472,16 @@ class _CheckoutViewState extends State<CheckoutView> {
       return;
     }
 
+    String? walletPassword;
+    if (checkoutVM.paymentMethod == 'wallet') {
+      walletPassword = await _showWalletPasswordDialog(context);
+      if (!context.mounted || walletPassword == null) return;
+    }
+
     final success = await checkoutVM.submitOrder(
       userId: userId,
       selectedEntries: selectedEntries,
+      walletPassword: walletPassword,
     );
 
     if (!context.mounted) return;
@@ -473,6 +498,66 @@ class _CheckoutViewState extends State<CheckoutView> {
     }
   }
 
+  Future<String?> _showWalletPasswordDialog(BuildContext context) async {
+    final passwordController = TextEditingController();
+    String? errorText;
+
+    final password = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Xác nhận thanh toán HamsaPay'),
+              content: TextField(
+                controller: passwordController,
+                autofocus: true,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Mật khẩu tài khoản',
+                  hintText: 'Nhập mật khẩu để tiếp tục',
+                  errorText: errorText,
+                ),
+                onSubmitted: (_) {
+                  final value = passwordController.text;
+                  if (value.isEmpty) {
+                    setDialogState(() {
+                      errorText = 'Vui lòng nhập mật khẩu.';
+                    });
+                    return;
+                  }
+                  Navigator.of(dialogContext).pop(value);
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Hủy'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final value = passwordController.text;
+                    if (value.isEmpty) {
+                      setDialogState(() {
+                        errorText = 'Vui lòng nhập mật khẩu.';
+                      });
+                      return;
+                    }
+                    Navigator.of(dialogContext).pop(value);
+                  },
+                  child: const Text('Xác nhận'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    passwordController.dispose();
+    return password;
+  }
+
   void _showSuccessDialog(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -486,9 +571,11 @@ class _CheckoutViewState extends State<CheckoutView> {
             children: [
               Icon(Icons.check_circle, color: Color(0xFF0F8644), size: 28),
               SizedBox(width: 8),
-              Text(
-                'Đặt hàng thành công',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Expanded(
+                child: Text(
+                  'Đặt hàng thành công',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -496,42 +583,62 @@ class _CheckoutViewState extends State<CheckoutView> {
             'Đơn hàng của bạn đã được tiếp nhận và đang chờ xác nhận.',
             style: TextStyle(fontSize: 15),
           ),
-          actionsPadding: const EdgeInsets.only(right: 16, bottom: 16),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.go('/shop');
-              },
-              child: const Text(
-                'Tiếp tục mua sắm',
-                style: TextStyle(
-                  color: AppColors.detail,
-                  fontWeight: FontWeight.bold,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _closeDialogAndGo(
+                      context,
+                      dialogContext,
+                      '/shop/orders',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Đi đến đơn hàng',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.go('/shop/orders');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                TextButton(
+                  onPressed: () =>
+                      _closeDialogAndGo(context, dialogContext, '/shop'),
+                  child: const Text(
+                    'Tiếp tục mua sắm',
+                    style: TextStyle(
+                      color: AppColors.detail,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Đi đến đơn hàng',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              ],
             ),
           ],
         );
       },
     );
+  }
+
+  void _closeDialogAndGo(
+    BuildContext context,
+    BuildContext dialogContext,
+    String location,
+  ) {
+    Navigator.of(dialogContext).pop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        context.go(location);
+      }
+    });
   }
 }
 

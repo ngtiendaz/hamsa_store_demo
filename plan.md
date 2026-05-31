@@ -309,6 +309,11 @@ lib/
   - Cho phép thông tin đơn giá, số lượng và thành tiền tự xuống dòng khi màn hình hẹp.
   - Xếp phần phương thức thanh toán và tổng tiền theo chiều dọc trên mobile.
   - Cho phép nhóm nút thao tác tự xuống dòng để tránh overflow.
+- [x] 11.7.12. Tối ưu bước xác nhận thanh toán:
+  - Co giãn tổng tiền và nút xác nhận đặt hàng để không overflow khi giá trị tiền lớn.
+  - Yêu cầu nhập lại mật khẩu tài khoản trước khi thanh toán bằng ví HamsaPay.
+  - Tối ưu dialog đặt hàng thành công trên mobile: tiêu đề co giãn và nút thao tác xếp dọc toàn chiều rộng.
+  - Điều hướng sang tab Đơn hàng ở frame kế tiếp sau khi đóng dialog để mở đúng danh sách đơn hàng customer.
 
 
 ### PHASE 12: Dashboard Admin

@@ -35,6 +35,8 @@ abstract class ProfileDataSource {
     required String newPassword,
     required String email,
   });
+
+  Future<void> verifyCurrentPassword(String password);
 }
 
 class ProfileRepository implements ProfileDataSource {
@@ -91,7 +93,9 @@ class ProfileRepository implements ProfileDataSource {
   }
 
   @override
-  Future<List<WalletTransactionModel>> getWalletTransactions(String userId) async {
+  Future<List<WalletTransactionModel>> getWalletTransactions(
+    String userId,
+  ) async {
     final response = await _client
         .from('wallet_transactions')
         .select()
@@ -108,12 +112,15 @@ class ProfileRepository implements ProfileDataSource {
     required double amount,
     String? note,
   }) async {
-    await _client.rpc('process_wallet_transaction', params: {
-      'p_user_id': userId,
-      'p_type': type,
-      'p_amount': amount,
-      'p_note': note,
-    });
+    await _client.rpc(
+      'process_wallet_transaction',
+      params: {
+        'p_user_id': userId,
+        'p_type': type,
+        'p_amount': amount,
+        'p_note': note,
+      },
+    );
   }
 
   @override
@@ -123,7 +130,10 @@ class ProfileRepository implements ProfileDataSource {
     required String email,
   }) async {
     try {
-      await _client.auth.signInWithPassword(email: email, password: currentPassword);
+      await _client.auth.signInWithPassword(
+        email: email,
+        password: currentPassword,
+      );
     } catch (_) {
       throw Exception('Mật khẩu hiện tại không chính xác.');
     }
@@ -132,6 +142,20 @@ class ProfileRepository implements ProfileDataSource {
       await _client.auth.updateUser(UserAttributes(password: newPassword));
     } catch (e) {
       throw Exception('Đổi mật khẩu thất bại: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> verifyCurrentPassword(String password) async {
+    final email = _client.auth.currentUser?.email;
+    if (email == null) {
+      throw Exception('Không xác định được tài khoản hiện tại.');
+    }
+
+    try {
+      await _client.auth.signInWithPassword(email: email, password: password);
+    } catch (_) {
+      throw Exception('Mật khẩu không chính xác.');
     }
   }
 }

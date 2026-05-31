@@ -203,6 +203,66 @@ void main() {
     },
   );
 
+  test('CheckoutViewModel requires password for wallet payment', () async {
+    final orderRepo = _FakeCustomerOrderRepository();
+    final profileRepo = _FakeProfileRepository();
+    final viewModel = CheckoutViewModel(
+      orderRepository: orderRepo,
+      profileRepository: profileRepo,
+    );
+
+    final profile = _buildProfile().copyWith(phone: '0909123456');
+    viewModel.initFromProfile(profile);
+    await Future<void>.delayed(Duration.zero);
+    viewModel.setCustomerAddress('123 Đường ABC');
+
+    final entry = CustomerCartEntry(
+      id: 'cart-item-1',
+      product: _buildProduct(stock: 10),
+      quantity: 1,
+    );
+
+    final success = await viewModel.submitOrder(
+      userId: profile.id,
+      selectedEntries: [entry],
+    );
+
+    expect(success, isFalse);
+    expect(viewModel.errorMessage, contains('Vui lòng nhập mật khẩu'));
+    expect(profileRepo.verifyPasswordCalled, isFalse);
+    expect(orderRepo.createOrderCalled, isFalse);
+  });
+
+  test('CheckoutViewModel verifies password before wallet payment', () async {
+    final orderRepo = _FakeCustomerOrderRepository();
+    final profileRepo = _FakeProfileRepository();
+    final viewModel = CheckoutViewModel(
+      orderRepository: orderRepo,
+      profileRepository: profileRepo,
+    );
+
+    final profile = _buildProfile().copyWith(phone: '0909123456');
+    viewModel.initFromProfile(profile);
+    await Future<void>.delayed(Duration.zero);
+    viewModel.setCustomerAddress('123 Đường ABC');
+
+    final entry = CustomerCartEntry(
+      id: 'cart-item-1',
+      product: _buildProduct(stock: 10),
+      quantity: 1,
+    );
+
+    final success = await viewModel.submitOrder(
+      userId: profile.id,
+      selectedEntries: [entry],
+      walletPassword: 'correct-password',
+    );
+
+    expect(success, isTrue);
+    expect(profileRepo.verifyPasswordCalled, isTrue);
+    expect(orderRepo.createOrderCalled, isTrue);
+  });
+
   test(
     'CustomerOrderListViewModel request and cancel request cancellation',
     () async {
@@ -527,6 +587,7 @@ ProductModel _buildProduct({required int stock}) {
 class _FakeProfileRepository implements ProfileDataSource {
   String? updatedUserId;
   bool getWalletCalled = false;
+  bool verifyPasswordCalled = false;
 
   @override
   Future<ProfileModel> updateProfile({
@@ -590,6 +651,11 @@ class _FakeProfileRepository implements ProfileDataSource {
     required String email,
   }) async {
     // Fake success
+  }
+
+  @override
+  Future<void> verifyCurrentPassword(String password) async {
+    verifyPasswordCalled = true;
   }
 }
 

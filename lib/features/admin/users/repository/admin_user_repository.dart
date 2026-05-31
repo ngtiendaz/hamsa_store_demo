@@ -13,10 +13,7 @@ class AdminUserRepository {
     required int pageSize,
   }) async {
     final offset = (page - 1) * pageSize;
-    var query = _client.from('profiles').select('*').inFilter('role', [
-      'admin',
-      'employee',
-    ]);
+    var query = _client.from('profiles').select('*');
 
     if (keyword != null && keyword.trim().isNotEmpty) {
       final value = keyword.trim();
@@ -79,7 +76,7 @@ class AdminUserRepository {
     required String name,
     String? phone,
     String? avatarUrl,
-    required bool isAdmin,
+    required String role,
     required bool isActive,
   }) async {
     await _client
@@ -88,7 +85,7 @@ class AdminUserRepository {
           'name': name.trim(),
           'phone': _nullIfEmpty(phone),
           'avatar_url': _nullIfEmpty(avatarUrl),
-          'role': isAdmin ? 'admin' : 'employee',
+          'role': role,
           'is_active': isActive,
           'updated_at': DateTime.now().toIso8601String(),
         })

@@ -158,22 +158,23 @@ lib/
     - `employee`: hiển thị Quản lý sản phẩm (read-only), Quản lý đơn hàng, Trang cá nhân (Ẩn menu Quản lý user).
   - Hỗ trợ responsive: Desktop dùng Sidebar, Mobile dùng Drawer/Bottom Navigation.
 
-### PHASE 5: Module 1 — Admin User Management (Quản lý Nhân viên)
-- [x] 5.1. Viết `AdminUserRepository` truy vấn, lọc, sửa thông tin trong bảng `profiles`.
-- [x] 5.2. Viết `AdminUserListViewModel` xử lý load danh sách, tìm kiếm và phân trang user.
+### PHASE 5: Module 1 — Admin User Management (Quản lý Người dùng)
+- [x] 5.1. Viết `AdminUserRepository` truy vấn, lọc, sửa thông tin trong bảng `profiles` (không lọc bỏ vai trò customer).
+- [x] 5.2. Viết `AdminUserListViewModel` xử lý load danh sách, tìm kiếm và phân trang người dùng (sửa thông báo tiếng Việt thành người dùng).
 - [x] 5.3. Thiết kế `AdminUserListView` (chỉ `admin` truy cập):
-  - Hiển thị danh sách user dạng table.
+  - Hiển thị danh sách người dùng dạng table.
   - Bộ tìm kiếm theo tên hoặc email.
-  - Bộ lọc trạng thái hoạt động (`is_active`) và phân quyền (`role`).
+  - Bộ lọc trạng thái hoạt động (`is_active`) và phân quyền (`role`, bao gồm lọc Khách hàng).
 - [x] 5.4. Viết `AdminUserFormViewModel` & thiết kế `AdminUserFormView`:
-  - Form thêm user gọi Edge Function `admin-create-user` để tạo Supabase Auth và đồng bộ profile.
-  - Mặc định user nội bộ mới là `employee`; checkbox quản trị viên mới chuyển thành `admin`; không cho tạo `customer`.
+  - Form thêm người dùng gọi Edge Function `admin-create-user` để tạo Supabase Auth và đồng bộ profile.
+  - Mặc định người dùng nội bộ mới là `employee`; checkbox quản trị viên mới chuyển thành `admin`; không cho tạo `customer`.
   - Form sửa thông tin: `name`, `phone`, `role`, `is_active`.
   - Không cho sửa email.
   - Vô hiệu hóa người dùng bằng thao tác xóa mềm `is_active = false` (không xóa cứng Auth).
   - Không cho admin tự hạ quyền hoặc tự vô hiệu hóa chính mình trên giao diện.
   - Giao diện chi tiết dùng dropdown trạng thái; danh sách chỉ giữ nút sửa và hiển thị avatar lớn hơn, không có divider giữa các dòng.
-  - Đồng bộ nhãn giao diện admin từ "Người dùng" thành "Nhân viên".
+  - Tùy chỉnh chi tiết đối với tài khoản Khách hàng (customer): chuyển Tên và Số điện thoại sang read-only, ẩn checkbox "Quyền quản trị viên", chỉ cho phép sửa trạng thái tài khoản.
+  - Đồng bộ nhãn giao diện admin sang "Người dùng".
 
 ### PHASE 6: Module 3 — Quản lý sản phẩm (Product Management)
 - [x] 6.1. Viết `AdminProductRepository` thực hiện các thao tác CRUD sản phẩm.

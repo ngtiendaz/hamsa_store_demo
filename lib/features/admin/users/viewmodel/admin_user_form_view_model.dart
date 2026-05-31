@@ -53,7 +53,9 @@ class AdminUserFormViewModel extends ChangeNotifier {
           name: name,
           phone: phone,
           avatarUrl: userToEdit!.avatarUrl,
-          isAdmin: _isAdmin,
+          role: userToEdit!.role == 'customer'
+              ? 'customer'
+              : (_isAdmin ? 'admin' : 'employee'),
           isActive: _isActive,
         );
       } else {
@@ -80,7 +82,7 @@ class AdminUserFormViewModel extends ChangeNotifier {
     required String password,
     required String name,
   }) {
-    if (name.trim().isEmpty) return 'Tên nhân viên là bắt buộc.';
+    if (name.trim().isEmpty) return 'Tên người dùng là bắt buộc.';
     if (!isEditing && (!email.contains('@') || email.trim().isEmpty)) {
       return 'Email không hợp lệ.';
     }

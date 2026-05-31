@@ -85,6 +85,7 @@ class _UserFilters extends StatelessWidget {
           DropdownMenuItem(value: null, child: Text('Tất cả vai trò')),
           DropdownMenuItem(value: 'employee', child: Text('Nhân viên')),
           DropdownMenuItem(value: 'admin', child: Text('Quản trị viên')),
+          DropdownMenuItem(value: 'customer', child: Text('Khách hàng')),
         ],
         onChanged: viewModel.selectRole,
       ),
@@ -103,7 +104,7 @@ class _UserFilters extends StatelessWidget {
       ),
     );
     final addButton = AppButton(
-      text: 'Thêm nhân viên',
+      text: 'Thêm người dùng',
       onPressed: () async {
         final result = await context.push('/admin/users/new');
         if (result == true) viewModel.loadUsers(refresh: true);
@@ -180,7 +181,7 @@ class _UserTable extends StatelessWidget {
           dataRowMaxHeight: 76,
           headingRowHeight: 64,
           columns: const [
-            DataColumn(label: Text('NHÂN VIÊN')),
+            DataColumn(label: Text('NGƯỜI DÙNG')),
             DataColumn(label: Text('EMAIL')),
             DataColumn(label: Text('VAI TRÒ')),
             DataColumn(label: Text('TRẠNG THÁI')),
@@ -298,10 +299,14 @@ class _RoleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Chip(
-      text: role == 'admin' ? 'Quản trị viên' : 'Nhân viên',
+      text: role == 'admin'
+          ? 'Quản trị viên'
+          : (role == 'employee' ? 'Nhân viên' : 'Khách hàng'),
       color: role == 'admin'
           ? const Color(0xFF5B21B6)
-          : const Color(0xFF1D4ED8),
+          : (role == 'employee'
+              ? const Color(0xFF1D4ED8)
+              : const Color(0xFF0F8644)),
     );
   }
 }
@@ -399,7 +404,7 @@ class _EmptyUsers extends StatelessWidget {
           const Icon(Icons.people_outline, size: 64, color: AppColors.detail),
           const SizedBox(height: 16),
           Text(
-            'Không tìm thấy nhân viên nào',
+            'Không tìm thấy người dùng nào',
             style: AppTextStyles.headlineMd.copyWith(color: AppColors.detail),
           ),
         ],

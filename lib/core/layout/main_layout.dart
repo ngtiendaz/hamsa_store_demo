@@ -343,7 +343,7 @@ class MainLayout extends StatelessWidget {
         _MenuItem('Danh mục', '/admin/categories', Icons.category_outlined),
         _MenuItem('Nhãn hàng', '/admin/brands', Icons.stars_outlined),
         _MenuItem('Đơn hàng', '/admin/orders', Icons.receipt_long_outlined),
-        _MenuItem('Nhân viên', '/admin/users', Icons.people_outline),
+        _MenuItem('Người dùng', '/admin/users', Icons.people_outline),
         _MenuItem('Trang cá nhân', '/profile', Icons.person_outline),
       ];
     } else if (role == 'employee') {
@@ -374,9 +374,9 @@ class MainLayout extends StatelessWidget {
     if (route.startsWith('/admin/brands')) return 'Quản lý nhãn hàng';
     if (route.startsWith('/admin/orders/detail')) return 'Chi tiết đơn hàng';
     if (route.startsWith('/admin/orders')) return 'Quản lý đơn hàng';
-    if (route.startsWith('/admin/users/new')) return 'Thêm nhân viên';
-    if (route.startsWith('/admin/users/edit')) return 'Chi tiết nhân viên';
-    if (route.startsWith('/admin/users')) return 'Quản lý nhân viên';
+    if (route.startsWith('/admin/users/new')) return 'Thêm người dùng';
+    if (route.startsWith('/admin/users/edit')) return 'Chi tiết người dùng';
+    if (route.startsWith('/admin/users')) return 'Quản lý người dùng';
     if (route.startsWith('/profile')) return 'Trang cá nhân';
     return 'Hamsa Store';
   }

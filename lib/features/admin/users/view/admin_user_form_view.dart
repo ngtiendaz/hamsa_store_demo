@@ -54,6 +54,7 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
           final isCurrentUser =
               context.read<AuthViewModel>().currentProfile?.id ==
               widget.userToEdit?.id;
+          final isCustomer = widget.userToEdit?.role == 'customer';
           return Scaffold(
             backgroundColor: AppColors.background,
             body: SingleChildScrollView(
@@ -79,8 +80,8 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                   if (isMobile)
                     Text(
                       viewModel.isEditing
-                          ? 'THÔNG TIN NHÂN VIÊN'
-                          : 'THÊM NHÂN VIÊN',
+                          ? (isCustomer ? 'THÔNG TIN KHÁCH HÀNG' : 'THÔNG TIN NGƯỜI DÙNG')
+                          : 'THÊM NGƯỜI DÙNG',
                       style: AppTextStyles.headlineMd.copyWith(fontSize: 18),
                     )
                   else
@@ -89,8 +90,8 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                       children: [
                         Text(
                           viewModel.isEditing
-                              ? 'THÔNG TIN NHÂN VIÊN'
-                              : 'THÊM NHÂN VIÊN',
+                              ? (isCustomer ? 'THÔNG TIN KHÁCH HÀNG' : 'THÔNG TIN NGƯỜI DÙNG')
+                              : 'THÊM NGƯỜI DÙNG',
                           style: AppTextStyles.headlineMd.copyWith(
                             fontSize: 18,
                           ),
@@ -102,12 +103,19 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                       ],
                     ),
                   const SizedBox(height: 24),
-                  AppTextField(
-                    label: 'Tên nhân viên (Bắt buộc)',
-                    hintText: 'Nhập họ tên...',
-                    controller: _nameController,
-                    showBorder: true,
-                  ),
+                  isCustomer
+                      ? _ReadOnlyField(
+                          label: 'HỌ VÀ TÊN',
+                          controller: _nameController,
+                          hintText: 'Nhập họ tên...',
+                          readOnly: true,
+                        )
+                      : AppTextField(
+                          label: 'Tên người dùng (Bắt buộc)',
+                          hintText: 'Nhập họ tên...',
+                          controller: _nameController,
+                          showBorder: true,
+                        ),
                   const SizedBox(height: 20),
                   _ReadOnlyField(
                     label: 'EMAIL',
@@ -126,23 +134,32 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                     ),
                   ],
                   const SizedBox(height: 20),
-                  AppTextField(
-                    label: 'Số điện thoại',
-                    hintText: 'Nhập số điện thoại...',
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    showBorder: true,
-                  ),
-                  const SizedBox(height: 20),
-                  _OptionTile(
-                    title: 'Quyền quản trị viên',
-                    subtitle: viewModel.isAdmin
-                        ? 'Tài khoản sẽ có quyền admin.'
-                        : 'Mặc định tài khoản là employee.',
-                    value: viewModel.isAdmin,
-                    enabled: !isCurrentUser,
-                    onChanged: viewModel.setIsAdmin,
-                  ),
+                  isCustomer
+                      ? _ReadOnlyField(
+                          label: 'SỐ ĐIỆN THOẠI',
+                          controller: _phoneController,
+                          hintText: 'Chưa cập nhật số điện thoại',
+                          readOnly: true,
+                        )
+                      : AppTextField(
+                          label: 'Số điện thoại',
+                          hintText: 'Nhập số điện thoại...',
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          showBorder: true,
+                        ),
+                  if (!isCustomer) ...[
+                    const SizedBox(height: 20),
+                    _OptionTile(
+                      title: 'Quyền quản trị viên',
+                      subtitle: viewModel.isAdmin
+                          ? 'Tài khoản sẽ có quyền admin.'
+                          : 'Mặc định tài khoản là employee.',
+                      value: viewModel.isAdmin,
+                      enabled: !isCurrentUser,
+                      onChanged: viewModel.setIsAdmin,
+                    ),
+                  ],
                   if (viewModel.isEditing) ...[
                     const SizedBox(height: 12),
                     _StatusDropdown(
@@ -181,8 +198,8 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
     AppToast.showSuccess(
       context,
       viewModel.isEditing
-          ? 'Cập nhật nhân viên thành công.'
-          : 'Thêm nhân viên thành công.',
+          ? 'Cập nhật người dùng thành công.'
+          : 'Thêm người dùng thành công.',
     );
     context.pop(true);
   }
@@ -197,7 +214,7 @@ class _SaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppButton(
-      text: viewModel.isEditing ? 'Cập nhật' : 'Thêm nhân viên',
+      text: viewModel.isEditing ? 'Cập nhật' : 'Thêm người dùng',
       isLoading: viewModel.isLoading,
       onPressed: onSave,
     );

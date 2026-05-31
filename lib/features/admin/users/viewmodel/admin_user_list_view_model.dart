@@ -47,7 +47,7 @@ class AdminUserListViewModel extends ChangeNotifier {
       _users = result.items;
       _totalCount = result.totalCount;
     } catch (error) {
-      _errorMessage = 'Không thể tải danh sách nhân viên.';
+      _errorMessage = 'Không thể tải danh sách người dùng.';
       debugPrint('Error loading users: $error');
     } finally {
       _isLoading = false;
@@ -92,7 +92,7 @@ class AdminUserListViewModel extends ChangeNotifier {
       await loadUsers();
       return true;
     } catch (error) {
-      _errorMessage = 'Không thể vô hiệu hóa nhân viên.';
+      _errorMessage = 'Không thể vô hiệu hóa người dùng.';
       _isLoading = false;
       notifyListeners();
       return false;

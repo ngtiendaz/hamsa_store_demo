@@ -232,7 +232,7 @@ class _CartSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasSelection = viewModel.selectedItemCount > 0;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
@@ -249,7 +249,10 @@ class _CartSummary extends StatelessWidget {
                 children: [
                   Text(
                     '${viewModel.selectedItemCount}/${viewModel.itemCount} sản phẩm đã chọn',
-                    style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppColors.detail,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   AnimatedSwitcher(
@@ -258,7 +261,10 @@ class _CartSummary extends StatelessWidget {
                         ? const Text(
                             'Chọn sản phẩm để tính tổng',
                             key: ValueKey('empty-selection'),
-                            style: TextStyle(color: AppColors.detail, fontSize: 14),
+                            style: TextStyle(
+                              color: AppColors.detail,
+                              fontSize: 14,
+                            ),
                           )
                         : Text(
                             _formatPrice(viewModel.selectedTotalAmount),
@@ -276,7 +282,7 @@ class _CartSummary extends StatelessWidget {
             if (hasSelection) ...[
               const SizedBox(width: 12),
               SizedBox(
-                width: 130,
+                width: 160,
                 child: AppButton(
                   text: 'Thanh toán',
                   onPressed: () => context.push('/checkout'),

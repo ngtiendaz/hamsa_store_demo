@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../core/widgets/app_loading.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../../../../data/models/admin_dashboard_stats_model.dart';
 import '../viewmodel/admin_dashboard_view_model.dart';
 import 'widgets/dashboard_product_list.dart';
@@ -199,6 +200,8 @@ class _DashboardContent extends StatelessWidget {
                       icon: Icons.inventory_2_outlined,
                       products: stats.lowStockProducts,
                       showStock: true,
+                      onProductTap: (product) =>
+                          _openProductForEditing(context, product),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -220,6 +223,8 @@ class _DashboardContent extends StatelessWidget {
                 icon: Icons.inventory_2_outlined,
                 products: stats.lowStockProducts,
                 showStock: true,
+                onProductTap: (product) =>
+                    _openProductForEditing(context, product),
               ),
               const SizedBox(height: 14),
               DashboardProductList(
@@ -241,6 +246,25 @@ class _DashboardContent extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _openProductForEditing(
+    BuildContext context,
+    DashboardProductStatModel product,
+  ) async {
+    final fullProduct = await viewModel.getProductForEditing(product.id);
+    if (!context.mounted) return;
+
+    if (fullProduct == null) {
+      AppToast.showError(
+        context,
+        viewModel.errorMessage ?? 'Không thể tải chi tiết sản phẩm.',
+      );
+      return;
+    }
+
+    await context.push('/admin/products/edit', extra: fullProduct);
+    await viewModel.loadStats();
   }
 }
 

@@ -37,6 +37,9 @@ class AppButton extends StatelessWidget {
               )
             : Text(
                 text,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.button.copyWith(color: AppColors.primary),
               ),
       );
@@ -55,6 +58,9 @@ class AppButton extends StatelessWidget {
             )
           : Text(
               text,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: AppTextStyles.button,
             ),
     );

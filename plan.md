@@ -324,6 +324,10 @@ lib/
   - Card đang giao, giao thành công và đã hủy mở tab đơn hàng với trạng thái tương ứng.
   - Card đã hoàn tiền mở tab đơn hàng và lọc theo `payment_status` hoàn tiền toàn phần hoặc một phần.
   - Trạng thái lọc được truyền qua query parameter và đồng bộ với dropdown danh sách đơn hàng.
+- [x] 12.10. Cho phép bấm sản phẩm sắp hết hàng để mở trang chi tiết sản phẩm và cập nhật tồn kho.
+
+### PHASE 12.5: Điều chỉnh UI Customer Cart
+- [x] 12.5.1. Giữ nhãn nút `Thanh toán` trên một dòng và tăng chiều rộng nút trong phần tổng kết giỏ hàng.
 
 ---
 

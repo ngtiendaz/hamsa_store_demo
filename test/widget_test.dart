@@ -335,7 +335,10 @@ void main() {
       viewModel.setEmail('test@example.com');
       viewModel.setPassword('123');
       expect(viewModel.validate(), isFalse);
-      expect(viewModel.errorMessage, contains('Mật khẩu phải chứa ít nhất 6 ký tự'));
+      expect(
+        viewModel.errorMessage,
+        contains('Mật khẩu phải chứa ít nhất 6 ký tự'),
+      );
 
       // Validate password mismatch
       viewModel.setPassword('123456');
@@ -351,7 +354,10 @@ void main() {
       final success = await viewModel.register();
       expect(success, isTrue);
       expect(authViewModel.registeredEmail, 'test@example.com');
-      expect(authViewModel.registeredName, 'test'); // derived from email local-part since name is empty
+      expect(
+        authViewModel.registeredName,
+        'test',
+      ); // derived from email local-part since name is empty
     });
 
     test('AuthViewModel recent accounts logic', () async {
@@ -554,6 +560,15 @@ class _FakeProfileRepository implements ProfileDataSource {
   }) async {
     // Fake success
   }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String email,
+  }) async {
+    // Fake success
+  }
 }
 
 ProfileModel _buildProfile() {
@@ -585,10 +600,22 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
   }) async {
     var list = orders.where((o) => o.customerId == userId).toList();
     if (startDate != null) {
-      list = list.where((o) => o.createdAt.isAfter(startDate) || o.createdAt.isAtSameMomentAs(startDate)).toList();
+      list = list
+          .where(
+            (o) =>
+                o.createdAt.isAfter(startDate) ||
+                o.createdAt.isAtSameMomentAs(startDate),
+          )
+          .toList();
     }
     if (endDate != null) {
-      list = list.where((o) => o.createdAt.isBefore(endDate) || o.createdAt.isAtSameMomentAs(endDate)).toList();
+      list = list
+          .where(
+            (o) =>
+                o.createdAt.isBefore(endDate) ||
+                o.createdAt.isAtSameMomentAs(endDate),
+          )
+          .toList();
     }
     return list;
   }
@@ -720,22 +747,45 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
     var list = orders;
     if (status != null && status != 'all') {
       if (status == 'refunded') {
-        list = list.where((o) => o.paymentStatus == 'refunded' || o.paymentStatus == 'partially_refunded').toList();
+        list = list
+            .where(
+              (o) =>
+                  o.paymentStatus == 'refunded' ||
+                  o.paymentStatus == 'partially_refunded',
+            )
+            .toList();
       } else {
         list = list.where((o) => o.status == status).toList();
       }
     }
     if (keyword != null && keyword.trim().isNotEmpty) {
       final q = keyword.trim().toLowerCase();
-      list = list.where((o) => o.orderCode.toLowerCase().contains(q) ||
-          o.customerName.toLowerCase().contains(q) ||
-          (o.customerPhone ?? '').toLowerCase().contains(q)).toList();
+      list = list
+          .where(
+            (o) =>
+                o.orderCode.toLowerCase().contains(q) ||
+                o.customerName.toLowerCase().contains(q) ||
+                (o.customerPhone ?? '').toLowerCase().contains(q),
+          )
+          .toList();
     }
     if (startDate != null) {
-      list = list.where((o) => o.createdAt.isAfter(startDate) || o.createdAt.isAtSameMomentAs(startDate)).toList();
+      list = list
+          .where(
+            (o) =>
+                o.createdAt.isAfter(startDate) ||
+                o.createdAt.isAtSameMomentAs(startDate),
+          )
+          .toList();
     }
     if (endDate != null) {
-      list = list.where((o) => o.createdAt.isBefore(endDate) || o.createdAt.isAtSameMomentAs(endDate)).toList();
+      list = list
+          .where(
+            (o) =>
+                o.createdAt.isBefore(endDate) ||
+                o.createdAt.isAtSameMomentAs(endDate),
+          )
+          .toList();
     }
     final totalCount = list.length;
     final offset = (page - 1) * pageSize;
@@ -873,5 +923,10 @@ class _FakeAdminDashboardRepository implements AdminDashboardDataSource {
       lowStockProducts: const [],
       topSellingProducts: const [],
     );
+  }
+
+  @override
+  Future<ProductModel> getProduct(String productId) async {
+    return _buildProduct(stock: 4);
   }
 }

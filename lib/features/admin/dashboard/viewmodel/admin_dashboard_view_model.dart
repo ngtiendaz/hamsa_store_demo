@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/admin_dashboard_stats_model.dart';
+import '../../../../data/models/products_model.dart';
 import '../repository/admin_dashboard_repository.dart';
 
 enum DashboardPeriod {
@@ -79,5 +80,15 @@ class AdminDashboardViewModel extends ChangeNotifier {
 
     _referenceDate = DateTime(year, _referenceDate.month);
     await loadStats();
+  }
+
+  Future<ProductModel?> getProductForEditing(String productId) async {
+    try {
+      return await _repository.getProduct(productId);
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
   }
 }

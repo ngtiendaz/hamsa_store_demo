@@ -1,11 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../data/models/admin_dashboard_stats_model.dart';
+import '../../../../data/models/products_model.dart';
 
 abstract class AdminDashboardDataSource {
   Future<AdminDashboardStatsModel> getStats(
     String period,
     DateTime referenceDate,
   );
+  Future<ProductModel> getProduct(String productId);
 }
 
 class AdminDashboardRepository implements AdminDashboardDataSource {
@@ -37,6 +39,20 @@ class AdminDashboardRepository implements AdminDashboardDataSource {
           .replaceAll('PostgrestException: ', '')
           .replaceAll('Exception: ', '');
       throw Exception(message);
+    }
+  }
+
+  @override
+  Future<ProductModel> getProduct(String productId) async {
+    try {
+      final response = await _client
+          .from('products')
+          .select('*, product_images(image_url)')
+          .eq('id', productId)
+          .single();
+      return ProductModel.fromJson(response);
+    } catch (e) {
+      throw Exception('Không thể tải chi tiết sản phẩm.');
     }
   }
 

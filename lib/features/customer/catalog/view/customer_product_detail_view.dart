@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../data/models/products_model.dart';
 import '../../cart/viewmodel/customer_cart_view_model.dart';
 import '../viewmodel/customer_product_detail_view_model.dart';
@@ -121,10 +122,11 @@ class _ProductGallery extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: imageUrl == null
             ? placeholder
-            : Image.network(
-                imageUrl,
+            : AppNetworkImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => placeholder,
+                placeholder: placeholder,
+                errorWidget: placeholder,
               ),
       ),
     );

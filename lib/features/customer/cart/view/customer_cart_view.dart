@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../viewmodel/customer_cart_view_model.dart';
 
 class CustomerCartView extends StatefulWidget {
@@ -326,15 +327,14 @@ class _CartImage extends StatelessWidget {
       child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
     );
     if (imageUrl == null || imageUrl!.isEmpty) return placeholder;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        imageUrl!,
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
-      ),
+    return AppNetworkImage(
+      imageUrl: imageUrl!,
+      width: 80,
+      height: 80,
+      borderRadius: 8,
+      fit: BoxFit.cover,
+      placeholder: placeholder,
+      errorWidget: placeholder,
     );
   }
 }

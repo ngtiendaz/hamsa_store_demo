@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../../data/models/order_item_model.dart';
@@ -200,35 +201,35 @@ class AdminOrderDetailView extends StatelessWidget {
   }
 
   Widget _buildProductImage(String? url) {
+    final placeholder = Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail, size: 24),
+    );
+
     if (url == null || url.trim().isEmpty) {
-      return Container(
+      return placeholder;
+    }
+
+    return AppNetworkImage(
+      imageUrl: url,
+      width: 48,
+      height: 48,
+      borderRadius: 8,
+      fit: BoxFit.cover,
+      placeholder: placeholder,
+      errorWidget: Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail, size: 24),
-      );
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: Image.network(
-        url,
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.broken_image_outlined, color: AppColors.detail, size: 24),
-          );
-        },
+        child: const Icon(Icons.broken_image_outlined, color: AppColors.detail, size: 24),
       ),
     );
   }

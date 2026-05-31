@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_network_image.dart';
 import '../../../../../data/models/admin_dashboard_stats_model.dart';
 
 class DashboardProductList extends StatelessWidget {
@@ -115,25 +116,32 @@ class _ProductRow extends StatelessWidget {
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Container(
+            child: AppNetworkImage(
+              imageUrl: product.imageUrl ?? '',
               width: 44,
               height: 44,
-              color: AppColors.surface,
-              child: product.imageUrl == null
-                  ? const Icon(
-                      Icons.inventory_2_outlined,
-                      size: 20,
-                      color: AppColors.detail,
-                    )
-                  : Image.network(
-                      product.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, error, stackTrace) => const Icon(
-                        Icons.inventory_2_outlined,
-                        size: 20,
-                        color: AppColors.detail,
-                      ),
-                    ),
+              borderRadius: 10,
+              fit: BoxFit.cover,
+              placeholder: Container(
+                width: 44,
+                height: 44,
+                color: AppColors.surface,
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  size: 20,
+                  color: AppColors.detail,
+                ),
+              ),
+              errorWidget: Container(
+                width: 44,
+                height: 44,
+                color: AppColors.surface,
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  size: 20,
+                  color: AppColors.detail,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),

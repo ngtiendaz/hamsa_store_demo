@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/checkout_view_model.dart';
 import '../../cart/viewmodel/customer_cart_view_model.dart';
@@ -105,25 +106,27 @@ class _CheckoutViewState extends State<CheckoutView> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: entry.product.imageUrls.isEmpty
-                                      ? Container(
-                                          width: 60,
-                                          height: 60,
-                                          color: AppColors.surface,
-                                          child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
-                                        )
-                                      : Image.network(
-                                          entry.product.imageUrls.first,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => Container(
-                                            width: 60,
-                                            height: 60,
-                                            color: AppColors.surface,
-                                            child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
-                                          ),
-                                        ),
+                                  child: AppNetworkImage(
+                                    imageUrl: entry.product.imageUrls.isEmpty
+                                        ? ''
+                                        : entry.product.imageUrls.first,
+                                    width: 60,
+                                    height: 60,
+                                    borderRadius: 8,
+                                    fit: BoxFit.cover,
+                                    placeholder: Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: AppColors.surface,
+                                      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                    ),
+                                    errorWidget: Container(
+                                      width: 60,
+                                      height: 60,
+                                      color: AppColors.surface,
+                                      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(

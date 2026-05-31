@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/widgets/app_network_image.dart';
 
 class AvatarPicker extends StatelessWidget {
   final String name;
@@ -71,12 +72,12 @@ class AvatarPicker extends StatelessWidget {
       return Image.memory(pendingBytes!, fit: BoxFit.cover);
     }
     if (avatarUrl != null && avatarUrl!.trim().isNotEmpty) {
-      return Image.network(
-        avatarUrl!,
+      return AppNetworkImage(
+        imageUrl: avatarUrl!,
         key: ValueKey(avatarUrl),
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            _AvatarFallback(name: name),
+        placeholder: _AvatarFallback(name: name),
+        errorWidget: _AvatarFallback(name: name),
       );
     }
     return _AvatarFallback(name: name);

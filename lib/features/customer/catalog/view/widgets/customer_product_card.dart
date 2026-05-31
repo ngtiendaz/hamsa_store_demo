@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/app_toast.dart';
+import '../../../../../core/widgets/app_network_image.dart';
 import '../../../../../data/models/products_model.dart';
 import '../../../cart/viewmodel/customer_cart_view_model.dart';
 
@@ -141,10 +142,11 @@ class _ProductImage extends StatelessWidget {
     );
     if (imageUrl == null || imageUrl!.isEmpty) return placeholder;
 
-    return Image.network(
-      imageUrl!,
+    return AppNetworkImage(
+      imageUrl: imageUrl!,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => placeholder,
+      placeholder: placeholder,
+      errorWidget: placeholder,
     );
   }
 }

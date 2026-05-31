@@ -6,6 +6,7 @@ import '../../../user/auth/viewmodel/auth_viewmodel.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loading.dart';
+import '../../../../core/widgets/app_network_image.dart';
 
 class BrandListView extends StatefulWidget {
   const BrandListView({super.key});
@@ -223,20 +224,21 @@ class _BrandListViewState extends State<BrandListView> {
                               children: [
                                 if (brand.logoUrl != null &&
                                     brand.logoUrl!.trim().isNotEmpty) ...[
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: Image.network(
-                                      brand.logoUrl!,
-                                      width: 28,
-                                      height: 28,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(
-                                                Icons.stars,
-                                                size: 28,
-                                                color: AppColors.detail,
-                                              ),
+                                  AppNetworkImage(
+                                    imageUrl: brand.logoUrl!,
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: 4,
+                                    fit: BoxFit.cover,
+                                    placeholder: const Icon(
+                                      Icons.stars,
+                                      size: 28,
+                                      color: AppColors.detail,
+                                    ),
+                                    errorWidget: const Icon(
+                                      Icons.stars,
+                                      size: 28,
+                                      color: AppColors.detail,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -313,20 +315,22 @@ class _BrandListViewState extends State<BrandListView> {
                     Row(
                       children: [
                         if (brand.logoUrl != null &&
-                            brand.logoUrl!.trim().isNotEmpty) ...[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: Image.network(
-                              brand.logoUrl!,
-                              width: 24,
-                              height: 24,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.stars,
-                                    size: 24,
-                                    color: AppColors.detail,
-                                  ),
+                                                            brand.logoUrl!.trim().isNotEmpty) ...[
+                          AppNetworkImage(
+                            imageUrl: brand.logoUrl!,
+                            width: 24,
+                            height: 24,
+                            borderRadius: 4,
+                            fit: BoxFit.cover,
+                            placeholder: const Icon(
+                              Icons.stars,
+                              size: 24,
+                              color: AppColors.detail,
+                            ),
+                            errorWidget: const Icon(
+                              Icons.stars,
+                              size: 24,
+                              color: AppColors.detail,
                             ),
                           ),
                           const SizedBox(width: 8),

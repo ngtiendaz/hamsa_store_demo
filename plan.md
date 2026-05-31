@@ -268,6 +268,7 @@ lib/
   - Card hiển thị ảnh, tên, giá và nút thêm vào giỏ hàng.
   - Hiển thị thanh phân trang `Trước / Sau`, mỗi trang cố định 40 sản phẩm.
   - Toàn bộ vùng card, bao gồm ảnh sản phẩm trên web, có thể bấm để mở trang chi tiết; nút thêm giỏ hàng giữ thao tác riêng.
+  - Cấu hình ảnh HTML trên Flutter Web dùng hit-test trong suốt để click xuyên xuống card và thumbnail.
 - [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có gallery ảnh, thumbnail đổi ảnh chính, thông tin chi tiết và nút thêm vào giỏ hàng.
 - [x] 10.6. Xây dựng trang giỏ hàng local state và màn hình customer cho tab Đơn hàng, Cá nhân.
 - [x] 10.7. Thay test counter template bằng test `CustomerCartViewModel` kiểm tra thêm, giới hạn tồn kho, giảm và xóa sản phẩm.

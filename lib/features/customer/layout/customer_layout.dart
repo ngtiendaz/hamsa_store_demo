@@ -60,7 +60,7 @@ class CustomerLayout extends StatelessWidget {
           appBar: AppBar(
             title: Text(_titleForPath(path)),
             centerTitle: true,
-            leading: (path.startsWith('/shop/products/') || path == '/checkout')
+            leading: (path.startsWith('/shop/products/') || path == '/checkout' || path == '/shop/orders/detail')
                 ? IconButton(
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back),
@@ -95,7 +95,7 @@ class _DesktopTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (path.startsWith('/shop/products/') || path == '/checkout') ...[
+          if (path.startsWith('/shop/products/') || path == '/checkout' || path == '/shop/orders/detail') ...[
             IconButton(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back),
@@ -228,6 +228,7 @@ String _titleForPath(String path) {
   if (path == '/cart') return 'Giỏ hàng';
   if (path == '/checkout') return 'Thanh toán đơn hàng';
   if (path == '/shop/orders') return 'Đơn hàng';
+  if (path == '/shop/orders/detail') return 'Chi tiết đơn hàng';
   if (path == '/shop/profile') return 'Cá nhân';
   return 'Hamsa Store';
 }

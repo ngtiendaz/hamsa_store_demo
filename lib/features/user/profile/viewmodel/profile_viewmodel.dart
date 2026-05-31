@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../data/models/profiles_model.dart';
 import '../../../../data/models/wallet_model.dart';
 import '../../../../data/models/wallet_transaction_model.dart';
@@ -149,17 +150,30 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> deposit(double amount) async {
+  Future<bool> deposit(double amount, String password) async {
     if (amount <= 0) {
       _errorMessage = 'Số tiền nạp phải lớn hơn 0.';
       notifyListeners();
       return false;
     }
+    if (amount > 10000000) {
+      _errorMessage = 'Số tiền nạp tối đa mỗi lần là 10.000.000₫.';
+      notifyListeners();
+      return false;
+    }
+
     _isProcessingWallet = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
+      final isPasswordValid = await _verifyPassword(password);
+      if (!isPasswordValid) {
+        _errorMessage = 'Mật khẩu xác nhận không chính xác.';
+        notifyListeners();
+        return false;
+      }
+
       await _repository.processWalletTransaction(
         userId: _profile.id,
         type: 'deposit',
@@ -177,9 +191,14 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> withdraw(double amount) async {
+  Future<bool> withdraw(double amount, String password) async {
     if (amount <= 0) {
       _errorMessage = 'Số tiền rút phải lớn hơn 0.';
+      notifyListeners();
+      return false;
+    }
+    if (amount > 10000000) {
+      _errorMessage = 'Số tiền rút tối đa mỗi lần là 10.000.000₫.';
       notifyListeners();
       return false;
     }
@@ -188,11 +207,19 @@ class ProfileViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+
     _isProcessingWallet = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
+      final isPasswordValid = await _verifyPassword(password);
+      if (!isPasswordValid) {
+        _errorMessage = 'Mật khẩu xác nhận không chính xác.';
+        notifyListeners();
+        return false;
+      }
+
       await _repository.processWalletTransaction(
         userId: _profile.id,
         type: 'manual_adjustment',
@@ -207,6 +234,16 @@ class ProfileViewModel extends ChangeNotifier {
     } finally {
       _isProcessingWallet = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> _verifyPassword(String password) async {
+    try {
+      final client = Supabase.instance.client;
+      await client.auth.signInWithPassword(email: _profile.email, password: password);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 }

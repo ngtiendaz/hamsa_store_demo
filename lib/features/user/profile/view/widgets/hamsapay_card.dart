@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/widgets/app_toast.dart';
@@ -214,55 +215,90 @@ class HamsapayCard extends StatelessWidget {
 
   void _showTransactionDialog(BuildContext context, {required bool isDeposit}) {
     final controller = TextEditingController();
+    final passwordController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(isDeposit ? 'Nạp tiền HamsaPay' : 'Rút tiền HamsaPay'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                isDeposit
-                    ? 'Nhập số tiền bạn muốn nạp vào ví điện tử.'
-                    : 'Nhập số tiền bạn muốn rút khỏi ví điện tử.',
-                style: const TextStyle(color: AppColors.detail, fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Nhập số tiền (đ)...',
-                  suffixText: '₫',
-                  border: OutlineInputBorder(),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                  ),
+        content: SizedBox(
+          width: 400,
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  isDeposit
+                      ? 'Nhập số tiền bạn muốn nạp vào ví điện tử.'
+                      : 'Nhập số tiền bạn muốn rút khỏi ví điện tử.',
+                  style: const TextStyle(color: AppColors.detail, fontSize: 13),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Vui lòng nhập số tiền.';
-                  }
-                  final amount = double.tryParse(value.trim());
-                  if (amount == null || amount <= 0) {
-                    return 'Số tiền phải là số lớn hơn 0.';
-                  }
-                  if (!isDeposit) {
-                    final balance = viewModel.wallet?.balance ?? 0.0;
-                    if (amount > balance) {
-                      return 'Số dư khả dụng không đủ.';
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    ThousandsSeparatorFormatter(),
+                  ],
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Số tiền giao dịch',
+                    hintText: 'Nhập số tiền (đ)...',
+                    suffixText: '₫',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Vui lòng nhập số tiền.';
                     }
-                  }
-                  return null;
-                },
-              ),
-            ],
+                    final cleanValue = value.replaceAll(',', '').trim();
+                    final amount = double.tryParse(cleanValue);
+                    if (amount == null || amount <= 0) {
+                      return 'Số tiền phải là số lớn hơn 0.';
+                    }
+                    if (amount > 10000000) {
+                      return 'Số tiền tối đa mỗi lần giao dịch là 10.000.000₫.';
+                    }
+                    if (!isDeposit) {
+                      final balance = viewModel.wallet?.balance ?? 0.0;
+                      if (amount > balance) {
+                        return 'Số dư khả dụng không đủ.';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Mật khẩu xác nhận',
+                    hintText: 'Nhập mật khẩu của bạn...',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Vui lòng nhập mật khẩu xác nhận.';
+                    }
+                    if (value.trim().length < 6) {
+                      return 'Mật khẩu phải từ 6 ký tự.';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -273,12 +309,14 @@ class HamsapayCard extends StatelessWidget {
           TextButton(
             onPressed: () async {
               if (!formKey.currentState!.validate()) return;
-              final amount = double.parse(controller.text.trim());
+              final cleanText = controller.text.replaceAll(',', '').trim();
+              final amount = double.parse(cleanText);
+              final password = passwordController.text.trim();
               Navigator.of(ctx).pop();
 
               final success = isDeposit
-                  ? await viewModel.deposit(amount)
-                  : await viewModel.withdraw(amount);
+                  ? await viewModel.deposit(amount, password)
+                  : await viewModel.withdraw(amount, password);
 
               if (context.mounted) {
                 if (success) {
@@ -300,6 +338,46 @@ class HamsapayCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ThousandsSeparatorFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.selection.baseOffset == 0) {
+      return newValue;
+    }
+
+    String cleanText = newValue.text.replaceAll(',', '');
+
+    final double? parsed = double.tryParse(cleanText);
+    if (parsed == null) {
+      return newValue.copyWith(
+        text: cleanText,
+        selection: TextSelection.collapsed(offset: cleanText.length),
+      );
+    }
+
+    final formatter = NumberFormat('#,###', 'en_US');
+    String formattedText = formatter.format(parsed);
+
+    int commasBefore = oldValue.text.split(',').length - 1;
+    int commasAfter = formattedText.split(',').length - 1;
+    int offsetAdjustment = commasAfter - commasBefore;
+
+    int newSelectionIndex = newValue.selection.end + offsetAdjustment;
+
+    if (newSelectionIndex < 0) {
+      newSelectionIndex = 0;
+    } else if (newSelectionIndex > formattedText.length) {
+      newSelectionIndex = formattedText.length;
+    }
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: newSelectionIndex),
     );
   }
 }

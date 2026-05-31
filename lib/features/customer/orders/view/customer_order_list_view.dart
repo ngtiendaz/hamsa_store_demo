@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
@@ -372,11 +373,17 @@ class _OrderCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppColors.border, width: 0.5),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () async {
+          await context.push('/shop/orders/detail', extra: order);
+          viewModel.loadOrders(userId);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             // Header: Code + Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -591,7 +598,7 @@ class _OrderCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   void _showUpdateDialog(BuildContext context) {

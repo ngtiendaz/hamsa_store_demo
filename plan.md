@@ -301,6 +301,8 @@ lib/
 - [x] 11.7.7. Thiết kế màn hình đơn hàng của Admin/Employee (`AdminOrderListView`, `AdminOrderListViewModel`) cho phép lọc trạng thái, xác nhận giao hàng (Admin/Employee) và phê duyệt hủy đơn (Chỉ Admin).
 - [x] 11.7.8. Đăng ký các routes (`/checkout`, `/admin/orders`) trong `app_router.dart` và đăng ký các ViewModels trong `main.dart`.
 - [x] 11.7.9. Viết unit tests kiểm chứng toàn bộ luồng thanh toán và cập nhật trạng thái đơn hàng trong `widget_test.dart`.
+- [x] 11.7.10. Thiết kế màn hình chi tiết đơn hàng của Khách hàng (`CustomerOrderDetailView`) cho phép xem chi tiết sản phẩm và thao tác nghiệp vụ.
+
 
 ### PHASE 12: Dashboard Admin
 - [x] 12.1. Kiểm tra schema Supabase thực tế và tạo RPC `admin_get_dashboard_stats`:

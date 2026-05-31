@@ -19,6 +19,7 @@ import '../../features/customer/catalog/view/customer_home_view.dart';
 import '../../features/customer/catalog/view/customer_product_detail_view.dart';
 import '../../features/customer/layout/customer_layout.dart';
 import '../../features/customer/orders/view/customer_order_list_view.dart';
+import '../../features/customer/orders/view/customer_order_detail_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
 import '../../features/user/profile/view/profile_view.dart';
 import '../../features/admin/orders/view/admin_order_list_view.dart';
@@ -194,6 +195,13 @@ class AppRouter {
               path: '/shop/orders',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: CustomerOrderListView()),
+            ),
+            GoRoute(
+              path: '/shop/orders/detail',
+              builder: (context, state) {
+                final order = state.extra as OrderModel;
+                return CustomerOrderDetailView(order: order);
+              },
             ),
             GoRoute(
               path: '/shop/profile',

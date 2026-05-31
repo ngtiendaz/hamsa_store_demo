@@ -51,7 +51,8 @@ class AppNetworkImage extends StatelessWidget {
         height: height,
         fit: fit,
         placeholder: (context, url) => placeholder ?? _buildPlaceholder(),
-        errorWidget: (context, url, error) => errorWidget ?? _buildErrorWidget(),
+        errorWidget: (context, url, error) =>
+            errorWidget ?? _buildErrorWidget(),
       ),
     );
   }
@@ -69,9 +70,7 @@ class AppNetworkImage extends StatelessWidget {
             child: SizedBox(
               width: 24,
               height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
         );
@@ -86,10 +85,7 @@ class AppNetworkImage extends StatelessWidget {
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(borderRadius),
           ),
-          child: const Icon(
-            Icons.broken_image,
-            color: Colors.grey,
-          ),
+          child: const Icon(Icons.broken_image, color: Colors.grey),
         );
   }
 }

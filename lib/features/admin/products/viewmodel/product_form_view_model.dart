@@ -57,7 +57,7 @@ class ProductFormViewModel extends ChangeNotifier {
   String get status => _status;
   String get categoryId => _categoryId;
   String get brandId => _brandId;
-  
+
   List<ProductImageItem> get images => _images;
 
   bool get isChanged {
@@ -70,17 +70,20 @@ class ProductFormViewModel extends ChangeNotifier {
           _stock > 0 ||
           _images.isNotEmpty;
     }
-    
+
     final nameChanged = _internalName.trim() != _product!.internalName.trim();
-    final tradeNameChanged = (_tradeName ?? '').trim() != (_product!.tradeName ?? '').trim();
-    final barcodeChanged = (_barcode ?? '').trim() != (_product!.barcode ?? '').trim();
-    final descriptionChanged = (_description ?? '').trim() != (_product!.description ?? '').trim();
+    final tradeNameChanged =
+        (_tradeName ?? '').trim() != (_product!.tradeName ?? '').trim();
+    final barcodeChanged =
+        (_barcode ?? '').trim() != (_product!.barcode ?? '').trim();
+    final descriptionChanged =
+        (_description ?? '').trim() != (_product!.description ?? '').trim();
     final priceChanged = _price != _product!.price;
     final stockChanged = _stock != _product!.stock;
     final statusChanged = _status != _product!.status;
     final categoryChanged = _categoryId != _product!.categoryId;
     final brandChanged = _brandId != _product!.brandId;
-    
+
     bool imagesChanged = false;
     if (_images.length != _product!.imageUrls.length) {
       imagesChanged = true;
@@ -92,7 +95,7 @@ class ProductFormViewModel extends ChangeNotifier {
         }
       }
     }
-    
+
     return nameChanged ||
         tradeNameChanged ||
         barcodeChanged ||
@@ -139,21 +142,58 @@ class ProductFormViewModel extends ChangeNotifier {
       _status = product.status;
       _categoryId = product.categoryId;
       _brandId = product.brandId;
-      _images = product.imageUrls.map((url) => ProductImageItem(url: url, id: url)).toList();
+      _images = product.imageUrls
+          .map((url) => ProductImageItem(url: url, id: url))
+          .toList();
     }
     notifyListeners();
   }
 
   // Setters
-  void setInternalName(String value) { _internalName = value; notifyListeners(); }
-  void setTradeName(String value) { _tradeName = value.trim().isEmpty ? null : value; notifyListeners(); }
-  void setBarcode(String value) { _barcode = value.trim().isEmpty ? null : value; notifyListeners(); }
-  void setDescription(String value) { _description = value.trim().isEmpty ? null : value; notifyListeners(); }
-  void setPrice(double value) { _price = value; notifyListeners(); }
-  void setStock(int value) { _stock = value; notifyListeners(); }
-  void setStatus(String value) { _status = value; notifyListeners(); }
-  void setCategoryId(String value) { _categoryId = value; notifyListeners(); }
-  void setBrandId(String value) { _brandId = value; notifyListeners(); }
+  void setInternalName(String value) {
+    _internalName = value;
+    notifyListeners();
+  }
+
+  void setTradeName(String value) {
+    _tradeName = value.trim().isEmpty ? null : value;
+    notifyListeners();
+  }
+
+  void setBarcode(String value) {
+    _barcode = value.trim().isEmpty ? null : value;
+    notifyListeners();
+  }
+
+  void setDescription(String value) {
+    _description = value.trim().isEmpty ? null : value;
+    notifyListeners();
+  }
+
+  void setPrice(double value) {
+    _price = value;
+    notifyListeners();
+  }
+
+  void setStock(int value) {
+    _stock = value;
+    notifyListeners();
+  }
+
+  void setStatus(String value) {
+    _status = value;
+    notifyListeners();
+  }
+
+  void setCategoryId(String value) {
+    _categoryId = value;
+    notifyListeners();
+  }
+
+  void setBrandId(String value) {
+    _brandId = value;
+    notifyListeners();
+  }
 
   Future<void> pickImages() async {
     try {
@@ -166,10 +206,12 @@ class ProductFormViewModel extends ChangeNotifier {
       if (pickedFiles.isNotEmpty) {
         for (final file in pickedFiles) {
           final bytes = await file.readAsBytes();
-          _images.add(ProductImageItem(
-            bytes: bytes,
-            id: '${DateTime.now().microsecondsSinceEpoch}_${file.name}',
-          ));
+          _images.add(
+            ProductImageItem(
+              bytes: bytes,
+              id: '${DateTime.now().microsecondsSinceEpoch}_${file.name}',
+            ),
+          );
         }
         _errorMessage = null;
         notifyListeners();
@@ -249,10 +291,20 @@ class ProductFormViewModel extends ChangeNotifier {
           finalImageUrls.add(item.url!);
         } else if (item.bytes != null) {
           final extension = item.id.split('.').last.toLowerCase();
-          final safeExtension = (extension == 'png' || extension == 'jpeg' || extension == 'webp') ? extension : 'jpg';
-          final cleanUnique = UniqueKey().toString().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-          final fileName = '${DateTime.now().millisecondsSinceEpoch}_$cleanUnique.$safeExtension';
-          final url = await _repository.uploadProductImage(fileName, item.bytes!);
+          final safeExtension =
+              (extension == 'png' || extension == 'jpeg' || extension == 'webp')
+              ? extension
+              : 'jpg';
+          final cleanUnique = UniqueKey().toString().replaceAll(
+            RegExp(r'[^a-zA-Z0-9]'),
+            '',
+          );
+          final fileName =
+              '${DateTime.now().millisecondsSinceEpoch}_$cleanUnique.$safeExtension';
+          final url = await _repository.uploadProductImage(
+            fileName,
+            item.bytes!,
+          );
           finalImageUrls.add(url);
         }
       }

@@ -31,7 +31,7 @@ class HamsapayCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E3C72).withOpacity(0.35),
+            color: const Color(0xFF1E3C72).withValues(alpha: 0.35),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -49,7 +49,7 @@ class HamsapayCard extends StatelessWidget {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.04),
+                color: Colors.white.withValues(alpha: 0.04),
               ),
             ),
           ),
@@ -61,7 +61,7 @@ class HamsapayCard extends StatelessWidget {
               height: 140,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.03),
+                color: Colors.white.withValues(alpha: 0.03),
               ),
             ),
           ),
@@ -78,7 +78,7 @@ class HamsapayCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.12),
+                            color: Colors.white.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -100,7 +100,11 @@ class HamsapayCard extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.history, color: Colors.white, size: 24),
+                      icon: const Icon(
+                        Icons.history,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                       tooltip: 'Lịch sử giao dịch',
                       onPressed: () => _showHistory(context),
                     ),
@@ -125,7 +129,9 @@ class HamsapayCard extends StatelessWidget {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                       )
@@ -146,7 +152,8 @@ class HamsapayCard extends StatelessWidget {
                         context: context,
                         label: 'Nạp tiền',
                         icon: Icons.add_circle_outline,
-                        onPressed: () => _showTransactionDialog(context, isDeposit: true),
+                        onPressed: () =>
+                            _showTransactionDialog(context, isDeposit: true),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -155,7 +162,8 @@ class HamsapayCard extends StatelessWidget {
                         context: context,
                         label: 'Rút tiền',
                         icon: Icons.remove_circle_outline,
-                        onPressed: () => _showTransactionDialog(context, isDeposit: false),
+                        onPressed: () =>
+                            _showTransactionDialog(context, isDeposit: false),
                       ),
                     ),
                   ],
@@ -177,9 +185,9 @@ class HamsapayCard extends StatelessWidget {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -333,7 +341,10 @@ class HamsapayCard extends StatelessWidget {
             },
             child: Text(
               isDeposit ? 'Nạp tiền' : 'Rút tiền',
-              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -345,7 +356,9 @@ class HamsapayCard extends StatelessWidget {
 class ThousandsSeparatorFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.selection.baseOffset == 0) {
       return newValue;
     }

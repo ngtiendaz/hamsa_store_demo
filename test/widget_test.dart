@@ -681,12 +681,25 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
   bool cancelRequestCancelCalled = false;
 
   @override
-  Future<List<OrderModel>> getActiveOrders(
+  Future<PaginationResult<OrderModel>> getActiveOrders(
     String userId, {
+    String? keyword,
+    String? status,
     DateTime? startDate,
     DateTime? endDate,
+    required int page,
+    required int pageSize,
   }) async {
     var list = orders.where((o) => o.customerId == userId).toList();
+    if (keyword != null && keyword.trim().isNotEmpty) {
+      final query = keyword.trim().toLowerCase();
+      list = list
+          .where((order) => order.orderCode.toLowerCase().contains(query))
+          .toList();
+    }
+    if (status != null && status != 'all') {
+      list = list.where((order) => order.status == status).toList();
+    }
     if (startDate != null) {
       list = list
           .where(
@@ -705,7 +718,15 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
           )
           .toList();
     }
-    return list;
+    final totalCount = list.length;
+    final offset = (page - 1) * pageSize;
+    final end = offset + pageSize;
+    return PaginationResult(
+      items: list.sublist(offset, end > totalCount ? totalCount : end),
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 
   @override

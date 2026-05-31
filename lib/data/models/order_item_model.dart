@@ -25,7 +25,8 @@ class OrderItemModel {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     String? imageUrl;
-    if (json['products'] != null && json['products']['product_images'] != null) {
+    if (json['products'] != null &&
+        json['products']['product_images'] != null) {
       final list = json['products']['product_images'] as List;
       if (list.isNotEmpty) {
         imageUrl = list.first['image_url'] as String?;

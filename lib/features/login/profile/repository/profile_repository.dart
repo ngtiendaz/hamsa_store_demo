@@ -100,7 +100,8 @@ class ProfileRepository implements ProfileDataSource {
         .from('wallet_transactions')
         .select()
         .eq('user_id', userId)
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .limit(100);
     final list = response as List<dynamic>;
     return list.map((json) => WalletTransactionModel.fromJson(json)).toList();
   }

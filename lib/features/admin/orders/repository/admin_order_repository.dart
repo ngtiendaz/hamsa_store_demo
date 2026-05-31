@@ -24,7 +24,7 @@ class AdminOrderRepository implements AdminOrderDataSource {
   final SupabaseClient _client;
 
   AdminOrderRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   @override
   Future<PaginationResult<OrderModel>> getAllOrders({
@@ -38,11 +38,14 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       var query = _client
           .from('orders')
-          .select('*, order_items(*, products(*, product_images(image_url)))');
+          .select('*, order_items(*, products(product_images(image_url)))');
 
       if (status != null && status != 'all') {
         if (status == 'refunded') {
-          query = query.inFilter('payment_status', ['refunded', 'partially_refunded']);
+          query = query.inFilter('payment_status', [
+            'refunded',
+            'partially_refunded',
+          ]);
         } else {
           query = query.eq('status', status);
         }
@@ -50,7 +53,9 @@ class AdminOrderRepository implements AdminOrderDataSource {
 
       if (keyword != null && keyword.trim().isNotEmpty) {
         final val = keyword.trim();
-        query = query.or('order_code.ilike.%$val%,customer_name.ilike.%$val%,customer_phone.ilike.%$val%');
+        query = query.or(
+          'order_code.ilike.%$val%,customer_name.ilike.%$val%,customer_phone.ilike.%$val%',
+        );
       }
 
       if (startDate != null) {
@@ -87,13 +92,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_confirm_order',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -103,13 +108,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_approve_cancel_order',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -119,13 +124,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_deliver_order_success',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -135,13 +140,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_deliver_order_failed',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -151,13 +156,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_approve_return_order',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -167,13 +172,13 @@ class AdminOrderRepository implements AdminOrderDataSource {
     try {
       await _client.rpc(
         'admin_cancel_pending_order',
-        params: {
-          'p_order_id': orderId,
-          'p_admin_id': adminId,
-        },
+        params: {'p_order_id': orderId, 'p_admin_id': adminId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -189,7 +194,10 @@ class AdminOrderRepository implements AdminOrderDataSource {
           })
           .eq('id', orderId);
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }

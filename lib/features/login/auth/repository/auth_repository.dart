@@ -18,7 +18,7 @@ class AuthRepository {
         .select()
         .eq('id', userId)
         .maybeSingle();
-    
+
     if (response == null) return null;
     return ProfileModel.fromJson(response);
   }
@@ -42,11 +42,7 @@ class AuthRepository {
   }) async {
     final response = await _client.functions.invoke(
       'create-user',
-      body: {
-        'email': email,
-        'password': password,
-        'name': name,
-      },
+      body: {'email': email, 'password': password, 'name': name},
     );
 
     if (response.status < 200 || response.status >= 300) {

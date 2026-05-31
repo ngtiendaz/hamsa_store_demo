@@ -132,14 +132,16 @@ class ProfileViewModel extends ChangeNotifier {
 
     try {
       final w = await _repository.getWallet(_profile.id);
-      _wallet = w ?? WalletModel(
-        id: '',
-        userId: _profile.id,
-        balance: 0.0,
-        currency: 'VND',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      _wallet =
+          w ??
+          WalletModel(
+            id: '',
+            userId: _profile.id,
+            balance: 0.0,
+            currency: 'VND',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
       _transactions = await _repository.getWalletTransactions(_profile.id);
     } catch (e) {
       _errorMessage = 'Không thể tải thông tin ví. Vui lòng thử lại.';
@@ -240,7 +242,10 @@ class ProfileViewModel extends ChangeNotifier {
   Future<bool> _verifyPassword(String password) async {
     try {
       final client = Supabase.instance.client;
-      await client.auth.signInWithPassword(email: _profile.email, password: password);
+      await client.auth.signInWithPassword(
+        email: _profile.email,
+        password: password,
+      );
       return true;
     } catch (_) {
       return false;

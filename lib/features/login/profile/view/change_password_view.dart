@@ -53,10 +53,7 @@ class _ChangePasswordContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Đổi mật khẩu',
-                    style: AppTextStyles.headlineMd,
-                  ),
+                  const Text('Đổi mật khẩu', style: AppTextStyles.headlineMd),
                   const SizedBox(height: 6),
                   const Text(
                     'Vui lòng nhập mật khẩu hiện tại và mật khẩu mới để thực hiện thay đổi.',
@@ -90,7 +87,10 @@ class _ChangePasswordContent extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       viewModel.errorMessage!,
-                      style: const TextStyle(color: AppColors.error, fontSize: 13),
+                      style: const TextStyle(
+                        color: AppColors.error,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                   const SizedBox(height: 32),
@@ -103,8 +103,13 @@ class _ChangePasswordContent extends StatelessWidget {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.primary,
                             side: const BorderSide(color: AppColors.border),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 24,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           onPressed: () => context.pop(),
                           child: const Text('Hủy bỏ'),

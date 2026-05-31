@@ -138,6 +138,8 @@ class AppRouter {
             ),
             GoRoute(
               path: '/admin/orders/detail',
+              redirect: (context, state) =>
+                  state.extra is OrderModel ? null : '/admin/orders',
               builder: (context, state) {
                 final order = state.extra as OrderModel;
                 return AdminOrderDetailView(order: order);
@@ -206,6 +208,8 @@ class AppRouter {
             ),
             GoRoute(
               path: '/shop/orders/detail',
+              redirect: (context, state) =>
+                  state.extra is OrderModel ? null : '/shop/orders',
               builder: (context, state) {
                 final order = state.extra as OrderModel;
                 return CustomerOrderDetailView(order: order);

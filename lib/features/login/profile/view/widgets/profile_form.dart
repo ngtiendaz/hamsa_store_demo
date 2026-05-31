@@ -66,7 +66,10 @@ class ProfileForm extends StatelessWidget {
                     children: [
                       const Text(
                         'Mật khẩu tài khoản',
-                        style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
                       ),
                       TextButton.icon(
                         onPressed: () {
@@ -76,10 +79,18 @@ class ProfileForm extends StatelessWidget {
                             context.push('/profile/change-password');
                           }
                         },
-                        icon: const Icon(Icons.lock_outline, size: 16, color: AppColors.primary),
+                        icon: const Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
                         label: const Text(
                           'Thay đổi mật khẩu',
-                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],

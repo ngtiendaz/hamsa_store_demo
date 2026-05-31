@@ -1,11 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../../data/dto/pagination_result.dart';
 import '../../../../../data/models/order_model.dart';
 
 abstract class CustomerOrderDataSource {
-  Future<List<OrderModel>> getActiveOrders(
+  Future<PaginationResult<OrderModel>> getActiveOrders(
     String userId, {
+    String? keyword,
+    String? status,
     DateTime? startDate,
     DateTime? endDate,
+    required int page,
+    required int pageSize,
   });
   Future<String> createOrder({
     required String userId,
@@ -35,20 +40,30 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
   final SupabaseClient _client;
 
   CustomerOrderRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   @override
-  Future<List<OrderModel>> getActiveOrders(
+  Future<PaginationResult<OrderModel>> getActiveOrders(
     String userId, {
+    String? keyword,
+    String? status,
     DateTime? startDate,
     DateTime? endDate,
+    required int page,
+    required int pageSize,
   }) async {
     try {
       var query = _client
           .from('orders')
-          .select('*, order_items(*, products(*, product_images(image_url)))')
+          .select('*, order_items(*, products(product_images(image_url)))')
           .eq('customer_id', userId);
 
+      if (keyword != null && keyword.trim().isNotEmpty) {
+        query = query.ilike('order_code', '%${keyword.trim()}%');
+      }
+      if (status != null && status != 'all') {
+        query = query.eq('status', status);
+      }
       if (startDate != null) {
         query = query.gte('created_at', startDate.toIso8601String());
       }
@@ -56,10 +71,21 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
         query = query.lte('created_at', endDate.toIso8601String());
       }
 
-      final response = await query.order('created_at', ascending: false);
-      
-      final data = response as List<dynamic>;
-      return data.map((json) => OrderModel.fromJson(json as Map<String, dynamic>)).toList();
+      final offset = (page - 1) * pageSize;
+      final response = await query
+          .order('created_at', ascending: false)
+          .range(offset, offset + pageSize - 1)
+          .count(CountOption.exact);
+
+      final data = response.data as List<dynamic>;
+      return PaginationResult(
+        items: data
+            .map((json) => OrderModel.fromJson(json as Map<String, dynamic>))
+            .toList(),
+        totalCount: response.count,
+        page: page,
+        pageSize: pageSize,
+      );
     } catch (e) {
       throw Exception('Không thể tải lịch sử đơn hàng của bạn.');
     }
@@ -92,7 +118,10 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
       );
       return response as String;
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -102,13 +131,13 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       await _client.rpc(
         'request_cancel_order',
-        params: {
-          'p_order_id': orderId,
-          'p_user_id': userId,
-        },
+        params: {'p_order_id': orderId, 'p_user_id': userId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -118,13 +147,13 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       await _client.rpc(
         'cancel_request_cancel_order',
-        params: {
-          'p_order_id': orderId,
-          'p_user_id': userId,
-        },
+        params: {'p_order_id': orderId, 'p_user_id': userId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -134,13 +163,13 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       await _client.rpc(
         'customer_request_return_order',
-        params: {
-          'p_order_id': orderId,
-          'p_user_id': userId,
-        },
+        params: {'p_order_id': orderId, 'p_user_id': userId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -150,13 +179,13 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
     try {
       await _client.rpc(
         'customer_cancel_request_return_order',
-        params: {
-          'p_order_id': orderId,
-          'p_user_id': userId,
-        },
+        params: {'p_order_id': orderId, 'p_user_id': userId},
       );
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }
@@ -182,7 +211,10 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
           .eq('id', orderId)
           .eq('customer_id', userId);
     } catch (e) {
-      final msg = e.toString().replaceAll('PostgrestException: ', '').replaceAll('Exception: ', '');
+      final msg = e
+          .toString()
+          .replaceAll('PostgrestException: ', '')
+          .replaceAll('Exception: ', '');
       throw Exception(msg);
     }
   }

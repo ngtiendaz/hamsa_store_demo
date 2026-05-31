@@ -24,10 +24,12 @@ class CategoryFormViewModel extends ChangeNotifier {
 
   bool get isChanged {
     if (_category == null) {
-      return _name.trim().isNotEmpty || (_description != null && _description!.trim().isNotEmpty);
+      return _name.trim().isNotEmpty ||
+          (_description != null && _description!.trim().isNotEmpty);
     }
     final nameChanged = _name.trim() != _category!.name.trim();
-    final descriptionChanged = (_description ?? '').trim() != (_category!.description ?? '').trim();
+    final descriptionChanged =
+        (_description ?? '').trim() != (_category!.description ?? '').trim();
     final isActiveChanged = _isActive != _category!.isActive;
     return nameChanged || descriptionChanged || isActiveChanged;
   }

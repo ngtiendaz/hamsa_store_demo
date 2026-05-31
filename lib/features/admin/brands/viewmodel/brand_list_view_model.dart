@@ -15,6 +15,7 @@ class BrandListViewModel extends ChangeNotifier {
   int _currentPage = 1;
   final int _pageSize = 20;
   int _totalCount = 0;
+  int _requestVersion = 0;
 
   List<BrandModel> get brands => _brands;
   bool get isLoading => _isLoading;
@@ -36,6 +37,7 @@ class BrandListViewModel extends ChangeNotifier {
       _currentPage = 1;
     }
 
+    final requestVersion = ++_requestVersion;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -46,15 +48,20 @@ class BrandListViewModel extends ChangeNotifier {
         page: _currentPage,
         pageSize: _pageSize,
       );
+      if (requestVersion != _requestVersion) return;
 
       _brands = result.items;
       _totalCount = result.totalCount;
     } catch (e) {
-      _errorMessage = 'Không thể tải danh sách nhãn hàng. Vui lòng thử lại.';
-      debugPrint('Error loading brands: $e');
+      if (requestVersion == _requestVersion) {
+        _errorMessage = 'Không thể tải danh sách nhãn hàng. Vui lòng thử lại.';
+        debugPrint('Error loading brands: $e');
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestVersion == _requestVersion) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -96,6 +103,7 @@ class BrandListViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _requestVersion++;
     _debounce.dispose();
     super.dispose();
   }

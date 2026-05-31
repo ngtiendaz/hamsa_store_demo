@@ -341,6 +341,25 @@ lib/
 ### PHASE 12.5: Điều chỉnh UI Customer Cart
 - [x] 12.5.1. Giữ nhãn nút `Thanh toán` trên một dòng và tăng chiều rộng nút trong phần tổng kết giỏ hàng.
 
+### PHASE 13: Audit hiệu năng và ổn định hệ thống
+- [x] 13.1. Audit toàn bộ Flutter app và Supabase bằng analyzer, unit test, Supabase performance advisor và security advisor.
+- [x] 13.2. Tối ưu danh sách đơn hàng customer:
+  - Phân trang server-side 20 đơn hàng/trang.
+  - Lọc trạng thái, tìm kiếm mã đơn và khoảng thời gian trực tiếp tại Supabase.
+  - Giảm payload nested: chỉ lấy ảnh sản phẩm cần hiển thị thay vì tải toàn bộ dữ liệu sản phẩm.
+- [x] 13.3. Khôi phục catalog customer về đúng 40 sản phẩm/trang.
+- [x] 13.4. Chống race condition cho các danh sách có tìm kiếm và bộ lọc:
+  - Bỏ qua response cũ khi request mới đã được gửi.
+  - Invalidate request khi dispose viewmodel để tránh cập nhật UI sau khi rời màn hình.
+- [x] 13.5. Chặn crash khi refresh hoặc mở trực tiếp URL chi tiết đơn hàng thiếu `extra`: tự chuyển về danh sách đơn hàng tương ứng.
+- [x] 13.6. Tối ưu Supabase cho dữ liệu lớn:
+  - Thêm index composite phục vụ phân trang đơn hàng, catalog active, lịch sử ví và ảnh sản phẩm.
+  - Bổ sung index cho các foreign key còn thiếu theo Supabase advisor.
+  - Tối ưu RLS dùng `(select auth.uid())` để tránh tính lại theo từng dòng.
+  - Thu hồi quyền gọi RPC đơn hàng, ví và hàm nội bộ từ `anon`.
+- [x] 13.7. Giới hạn lịch sử ví tải tối đa 100 giao dịch gần nhất để giữ dialog profile mượt khi sử dụng lâu dài.
+- [x] 13.8. Dọn cảnh báo Flutter deprecated API và chuẩn hóa enum Dart để `flutter analyze` sạch.
+
 ---
 
 ## 🚦 Quy tắc cập nhật checklist

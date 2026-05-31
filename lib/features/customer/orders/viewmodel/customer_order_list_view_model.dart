@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../data/dto/pagination_result.dart';
 import '../../../../data/models/order_model.dart';
 import '../repository/customer_order_repository.dart';
 
@@ -11,9 +12,15 @@ class CustomerOrderListViewModel extends ChangeNotifier {
 
   DateTime? _startDate;
   DateTime? _endDate;
+  String _keyword = '';
+  String _status = 'all';
+  int _currentPage = 1;
+  final int _pageSize = 20;
+  int _totalCount = 0;
+  int _requestVersion = 0;
 
   CustomerOrderListViewModel({CustomerOrderDataSource? orderRepository})
-      : _orderRepository = orderRepository ?? CustomerOrderRepository();
+    : _orderRepository = orderRepository ?? CustomerOrderRepository();
 
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
@@ -21,35 +28,80 @@ class CustomerOrderListViewModel extends ChangeNotifier {
 
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
+  String get keyword => _keyword;
+  String get status => _status;
+  int get currentPage => _currentPage;
+  int get totalCount => _totalCount;
+  int get totalPages => _totalCount == 0 ? 1 : (_totalCount / _pageSize).ceil();
+  bool get hasNextPage => _currentPage * _pageSize < _totalCount;
+  bool get hasPreviousPage => _currentPage > 1;
 
   void setDateRange(DateTime start, DateTime end, String userId) {
     _startDate = start;
     _endDate = end;
-    loadOrders(userId);
+    loadOrders(userId, refresh: true);
   }
 
   void clearDateRange(String userId) {
     _startDate = null;
     _endDate = null;
-    loadOrders(userId);
+    loadOrders(userId, refresh: true);
   }
 
-  Future<void> loadOrders(String userId) async {
+  void setKeyword(String value, String userId) {
+    _keyword = value;
+    loadOrders(userId, refresh: true);
+  }
+
+  void selectStatus(String value, String userId) {
+    _status = value;
+    loadOrders(userId, refresh: true);
+  }
+
+  void nextPage(String userId) {
+    if (hasNextPage && !_isLoading) {
+      _currentPage++;
+      loadOrders(userId);
+    }
+  }
+
+  void previousPage(String userId) {
+    if (hasPreviousPage && !_isLoading) {
+      _currentPage--;
+      loadOrders(userId);
+    }
+  }
+
+  Future<void> loadOrders(String userId, {bool refresh = false}) async {
+    if (refresh) _currentPage = 1;
+    final requestVersion = ++_requestVersion;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _orders = await _orderRepository.getActiveOrders(
-        userId,
-        startDate: _startDate,
-        endDate: _endDate,
-      );
+      final PaginationResult<OrderModel> result = await _orderRepository
+          .getActiveOrders(
+            userId,
+            keyword: _keyword,
+            status: _status,
+            startDate: _startDate,
+            endDate: _endDate,
+            page: _currentPage,
+            pageSize: _pageSize,
+          );
+      if (requestVersion != _requestVersion) return;
+      _orders = result.items;
+      _totalCount = result.totalCount;
     } catch (e) {
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      if (requestVersion == _requestVersion) {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestVersion == _requestVersion) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 

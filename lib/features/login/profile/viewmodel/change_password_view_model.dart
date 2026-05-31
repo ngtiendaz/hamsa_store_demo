@@ -42,7 +42,9 @@ class ChangePasswordViewModel extends ChangeNotifier {
   }
 
   Future<bool> changePassword() async {
-    if (_currentPassword.isEmpty || _newPassword.isEmpty || _confirmNewPassword.isEmpty) {
+    if (_currentPassword.isEmpty ||
+        _newPassword.isEmpty ||
+        _confirmNewPassword.isEmpty) {
       _errorMessage = 'Vui lòng điền đầy đủ tất cả các trường.';
       notifyListeners();
       return false;

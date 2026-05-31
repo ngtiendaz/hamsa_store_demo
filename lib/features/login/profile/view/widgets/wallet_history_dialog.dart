@@ -46,7 +46,10 @@ class WalletHistoryDialog extends StatelessWidget {
                     ? const Center(
                         child: Text(
                           'Chưa có giao dịch nào được ghi nhận.',
-                          style: TextStyle(color: AppColors.detail, fontSize: 14),
+                          style: TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 14,
+                          ),
                         ),
                       )
                     : ListView.separated(
@@ -66,7 +69,8 @@ class WalletHistoryDialog extends StatelessWidget {
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         tx.type.label,
@@ -77,7 +81,8 @@ class WalletHistoryDialog extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      if (tx.note != null && tx.note!.isNotEmpty) ...[
+                                      if (tx.note != null &&
+                                          tx.note!.isNotEmpty) ...[
                                         Text(
                                           tx.note!,
                                           style: const TextStyle(
@@ -103,7 +108,9 @@ class WalletHistoryDialog extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
-                                    color: isAdd ? const Color(0xFF0F8644) : AppColors.error,
+                                    color: isAdd
+                                        ? const Color(0xFF0F8644)
+                                        : AppColors.error,
                                   ),
                                 ),
                               ],
@@ -133,14 +140,14 @@ class WalletHistoryDialog extends StatelessWidget {
       case WalletTransactionType.payment:
         icon = Icons.shopping_bag_outlined;
         color = AppColors.primary;
-        bgColor = AppColors.primary.withOpacity(0.1);
+        bgColor = AppColors.primary.withValues(alpha: 0.1);
         break;
       case WalletTransactionType.refund:
         icon = Icons.keyboard_return;
         color = Colors.orange;
-        bgColor = Colors.orange.withOpacity(0.1);
+        bgColor = Colors.orange.withValues(alpha: 0.1);
         break;
-      case WalletTransactionType.manual_adjustment:
+      case WalletTransactionType.manualAdjustment:
         icon = Icons.remove;
         color = AppColors.error;
         bgColor = const Color(0xFFFEE2E2);
@@ -149,10 +156,7 @@ class WalletHistoryDialog extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: Icon(icon, color: color, size: 20),
     );
   }

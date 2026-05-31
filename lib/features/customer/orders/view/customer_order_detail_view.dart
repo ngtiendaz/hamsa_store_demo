@@ -145,7 +145,7 @@ class CustomerOrderDetailView extends StatelessWidget {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: currentOrder.items.length,
-                      separatorBuilder: (_, __) => const Divider(height: 24),
+                      separatorBuilder: (_, _) => const Divider(height: 24),
                       itemBuilder: (context, idx) {
                         final item = currentOrder.items[idx];
                         final imgUrl = item.productImageUrl;

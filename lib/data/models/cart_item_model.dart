@@ -8,7 +8,7 @@ class CartItemModel {
   final double priceSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   // Joined data
   final ProductModel? product;
 

@@ -58,9 +58,6 @@ class AdminBrandRepository {
   }
 
   Future<void> deleteBrand(String brandId) async {
-    await _client.rpc(
-      'admin_delete_brand',
-      params: {'p_brand_id': brandId},
-    );
+    await _client.rpc('admin_delete_brand', params: {'p_brand_id': brandId});
   }
 }

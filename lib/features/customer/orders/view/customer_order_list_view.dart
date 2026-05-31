@@ -18,9 +18,6 @@ class CustomerOrderListView extends StatefulWidget {
 }
 
 class _CustomerOrderListViewState extends State<CustomerOrderListView> {
-  String _statusFilter = 'all';
-  String _searchQuery = '';
-
   late final Debounce _debounce;
   final _searchController = TextEditingController();
 
@@ -67,21 +64,6 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             return const AppLoading();
           }
 
-          // Lọc danh sách theo status và tìm kiếm
-          final filteredOrders = viewModel.orders.where((order) {
-            final matchesStatus =
-                _statusFilter == 'all' || order.status == _statusFilter;
-            final query = _searchQuery.trim().toLowerCase();
-            if (query.isEmpty) return matchesStatus;
-
-            final matchesCode = order.orderCode.toLowerCase().contains(query);
-            final matchesProduct = order.items.any(
-              (item) => item.productNameSnapshot.toLowerCase().contains(query),
-            );
-
-            return matchesStatus && (matchesCode || matchesProduct);
-          }).toList();
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -92,7 +74,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async => _refresh(),
-                  child: filteredOrders.isEmpty
+                  child: viewModel.orders.isEmpty
                       ? const Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -109,11 +91,11 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                         )
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),
-                          itemCount: filteredOrders.length,
+                          itemCount: viewModel.orders.length,
                           separatorBuilder: (_, _) =>
                               const SizedBox(height: 16),
                           itemBuilder: (context, index) {
-                            final order = filteredOrders[index];
+                            final order = viewModel.orders[index];
                             return _OrderCard(
                               order: order,
                               userId: userId,
@@ -123,6 +105,8 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                         ),
                 ),
               ),
+              if (viewModel.orders.isNotEmpty)
+                _PaginationFooter(viewModel: viewModel, userId: userId),
             ],
           );
         },
@@ -156,13 +140,11 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
               controller: _searchController,
               onChanged: (val) {
                 _debounce.run(() {
-                  setState(() {
-                    _searchQuery = val;
-                  });
+                  viewModel.setKeyword(val, userId);
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm mã đơn, sản phẩm...',
+                hintText: 'Tìm kiếm mã đơn...',
                 hintStyle: const TextStyle(
                   color: AppColors.detail,
                   fontSize: 13,
@@ -215,7 +197,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: _statusFilter,
+                value: viewModel.status,
                 icon: const Icon(
                   Icons.filter_list,
                   size: 18,
@@ -230,9 +212,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                 borderRadius: BorderRadius.circular(12),
                 onChanged: (String? newValue) {
                   if (newValue != null) {
-                    setState(() {
-                      _statusFilter = newValue;
-                    });
+                    viewModel.selectStatus(newValue, userId);
                   }
                 },
                 items: filters.map<DropdownMenuItem<String>>((filter) {
@@ -355,6 +335,50 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _PaginationFooter extends StatelessWidget {
+  final CustomerOrderListViewModel viewModel;
+  final String userId;
+
+  const _PaginationFooter({required this.viewModel, required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: viewModel.hasPreviousPage
+                ? () => viewModel.previousPage(userId)
+                : null,
+            icon: const Icon(Icons.chevron_left),
+            tooltip: 'Trang trước',
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'Trang ${viewModel.currentPage}/${viewModel.totalPages} '
+              '(${viewModel.totalCount} đơn hàng)',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: viewModel.hasNextPage
+                ? () => viewModel.nextPage(userId)
+                : null,
+            icon: const Icon(Icons.chevron_right),
+            tooltip: 'Trang sau',
+          ),
+        ],
       ),
     );
   }

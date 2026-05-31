@@ -159,7 +159,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final recentStringList = prefs.getStringList('recent_accounts') ?? [];
-      
+
       List<Map<String, dynamic>> accounts = recentStringList
           .map((s) => jsonDecode(s) as Map<String, dynamic>)
           .toList();

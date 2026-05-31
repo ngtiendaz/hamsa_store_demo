@@ -28,7 +28,9 @@ class CartModel {
       status: json['status'] as String? ?? 'active',
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      items: rawItems.map((item) => CartItemModel.fromJson(item as Map<String, dynamic>)).toList(),
+      items: rawItems
+          .map((item) => CartItemModel.fromJson(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 

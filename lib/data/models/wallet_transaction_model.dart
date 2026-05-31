@@ -2,7 +2,7 @@ enum WalletTransactionType {
   deposit,
   payment,
   refund,
-  manual_adjustment;
+  manualAdjustment;
 
   static WalletTransactionType fromString(String value) {
     switch (value) {
@@ -13,7 +13,7 @@ enum WalletTransactionType {
       case 'refund':
         return WalletTransactionType.refund;
       default:
-        return WalletTransactionType.manual_adjustment;
+        return WalletTransactionType.manualAdjustment;
     }
   }
 
@@ -25,7 +25,7 @@ enum WalletTransactionType {
         return 'payment';
       case WalletTransactionType.refund:
         return 'refund';
-      case WalletTransactionType.manual_adjustment:
+      case WalletTransactionType.manualAdjustment:
         return 'manual_adjustment';
     }
   }
@@ -38,7 +38,7 @@ enum WalletTransactionType {
         return 'Thanh toán';
       case WalletTransactionType.refund:
         return 'Hoàn tiền';
-      case WalletTransactionType.manual_adjustment:
+      case WalletTransactionType.manualAdjustment:
         return 'Rút tiền';
     }
   }
@@ -72,7 +72,8 @@ class WalletTransactionModel {
   });
 
   bool get isAdd {
-    return type == WalletTransactionType.deposit || type == WalletTransactionType.refund;
+    return type == WalletTransactionType.deposit ||
+        type == WalletTransactionType.refund;
   }
 
   factory WalletTransactionModel.fromJson(Map<String, dynamic> json) {

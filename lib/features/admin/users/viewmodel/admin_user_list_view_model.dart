@@ -16,6 +16,7 @@ class AdminUserListViewModel extends ChangeNotifier {
   int _currentPage = 1;
   final int _pageSize = 20;
   int _totalCount = 0;
+  int _requestVersion = 0;
 
   List<ProfileModel> get users => _users;
   bool get isLoading => _isLoading;
@@ -33,6 +34,7 @@ class AdminUserListViewModel extends ChangeNotifier {
 
   Future<void> loadUsers({bool refresh = false}) async {
     if (refresh) _currentPage = 1;
+    final requestVersion = ++_requestVersion;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -44,14 +46,19 @@ class AdminUserListViewModel extends ChangeNotifier {
         page: _currentPage,
         pageSize: _pageSize,
       );
+      if (requestVersion != _requestVersion) return;
       _users = result.items;
       _totalCount = result.totalCount;
     } catch (error) {
-      _errorMessage = 'Không thể tải danh sách người dùng.';
-      debugPrint('Error loading users: $error');
+      if (requestVersion == _requestVersion) {
+        _errorMessage = 'Không thể tải danh sách người dùng.';
+        debugPrint('Error loading users: $error');
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestVersion == _requestVersion) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -101,6 +108,7 @@ class AdminUserListViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _requestVersion++;
     _debounce.dispose();
     super.dispose();
   }

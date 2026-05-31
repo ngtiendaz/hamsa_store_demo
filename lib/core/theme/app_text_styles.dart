@@ -47,7 +47,7 @@ class AppTextStyles {
     letterSpacing: 0.6,
     color: AppColors.detail,
   );
-  
+
   static const TextStyle button = TextStyle(
     fontFamily: 'Inter',
     fontSize: 16,

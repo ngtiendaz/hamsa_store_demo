@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'web_image_stub.dart'
-    if (dart.library.html) 'web_image_web.dart';
+import 'web_image_stub.dart' if (dart.library.html) 'web_image_web.dart';
 
 Widget buildWebImage({
   required String imageUrl,

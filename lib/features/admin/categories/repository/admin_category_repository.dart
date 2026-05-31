@@ -26,8 +26,9 @@ class AdminCategoryRepository {
     final List<dynamic> data = response.data;
     final int count = response.count;
 
-    final categories =
-        data.map((json) => CategoryModel.fromJson(json)).toList();
+    final categories = data
+        .map((json) => CategoryModel.fromJson(json))
+        .toList();
 
     return PaginationResult<CategoryModel>(
       items: categories,
@@ -46,11 +47,14 @@ class AdminCategoryRepository {
   }
 
   Future<void> updateCategory(CategoryModel category) async {
-    await _client.from('categories').update({
-      'name': category.name.trim(),
-      'description': category.description?.trim(),
-      'is_active': category.isActive,
-    }).eq('id', category.id);
+    await _client
+        .from('categories')
+        .update({
+          'name': category.name.trim(),
+          'description': category.description?.trim(),
+          'is_active': category.isActive,
+        })
+        .eq('id', category.id);
   }
 
   Future<void> deleteCategory(String categoryId) async {

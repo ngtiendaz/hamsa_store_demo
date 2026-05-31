@@ -7,11 +7,13 @@ class OrderModel {
   final String customerName;
   final String? customerPhone;
   final String? customerAddress;
-  final String status; // 'pending_confirmation', 'confirmed', 'shipping', 'delivered', 'delivery_failed', 'cancelled', 'return_requested', 'returned'
+  final String
+  status; // 'pending_confirmation', 'confirmed', 'shipping', 'delivered', 'delivery_failed', 'cancelled', 'return_requested', 'returned'
   final double totalAmount;
   final String? note;
   final String paymentMethod; // 'wallet', 'cash', 'bank_transfer'
-  final String paymentStatus; // 'unpaid', 'paid', 'refunded', 'partially_refunded'
+  final String
+  paymentStatus; // 'unpaid', 'paid', 'refunded', 'partially_refunded'
   final String? createdBy;
   final String? confirmedBy;
   final String? shippedBy;
@@ -116,7 +118,9 @@ class OrderModel {
           : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      items: rawItems.map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>)).toList(),
+      items: rawItems
+          .map((item) => OrderItemModel.fromJson(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 

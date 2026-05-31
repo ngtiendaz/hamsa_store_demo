@@ -19,9 +19,10 @@ class AdminOrderListViewModel extends ChangeNotifier {
   String _status = 'all';
   DateTime? _startDate;
   DateTime? _endDate;
+  int _requestVersion = 0;
 
   AdminOrderListViewModel({AdminOrderDataSource? orderRepository})
-      : _orderRepository = orderRepository ?? AdminOrderRepository();
+    : _orderRepository = orderRepository ?? AdminOrderRepository();
 
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
@@ -85,26 +86,33 @@ class AdminOrderListViewModel extends ChangeNotifier {
     if (refresh) {
       _currentPage = 1;
     }
+    final requestVersion = ++_requestVersion;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final PaginationResult<OrderModel> result = await _orderRepository.getAllOrders(
-        keyword: _keyword.trim(),
-        status: _status,
-        startDate: _startDate,
-        endDate: _endDate,
-        page: _currentPage,
-        pageSize: _pageSize,
-      );
+      final PaginationResult<OrderModel> result = await _orderRepository
+          .getAllOrders(
+            keyword: _keyword.trim(),
+            status: _status,
+            startDate: _startDate,
+            endDate: _endDate,
+            page: _currentPage,
+            pageSize: _pageSize,
+          );
+      if (requestVersion != _requestVersion) return;
       _orders = result.items;
       _totalCount = result.totalCount;
     } catch (e) {
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      if (requestVersion == _requestVersion) {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (requestVersion == _requestVersion) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -236,6 +244,7 @@ class AdminOrderListViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _requestVersion++;
     _debounce.dispose();
     super.dispose();
   }

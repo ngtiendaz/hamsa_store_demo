@@ -305,8 +305,8 @@ class _RoleChip extends StatelessWidget {
       color: role == 'admin'
           ? const Color(0xFF5B21B6)
           : (role == 'employee'
-              ? const Color(0xFF1D4ED8)
-              : const Color(0xFF0F8644)),
+                ? const Color(0xFF1D4ED8)
+                : const Color(0xFF0F8644)),
     );
   }
 }

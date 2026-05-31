@@ -80,7 +80,7 @@ class _LoginViewState extends State<LoginView> {
         border: Border.all(color: AppColors.surface, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -162,7 +162,10 @@ class _LoginViewState extends State<LoginView> {
             if (_recentAccounts.isNotEmpty) ...[
               Text('TÀI KHOẢN ĐĂNG NHẬP GẦN ĐÂY', style: AppTextStyles.labelMd),
               const SizedBox(height: 12),
-              ..._recentAccounts.map((account) => _buildRecentAccountItem(context, account, viewModel)),
+              ..._recentAccounts.map(
+                (account) =>
+                    _buildRecentAccountItem(context, account, viewModel),
+              ),
               const SizedBox(height: 20),
             ],
             AppTextField(
@@ -201,10 +204,7 @@ class _LoginViewState extends State<LoginView> {
                 const SizedBox(width: 8),
                 const Text(
                   'Ghi nhớ đăng nhập',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.onSurface,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.onSurface),
                 ),
               ],
             ),
@@ -276,13 +276,17 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildRecentAccountItem(BuildContext context, ProfileModel account, LoginViewModel viewModel) {
+  Widget _buildRecentAccountItem(
+    BuildContext context,
+    ProfileModel account,
+    LoginViewModel viewModel,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
       ),
       child: InkWell(
         onTap: () {
@@ -300,11 +304,16 @@ class _LoginViewState extends State<LoginView> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 radius: 20,
-                backgroundImage: account.avatarUrl != null && account.avatarUrl!.isNotEmpty
+                backgroundImage:
+                    account.avatarUrl != null && account.avatarUrl!.isNotEmpty
                     ? NetworkImage(account.avatarUrl!)
                     : null,
                 child: account.avatarUrl == null || account.avatarUrl!.isEmpty
-                    ? Text(account.name.isNotEmpty ? account.name[0].toUpperCase() : 'U')
+                    ? Text(
+                        account.name.isNotEmpty
+                            ? account.name[0].toUpperCase()
+                            : 'U',
+                      )
                     : null,
               ),
               const SizedBox(width: 12),
@@ -314,7 +323,9 @@ class _LoginViewState extends State<LoginView> {
                   children: [
                     Text(
                       account.name,
-                      style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyMd.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -328,9 +339,16 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, size: 18, color: AppColors.detail),
+                icon: const Icon(
+                  Icons.close,
+                  size: 18,
+                  color: AppColors.detail,
+                ),
                 onPressed: () async {
-                  final authVM = Provider.of<AuthViewModel>(context, listen: false);
+                  final authVM = Provider.of<AuthViewModel>(
+                    context,
+                    listen: false,
+                  );
                   await authVM.removeRecentAccount(account.email);
                   _loadRecentAccounts();
                 },

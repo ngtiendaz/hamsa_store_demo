@@ -15,16 +15,16 @@ class AdminProductRepository {
     int page = 1,
     int pageSize = 20,
   }) async {
-    var query = _client
-        .from('products')
-        .select('*, product_images(image_url)');
+    var query = _client.from('products').select('*, product_images(image_url)');
 
     // Exclude hard-deleted items
     query = query.isFilter('deleted_at', null);
 
     if (keyword != null && keyword.trim().isNotEmpty) {
       final k = '%${keyword.trim()}%';
-      query = query.or('internal_name.ilike.$k,trade_name.ilike.$k,barcode.ilike.$k');
+      query = query.or(
+        'internal_name.ilike.$k,trade_name.ilike.$k,barcode.ilike.$k',
+      );
     }
 
     if (categoryId != null && categoryId.isNotEmpty) {
@@ -57,7 +57,11 @@ class AdminProductRepository {
   }
 
   Future<ProductModel> createProduct(Map<String, dynamic> data) async {
-    final response = await _client.from('products').insert(data).select().single();
+    final response = await _client
+        .from('products')
+        .insert(data)
+        .select()
+        .single();
     return ProductModel.fromJson(response);
   }
 
@@ -75,7 +79,9 @@ class AdminProductRepository {
 
   Future<String> uploadProductImage(String fileName, Uint8List bytes) async {
     final path = 'uploads/$fileName';
-    await _client.storage.from('product-images').uploadBinary(
+    await _client.storage
+        .from('product-images')
+        .uploadBinary(
           path,
           bytes,
           fileOptions: const FileOptions(upsert: true),
@@ -84,7 +90,10 @@ class AdminProductRepository {
     return publicUrl;
   }
 
-  Future<void> saveProductImages(String productId, List<String> imageUrls) async {
+  Future<void> saveProductImages(
+    String productId,
+    List<String> imageUrls,
+  ) async {
     // Xóa tất cả ảnh hiện có của sản phẩm này
     await _client.from('product_images').delete().eq('product_id', productId);
     // Chèn lại toàn bộ danh sách

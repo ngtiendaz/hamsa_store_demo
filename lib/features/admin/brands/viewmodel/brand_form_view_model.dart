@@ -36,7 +36,10 @@ class BrandFormViewModel extends ChangeNotifier {
     final logoUrlChanged =
         (_logoUrl ?? '').trim() != (_brand!.logoUrl ?? '').trim();
     final isActiveChanged = _isActive != _brand!.isActive;
-    return nameChanged || descriptionChanged || logoUrlChanged || isActiveChanged;
+    return nameChanged ||
+        descriptionChanged ||
+        logoUrlChanged ||
+        isActiveChanged;
   }
 
   void init(BrandModel? brand) {

@@ -537,7 +537,7 @@ class AdminOrderDetailView extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const Divider(height: 16),
+              separatorBuilder: (_, _) => const Divider(height: 16),
               itemBuilder: (context, idx) {
                 final item = items[idx];
                 return Row(
@@ -678,9 +678,9 @@ class AdminOrderDetailView extends StatelessWidget {
       width: 140,
       padding: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Text(

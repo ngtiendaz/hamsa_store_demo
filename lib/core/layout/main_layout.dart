@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
-import '../../features/user/auth/viewmodel/auth_viewmodel.dart';
+import '../../features/login/auth/viewmodel/auth_viewmodel.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;

@@ -7,7 +7,7 @@ import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/utils/debounce.dart';
 import '../../../../core/utils/formatters.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/customer_order_list_view_model.dart';
 
 class CustomerOrderListView extends StatefulWidget {
@@ -18,7 +18,7 @@ class CustomerOrderListView extends StatefulWidget {
 }
 
 class _CustomerOrderListViewState extends State<CustomerOrderListView> {
-  String _statusFilter = 'all'; 
+  String _statusFilter = 'all';
   String _searchQuery = '';
 
   late final Debounce _debounce;
@@ -69,13 +69,15 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
 
           // Lọc danh sách theo status và tìm kiếm
           final filteredOrders = viewModel.orders.where((order) {
-            final matchesStatus = _statusFilter == 'all' || order.status == _statusFilter;
+            final matchesStatus =
+                _statusFilter == 'all' || order.status == _statusFilter;
             final query = _searchQuery.trim().toLowerCase();
             if (query.isEmpty) return matchesStatus;
 
             final matchesCode = order.orderCode.toLowerCase().contains(query);
-            final matchesProduct = order.items.any((item) =>
-                item.productNameSnapshot.toLowerCase().contains(query));
+            final matchesProduct = order.items.any(
+              (item) => item.productNameSnapshot.toLowerCase().contains(query),
+            );
 
             return matchesStatus && (matchesCode || matchesProduct);
           }).toList();
@@ -85,17 +87,21 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             children: [
               // Search & Filter header
               _buildHeader(viewModel, userId),
-              
+
               // Main Content
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async => _refresh(),
                   child: filteredOrders.isEmpty
-                       ? const Center(
+                      ? const Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.receipt_long_outlined, size: 56, color: AppColors.detail),
+                              Icon(
+                                Icons.receipt_long_outlined,
+                                size: 56,
+                                color: AppColors.detail,
+                              ),
                               SizedBox(height: 12),
                               Text('Không tìm thấy đơn hàng nào.'),
                             ],
@@ -104,7 +110,8 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: filteredOrders.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 16),
                           itemBuilder: (context, index) {
                             final order = filteredOrders[index];
                             return _OrderCard(
@@ -141,7 +148,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isLarge = constraints.maxWidth >= 700;
-          
+
           final searchField = SizedBox(
             width: isLarge ? 320 : double.infinity,
             height: 40,
@@ -156,23 +163,42 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
               },
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm mã đơn, sản phẩm...',
-                hintStyle: const TextStyle(color: AppColors.detail, fontSize: 13),
-                prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.detail),
+                hintStyle: const TextStyle(
+                  color: AppColors.detail,
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 18,
+                  color: AppColors.detail,
+                ),
                 fillColor: AppColors.surface,
                 filled: true,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.border,
+                    width: 1.0,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.border,
+                    width: 1.0,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.0),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -190,8 +216,16 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _statusFilter,
-                icon: const Icon(Icons.filter_list, size: 18, color: AppColors.detail),
-                style: const TextStyle(color: AppColors.onSurface, fontSize: 13, fontWeight: FontWeight.w500),
+                icon: const Icon(
+                  Icons.filter_list,
+                  size: 18,
+                  color: AppColors.detail,
+                ),
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
                 dropdownColor: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 onChanged: (String? newValue) {
@@ -225,8 +259,12 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                   context: context,
                   firstDate: DateTime(2020),
                   lastDate: DateTime.now().add(const Duration(days: 365)),
-                  initialDateRange: viewModel.startDate != null && viewModel.endDate != null
-                      ? DateTimeRange(start: viewModel.startDate!, end: viewModel.endDate!)
+                  initialDateRange:
+                      viewModel.startDate != null && viewModel.endDate != null
+                      ? DateTimeRange(
+                          start: viewModel.startDate!,
+                          end: viewModel.endDate!,
+                        )
                       : null,
                   builder: (context, child) {
                     return Theme(
@@ -257,7 +295,11 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.date_range, size: 18, color: AppColors.detail),
+                  const Icon(
+                    Icons.date_range,
+                    size: 18,
+                    color: AppColors.detail,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     viewModel.startDate == null || viewModel.endDate == null
@@ -272,7 +314,11 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                   if (viewModel.startDate != null) ...[
                     const SizedBox(width: 4),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 14, color: AppColors.detail),
+                      icon: const Icon(
+                        Icons.close,
+                        size: 14,
+                        color: AppColors.detail,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () {
@@ -328,8 +374,12 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-    final double amountPaid = order.paymentStatus == 'paid' ? order.totalAmount : 0.0;
-    final double amountDue = order.paymentStatus == 'unpaid' ? order.totalAmount : 0.0;
+    final double amountPaid = order.paymentStatus == 'paid'
+        ? order.totalAmount
+        : 0.0;
+    final double amountDue = order.paymentStatus == 'unpaid'
+        ? order.totalAmount
+        : 0.0;
 
     Color statusColor;
     String statusText = order.statusLabel;
@@ -384,227 +434,307 @@ class _OrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            // Header: Code + Status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.orderCode,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        formatVietnamDateTime(order.createdAt),
-                        style: const TextStyle(color: AppColors.detail, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Items List
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: order.items.length,
-              separatorBuilder: (_, __) => const Divider(height: 16),
-              itemBuilder: (context, idx) {
-                final item = order.items[idx];
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.productNameSnapshot,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Header: Code + Status
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Đơn giá: ${currencyFormat.format(item.priceSnapshot)}',
-                          style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                          order.orderCode,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          'Số lượng: ${item.quantity}',
-                          style: const TextStyle(color: AppColors.detail, fontSize: 13),
-                        ),
-                        Text(
-                          'Thành tiền: ${currencyFormat.format(item.subtotal)}',
-                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                          formatVietnamDateTime(order.createdAt),
+                          style: const TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
-                  ],
-                );
-              },
-            ),
-            const Divider(height: 24),
-
-            // Shipping Info
-            Row(
-              children: [
-                const Icon(Icons.location_on_outlined, size: 16, color: AppColors.detail),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Giao đến: ${order.customerAddress ?? "Chưa nhập địa chỉ"}',
-                    style: const TextStyle(color: AppColors.detail, fontSize: 13),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            if (order.note != null && order.note!.trim().isNotEmpty) ...[
-              const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      statusText,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+
+              // Items List
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: order.items.length,
+                separatorBuilder: (_, _) => const Divider(height: 16),
+                itemBuilder: (context, idx) {
+                  final item = order.items[idx];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.productNameSnapshot,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            'Đơn giá: ${currencyFormat.format(item.priceSnapshot)}',
+                            style: const TextStyle(
+                              color: AppColors.detail,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            'Số lượng: ${item.quantity}',
+                            style: const TextStyle(
+                              color: AppColors.detail,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            'Thành tiền: ${currencyFormat.format(item.subtotal)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const Divider(height: 24),
+
+              // Shipping Info
               Row(
                 children: [
-                  const Icon(Icons.note_alt_outlined, size: 16, color: AppColors.detail),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 16,
+                    color: AppColors.detail,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Ghi chú: ${order.note}',
-                      style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                      'Giao đến: ${order.customerAddress ?? "Chưa nhập địa chỉ"}',
+                      style: const TextStyle(
+                        color: AppColors.detail,
+                        fontSize: 13,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-            ],
-            const Divider(height: 24),
-
-            // Footer: Payment Method + Total
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  order.paymentMethod == 'wallet'
-                      ? 'Thanh toán qua HamsaPay'
-                      : 'Thanh toán khi nhận hàng (COD)',
-                  style: const TextStyle(color: AppColors.detail, fontSize: 13),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+              if (order.note != null && order.note!.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
                   children: [
-                    Text(
-                      'Đã thanh toán: ${currencyFormat.format(amountPaid)}',
-                      style: const TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.w500),
+                    const Icon(
+                      Icons.note_alt_outlined,
+                      size: 16,
+                      color: AppColors.detail,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Cần thanh toán: ${currencyFormat.format(amountDue)}',
-                      style: const TextStyle(
-                        color: AppColors.error,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Ghi chú: ${order.note}',
+                        style: const TextStyle(
+                          color: AppColors.detail,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ],
-            ),
-
-            // Actions Buttons
-            if (order.status == 'pending_confirmation' ||
-                order.status == 'cancel_requested' ||
-                order.status == 'delivered' ||
-                order.status == 'return_requested') ...[
               const Divider(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (order.status == 'pending_confirmation') ...[
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: const BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () => _showUpdateDialog(context),
-                      child: const Text('Cập nhật'),
+
+              // Footer: Payment Method + Total
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final paymentMethod = Text(
+                    order.paymentMethod == 'wallet'
+                        ? 'Thanh toán qua HamsaPay'
+                        : 'Thanh toán khi nhận hàng (COD)',
+                    style: const TextStyle(
+                      color: AppColors.detail,
+                      fontSize: 13,
                     ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.error,
-                        side: const BorderSide(color: AppColors.error),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  );
+                  final totals = Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Đã thanh toán: ${currencyFormat.format(amountPaid)}',
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      onPressed: () => _showCancelDialog(context),
-                      child: const Text('Yêu cầu hủy'),
-                    ),
-                  ],
-                  if (order.status == 'cancel_requested')
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Cần thanh toán: ${currencyFormat.format(amountDue)}',
+                        textAlign: TextAlign.end,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      onPressed: () => _onWithdrawCancel(context),
-                      child: const Text('Rút yêu cầu hủy'),
-                    ),
-                  if (order.status == 'delivered')
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.orange,
-                        side: const BorderSide(color: Colors.orange),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () => _showReturnDialog(context),
-                      child: const Text('Yêu cầu đổi trả'),
-                    ),
-                  if (order.status == 'return_requested')
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () => _showCancelReturnDialog(context),
-                      child: const Text('Hủy yêu cầu hoàn trả'),
-                    ),
-                ],
+                    ],
+                  );
+
+                  if (constraints.maxWidth < 520) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        paymentMethod,
+                        const SizedBox(height: 8),
+                        totals,
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      paymentMethod,
+                      const SizedBox(width: 16),
+                      totals,
+                    ],
+                  );
+                },
               ),
+
+              // Actions Buttons
+              if (order.status == 'pending_confirmation' ||
+                  order.status == 'cancel_requested' ||
+                  order.status == 'delivered' ||
+                  order.status == 'return_requested') ...[
+                const Divider(height: 24),
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (order.status == 'pending_confirmation') ...[
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _showUpdateDialog(context),
+                        child: const Text('Cập nhật'),
+                      ),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: AppColors.error),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _showCancelDialog(context),
+                        child: const Text('Yêu cầu hủy'),
+                      ),
+                    ],
+                    if (order.status == 'cancel_requested')
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _onWithdrawCancel(context),
+                        child: const Text('Rút yêu cầu hủy'),
+                      ),
+                    if (order.status == 'delivered')
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.orange,
+                          side: const BorderSide(color: Colors.orange),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _showReturnDialog(context),
+                        child: const Text('Yêu cầu đổi trả'),
+                      ),
+                    if (order.status == 'return_requested')
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => _showCancelReturnDialog(context),
+                        child: const Text('Hủy yêu cầu hoàn trả'),
+                      ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   void _showUpdateDialog(BuildContext context) {
     final nameController = TextEditingController(text: order.customerName);
     final phoneController = TextEditingController(text: order.customerPhone);
-    final addressController = TextEditingController(text: order.customerAddress);
+    final addressController = TextEditingController(
+      text: order.customerAddress,
+    );
     final noteController = TextEditingController(text: order.note ?? '');
 
     showDialog(
@@ -655,7 +785,10 @@ class _OrderCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -665,7 +798,10 @@ class _OrderCard extends StatelessWidget {
               final note = noteController.text.trim();
 
               if (name.isEmpty || phone.isEmpty || address.isEmpty) {
-                AppToast.showError(context, 'Họ tên, SĐT và địa chỉ là bắt buộc.');
+                AppToast.showError(
+                  context,
+                  'Họ tên, SĐT và địa chỉ là bắt buộc.',
+                );
                 return;
               }
 
@@ -680,13 +816,22 @@ class _OrderCard extends StatelessWidget {
               );
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Cập nhật thông tin đơn hàng thành công.');
+                  AppToast.showSuccess(
+                    context,
+                    'Cập nhật thông tin đơn hàng thành công.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Lưu lại', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Lưu lại',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -698,25 +843,42 @@ class _OrderCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Hủy yêu cầu hoàn trả'),
-        content: const Text('Bạn có chắc chắn muốn hủy yêu cầu hoàn trả cho đơn hàng này để đưa về trạng thái giao thành công không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn hủy yêu cầu hoàn trả cho đơn hàng này để đưa về trạng thái giao thành công không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(ctx).pop();
-              final success = await viewModel.cancelRequestReturn(order.id, userId);
+              final success = await viewModel.cancelRequestReturn(
+                order.id,
+                userId,
+              );
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Đã hủy yêu cầu hoàn trả thành công.');
+                  AppToast.showSuccess(
+                    context,
+                    'Đã hủy yêu cầu hoàn trả thành công.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Đồng ý', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Đồng ý',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -728,11 +890,16 @@ class _OrderCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Yêu cầu hủy đơn hàng'),
-        content: const Text('Bạn có chắc chắn muốn gửi yêu cầu hủy đơn hàng này không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn gửi yêu cầu hủy đơn hàng này không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -746,7 +913,13 @@ class _OrderCard extends StatelessWidget {
                 }
               }
             },
-            child: const Text('Gửi yêu cầu', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Gửi yêu cầu',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -758,11 +931,16 @@ class _OrderCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Yêu cầu đổi trả đơn hàng'),
-        content: const Text('Bạn có chắc chắn muốn gửi yêu cầu đổi trả cho đơn hàng này không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn gửi yêu cầu đổi trả cho đơn hàng này không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -770,13 +948,22 @@ class _OrderCard extends StatelessWidget {
               final success = await viewModel.requestReturn(order.id, userId);
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Đã gửi yêu cầu đổi trả đơn hàng.');
+                  AppToast.showSuccess(
+                    context,
+                    'Đã gửi yêu cầu đổi trả đơn hàng.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Gửi yêu cầu', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Gửi yêu cầu',
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

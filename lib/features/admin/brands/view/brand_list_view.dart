@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../viewmodel/brand_list_view_model.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loading.dart';
@@ -315,7 +315,7 @@ class _BrandListViewState extends State<BrandListView> {
                     Row(
                       children: [
                         if (brand.logoUrl != null &&
-                                                            brand.logoUrl!.trim().isNotEmpty) ...[
+                            brand.logoUrl!.trim().isNotEmpty) ...[
                           AppNetworkImage(
                             imageUrl: brand.logoUrl!,
                             width: 24,

@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/admin_order_list_view_model.dart';
 
 class AdminOrderListView extends StatefulWidget {
@@ -39,7 +39,9 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     super.initState();
     final initialStatus = _normalizeStatusFilter(widget.initialStatus);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminOrderListViewModel>().initFilters(status: initialStatus);
+      context.read<AdminOrderListViewModel>().initFilters(
+        status: initialStatus,
+      );
     });
   }
 
@@ -266,8 +268,12 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   context: context,
                   firstDate: DateTime(2020),
                   lastDate: DateTime.now().add(const Duration(days: 365)),
-                  initialDateRange: viewModel.startDate != null && viewModel.endDate != null
-                      ? DateTimeRange(start: viewModel.startDate!, end: viewModel.endDate!)
+                  initialDateRange:
+                      viewModel.startDate != null && viewModel.endDate != null
+                      ? DateTimeRange(
+                          start: viewModel.startDate!,
+                          end: viewModel.endDate!,
+                        )
                       : null,
                   builder: (context, child) {
                     return Theme(
@@ -298,7 +304,11 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.date_range, size: 18, color: AppColors.detail),
+                  const Icon(
+                    Icons.date_range,
+                    size: 18,
+                    color: AppColors.detail,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     viewModel.startDate == null || viewModel.endDate == null
@@ -313,7 +323,11 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   if (viewModel.startDate != null) ...[
                     const SizedBox(width: 4),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 14, color: AppColors.detail),
+                      icon: const Icon(
+                        Icons.close,
+                        size: 14,
+                        color: AppColors.detail,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () {
@@ -361,7 +375,9 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           IconButton(
-            onPressed: viewModel.hasPreviousPage ? viewModel.previousPage : null,
+            onPressed: viewModel.hasPreviousPage
+                ? viewModel.previousPage
+                : null,
             icon: const Icon(Icons.chevron_left),
           ),
           Text('Trang ${viewModel.currentPage}/${viewModel.totalPages}'),

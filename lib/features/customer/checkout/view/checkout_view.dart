@@ -7,7 +7,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/widgets/app_network_image.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/checkout_view_model.dart';
 import '../../cart/viewmodel/customer_cart_view_model.dart';
 
@@ -35,7 +35,9 @@ class _CheckoutViewState extends State<CheckoutView> {
     }
     _nameController = TextEditingController(text: checkoutVM.customerName);
     _phoneController = TextEditingController(text: checkoutVM.customerPhone);
-    _addressController = TextEditingController(text: checkoutVM.customerAddress);
+    _addressController = TextEditingController(
+      text: checkoutVM.customerAddress,
+    );
     _noteController = TextEditingController(text: checkoutVM.note);
   }
 
@@ -51,7 +53,7 @@ class _CheckoutViewState extends State<CheckoutView> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Consumer3<AuthViewModel, CustomerCartViewModel, CheckoutViewModel>(
@@ -67,7 +69,11 @@ class _CheckoutViewState extends State<CheckoutView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.shopping_cart_checkout, size: 64, color: AppColors.detail),
+                  const Icon(
+                    Icons.shopping_cart_checkout,
+                    size: 64,
+                    color: AppColors.detail,
+                  ),
                   const SizedBox(height: 12),
                   const Text('Không có sản phẩm nào được chọn thanh toán.'),
                   const SizedBox(height: 16),
@@ -81,16 +87,24 @@ class _CheckoutViewState extends State<CheckoutView> {
           }
 
           final totalAmount = cartVM.selectedTotalAmount;
-          final totalQty = selectedEntries.fold<int>(0, (sum, e) => sum + e.quantity);
+          final totalQty = selectedEntries.fold<int>(
+            0,
+            (sum, e) => sum + e.quantity,
+          );
 
           return Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 12, bottom: 120),
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 12,
+                  bottom: 120,
+                ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final isDesktop = constraints.maxWidth >= 900;
-                    
+
                     final contentWidgets = [
                       // 1. Tóm tắt sản phẩm
                       _SectionContainer(
@@ -99,7 +113,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: selectedEntries.length,
-                          separatorBuilder: (_, __) => const Divider(height: 20),
+                          separatorBuilder: (_, __) =>
+                              const Divider(height: 20),
                           itemBuilder: (context, index) {
                             final entry = selectedEntries[index];
                             return Row(
@@ -118,31 +133,44 @@ class _CheckoutViewState extends State<CheckoutView> {
                                       width: 60,
                                       height: 60,
                                       color: AppColors.surface,
-                                      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                      child: const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: AppColors.detail,
+                                      ),
                                     ),
                                     errorWidget: Container(
                                       width: 60,
                                       height: 60,
                                       color: AppColors.surface,
-                                      child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                      child: const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: AppColors.detail,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         entry.product.displayName,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'Số lượng: ${entry.quantity}',
-                                        style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                                        style: const TextStyle(
+                                          color: AppColors.detail,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -150,14 +178,17 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 const SizedBox(width: 12),
                                 Text(
                                   currencyFormat.format(entry.subtotal),
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ],
                             );
                           },
                         ),
                       ),
-                      
+
                       // 2. Thông tin giao hàng
                       _SectionContainer(
                         title: 'Thông tin giao hàng',
@@ -186,7 +217,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                               AppTextField(
                                 label: 'Địa chỉ nhận hàng *',
                                 controller: _addressController,
-                                hintText: 'Nhập địa chỉ nhà, tên đường, phường/xã, quận/huyện...',
+                                hintText:
+                                    'Nhập địa chỉ nhà, tên đường, phường/xã, quận/huyện...',
                                 onChanged: checkoutVM.setCustomerAddress,
                                 showBorder: true,
                               ),
@@ -194,7 +226,8 @@ class _CheckoutViewState extends State<CheckoutView> {
                               AppTextField(
                                 label: 'Ghi chú (Tùy chọn)',
                                 controller: _noteController,
-                                hintText: 'Lưu ý cho shipper, thời gian nhận hàng...',
+                                hintText:
+                                    'Lưu ý cho shipper, thời gian nhận hàng...',
                                 maxLines: 3,
                                 onChanged: checkoutVM.setNote,
                                 showBorder: true,
@@ -203,7 +236,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                           ),
                         ),
                       ),
-                      
+
                       // 3. Phương thức thanh toán
                       _SectionContainer(
                         title: 'Phương thức thanh toán',
@@ -212,25 +245,35 @@ class _CheckoutViewState extends State<CheckoutView> {
                             RadioListTile<String>(
                               value: 'wallet',
                               groupValue: checkoutVM.paymentMethod,
-                              onChanged: (val) => checkoutVM.setPaymentMethod(val!),
+                              onChanged: (val) =>
+                                  checkoutVM.setPaymentMethod(val!),
                               activeColor: AppColors.primary,
-                              title: const Text('Ví điện tử HamsaPay', style: TextStyle(fontWeight: FontWeight.bold)),
+                              title: const Text(
+                                'Ví điện tử HamsaPay',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               subtitle: checkoutVM.isLoadingWallet
                                   ? const Align(
                                       alignment: Alignment.centerLeft,
                                       child: SizedBox(
                                         width: 14,
                                         height: 14,
-                                        child: CircularProgressIndicator(strokeWidth: 1.5),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1.5,
+                                        ),
                                       ),
                                     )
                                   : Text(
                                       'Số dư khả dụng: ${currencyFormat.format(checkoutVM.walletBalance)}',
                                       style: TextStyle(
-                                        color: checkoutVM.walletBalance < totalAmount
+                                        color:
+                                            checkoutVM.walletBalance <
+                                                totalAmount
                                             ? AppColors.error
                                             : AppColors.detail,
-                                        fontWeight: checkoutVM.walletBalance < totalAmount
+                                        fontWeight:
+                                            checkoutVM.walletBalance <
+                                                totalAmount
                                             ? FontWeight.bold
                                             : FontWeight.normal,
                                       ),
@@ -240,20 +283,33 @@ class _CheckoutViewState extends State<CheckoutView> {
                                 !checkoutVM.isLoadingWallet &&
                                 checkoutVM.walletBalance < totalAmount)
                               Padding(
-                                padding: const EdgeInsets.only(left: 24, right: 16, bottom: 8),
+                                padding: const EdgeInsets.only(
+                                  left: 24,
+                                  right: 16,
+                                  bottom: 8,
+                                ),
                                 child: Text(
                                   'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức thanh toán COD.',
-                                  style: TextStyle(color: AppColors.error, fontSize: 12),
+                                  style: TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             const Divider(height: 1),
                             RadioListTile<String>(
                               value: 'cash',
                               groupValue: checkoutVM.paymentMethod,
-                              onChanged: (val) => checkoutVM.setPaymentMethod(val!),
+                              onChanged: (val) =>
+                                  checkoutVM.setPaymentMethod(val!),
                               activeColor: AppColors.primary,
-                              title: const Text('Thanh toán sau khi nhận hàng (COD)', style: TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: const Text('Thanh toán bằng tiền mặt khi shipper giao hàng.'),
+                              title: const Text(
+                                'Thanh toán sau khi nhận hàng (COD)',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: const Text(
+                                'Thanh toán bằng tiền mặt khi shipper giao hàng.',
+                              ),
                             ),
                           ],
                         ),
@@ -296,12 +352,15 @@ class _CheckoutViewState extends State<CheckoutView> {
                   },
                 ),
               ),
-              
+
               // Bottom Action Bar
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -311,7 +370,9 @@ class _CheckoutViewState extends State<CheckoutView> {
                         offset: const Offset(0, -4),
                       ),
                     ],
-                    border: const Border(top: BorderSide(color: AppColors.border)),
+                    border: const Border(
+                      top: BorderSide(color: AppColors.border),
+                    ),
                   ),
                   child: SafeArea(
                     child: Row(
@@ -321,7 +382,14 @@ class _CheckoutViewState extends State<CheckoutView> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('TỔNG THANH TOÁN', style: TextStyle(color: AppColors.detail, fontSize: 11, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'TỔNG THANH TOÁN',
+                              style: TextStyle(
+                                color: AppColors.detail,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               currencyFormat.format(totalAmount),
@@ -338,9 +406,17 @@ class _CheckoutViewState extends State<CheckoutView> {
                           child: AppButton(
                             text: 'Xác nhận đặt hàng',
                             isLoading: checkoutVM.isLoading,
-                            onPressed: (checkoutVM.paymentMethod == 'wallet' && checkoutVM.walletBalance < totalAmount)
+                            onPressed:
+                                (checkoutVM.paymentMethod == 'wallet' &&
+                                    checkoutVM.walletBalance < totalAmount)
                                 ? null
-                                : () => _onOrderSubmit(context, checkoutVM, profile.id, selectedEntries, cartVM),
+                                : () => _onOrderSubmit(
+                                    context,
+                                    checkoutVM,
+                                    profile.id,
+                                    selectedEntries,
+                                    cartVM,
+                                  ),
                           ),
                         ),
                       ],
@@ -348,7 +424,7 @@ class _CheckoutViewState extends State<CheckoutView> {
                   ),
                 ),
               ),
-              
+
               if (checkoutVM.isLoading)
                 const Opacity(
                   opacity: 0.3,
@@ -389,7 +465,7 @@ class _CheckoutViewState extends State<CheckoutView> {
       // Reload giỏ hàng để xóa những items đã thanh toán
       await cartVM.loadCart();
       if (!context.mounted) return;
-      
+
       // Hiển thị thông báo thành công dialog
       _showSuccessDialog(context);
     } else if (checkoutVM.errorMessage != null) {
@@ -429,7 +505,10 @@ class _CheckoutViewState extends State<CheckoutView> {
               },
               child: const Text(
                 'Tiếp tục mua sắm',
-                style: TextStyle(color: AppColors.detail, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.detail,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             ElevatedButton(

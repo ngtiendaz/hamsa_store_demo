@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/profiles_model.dart';
-import '../../../user/profile/repository/profile_repository.dart';
+import '../../../login/profile/repository/profile_repository.dart';
 import '../../cart/viewmodel/customer_cart_view_model.dart';
 import '../../orders/repository/customer_order_repository.dart';
 
@@ -13,7 +13,7 @@ class CheckoutViewModel extends ChangeNotifier {
   String _customerAddress = '';
   String _note = '';
   String _paymentMethod = 'wallet'; // 'wallet' or 'cash'
-  
+
   bool _isLoading = false;
   bool _isLoadingWallet = false;
   double _walletBalance = 0.0;
@@ -23,15 +23,15 @@ class CheckoutViewModel extends ChangeNotifier {
   CheckoutViewModel({
     CustomerOrderDataSource? orderRepository,
     ProfileDataSource? profileRepository,
-  })  : _orderRepository = orderRepository ?? CustomerOrderRepository(),
-        _profileRepository = profileRepository ?? ProfileRepository();
+  }) : _orderRepository = orderRepository ?? CustomerOrderRepository(),
+       _profileRepository = profileRepository ?? ProfileRepository();
 
   String get customerName => _customerName;
   String get customerPhone => _customerPhone;
   String get customerAddress => _customerAddress;
   String get note => _note;
   String get paymentMethod => _paymentMethod;
-  
+
   bool get isLoading => _isLoading;
   bool get isLoadingWallet => _isLoadingWallet;
   double get walletBalance => _walletBalance;
@@ -48,7 +48,7 @@ class CheckoutViewModel extends ChangeNotifier {
     _successOrderId = null;
     _isLoading = false;
     _walletBalance = 0.0;
-    
+
     // Tải số dư ví
     loadWalletBalance(profile.id);
   }

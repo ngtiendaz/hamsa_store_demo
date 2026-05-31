@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../viewmodel/product_list_view_model.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/app_button.dart';

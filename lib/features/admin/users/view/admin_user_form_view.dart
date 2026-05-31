@@ -7,7 +7,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../data/models/profiles_model.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/admin_user_form_view_model.dart';
 
 class AdminUserFormView extends StatefulWidget {
@@ -80,7 +80,9 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                   if (isMobile)
                     Text(
                       viewModel.isEditing
-                          ? (isCustomer ? 'THÔNG TIN KHÁCH HÀNG' : 'THÔNG TIN NGƯỜI DÙNG')
+                          ? (isCustomer
+                                ? 'THÔNG TIN KHÁCH HÀNG'
+                                : 'THÔNG TIN NGƯỜI DÙNG')
                           : 'THÊM NGƯỜI DÙNG',
                       style: AppTextStyles.headlineMd.copyWith(fontSize: 18),
                     )
@@ -90,7 +92,9 @@ class _AdminUserFormViewState extends State<AdminUserFormView> {
                       children: [
                         Text(
                           viewModel.isEditing
-                              ? (isCustomer ? 'THÔNG TIN KHÁCH HÀNG' : 'THÔNG TIN NGƯỜI DÙNG')
+                              ? (isCustomer
+                                    ? 'THÔNG TIN KHÁCH HÀNG'
+                                    : 'THÔNG TIN NGƯỜI DÙNG')
                               : 'THÊM NGƯỜI DÙNG',
                           style: AppTextStyles.headlineMd.copyWith(
                             fontSize: 18,

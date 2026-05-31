@@ -224,28 +224,42 @@ class _PaginationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 12,
-        runSpacing: 8,
-        children: [
-          OutlinedButton.icon(
-            onPressed: isLoading ? null : onPrevious,
-            icon: const Icon(Icons.chevron_left),
-            label: const Text('Trước'),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isLoading ? null : onPrevious,
+                  icon: const Icon(Icons.chevron_left),
+                  label: const Text(''),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Trang $currentPage/$totalPages',
+                    maxLines: 1,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isLoading ? null : onNext,
+                  iconAlignment: IconAlignment.end,
+                  icon: const Icon(Icons.chevron_right),
+                  label: const Text(''),
+                ),
+              ),
+            ],
           ),
-          Text(
-            'Trang $currentPage/$totalPages ($totalCount sản phẩm)',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          OutlinedButton.icon(
-            onPressed: isLoading ? null : onNext,
-            iconAlignment: IconAlignment.end,
-            icon: const Icon(Icons.chevron_right),
-            label: const Text('Sau'),
-          ),
-        ],
+        ),
       ),
     );
   }

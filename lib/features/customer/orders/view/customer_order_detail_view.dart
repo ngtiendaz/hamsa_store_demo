@@ -6,7 +6,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_toast.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
-import '../../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/customer_order_list_view_model.dart';
 
 class CustomerOrderDetailView extends StatelessWidget {
@@ -35,9 +35,16 @@ class CustomerOrderDetailView extends StatelessWidget {
             orElse: () => order,
           );
 
-          final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
-          final double amountPaid = currentOrder.paymentStatus == 'paid' ? currentOrder.totalAmount : 0.0;
-          final double amountDue = currentOrder.paymentStatus == 'unpaid' ? currentOrder.totalAmount : 0.0;
+          final currencyFormat = NumberFormat.currency(
+            locale: 'vi_VN',
+            symbol: '₫',
+          );
+          final double amountPaid = currentOrder.paymentStatus == 'paid'
+              ? currentOrder.totalAmount
+              : 0.0;
+          final double amountDue = currentOrder.paymentStatus == 'unpaid'
+              ? currentOrder.totalAmount
+              : 0.0;
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -49,12 +56,26 @@ class CustomerOrderDetailView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildInfoRow('Mã đơn hàng', currentOrder.orderCode),
-                    _buildInfoRow('Ngày đặt', formatVietnamDateTime(currentOrder.createdAt)),
-                    _buildInfoRow('Phương thức thanh toán', currentOrder.paymentMethod == 'wallet' ? 'Ví HamsaPay' : 'COD'),
+                    _buildInfoRow(
+                      'Ngày đặt',
+                      formatVietnamDateTime(currentOrder.createdAt),
+                    ),
+                    _buildInfoRow(
+                      'Phương thức thanh toán',
+                      currentOrder.paymentMethod == 'wallet'
+                          ? 'Ví HamsaPay'
+                          : 'COD',
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Trạng thái đơn hàng', style: TextStyle(color: AppColors.detail, fontSize: 14)),
+                        const Text(
+                          'Trạng thái đơn hàng',
+                          style: TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 14,
+                          ),
+                        ),
                         _buildStatusBadge(currentOrder),
                       ],
                     ),
@@ -62,19 +83,25 @@ class CustomerOrderDetailView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Trạng thái thanh toán', style: TextStyle(color: AppColors.detail, fontSize: 14)),
+                        const Text(
+                          'Trạng thái thanh toán',
+                          style: TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 14,
+                          ),
+                        ),
                         Text(
                           currentOrder.paymentStatus == 'paid'
                               ? 'Đã thu tiền'
                               : currentOrder.paymentStatus == 'refunded'
-                                  ? 'Đã hoàn tiền'
-                                  : 'Chưa thu tiền',
+                              ? 'Đã hoàn tiền'
+                              : 'Chưa thu tiền',
                           style: TextStyle(
                             color: currentOrder.paymentStatus == 'paid'
                                 ? Colors.green
                                 : currentOrder.paymentStatus == 'refunded'
-                                    ? Colors.blue
-                                    : Colors.orange,
+                                ? Colors.blue
+                                : Colors.orange,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -91,9 +118,21 @@ class CustomerOrderDetailView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildInfoRow('Họ và tên', currentOrder.customerName),
-                    _buildInfoRow('Số điện thoại', currentOrder.customerPhone ?? 'Không có'),
-                    _buildInfoRow('Địa chỉ nhận hàng', currentOrder.customerAddress ?? 'Không có'),
-                    _buildInfoRow('Ghi chú', currentOrder.note != null && currentOrder.note!.trim().isNotEmpty ? currentOrder.note! : 'Không có'),
+                    _buildInfoRow(
+                      'Số điện thoại',
+                      currentOrder.customerPhone ?? 'Không có',
+                    ),
+                    _buildInfoRow(
+                      'Địa chỉ nhận hàng',
+                      currentOrder.customerAddress ?? 'Không có',
+                    ),
+                    _buildInfoRow(
+                      'Ghi chú',
+                      currentOrder.note != null &&
+                              currentOrder.note!.trim().isNotEmpty
+                          ? currentOrder.note!
+                          : 'Không có',
+                    ),
                   ],
                 ),
               );
@@ -110,7 +149,7 @@ class CustomerOrderDetailView extends StatelessWidget {
                       itemBuilder: (context, idx) {
                         final item = currentOrder.items[idx];
                         final imgUrl = item.productImageUrl;
-                        
+
                         return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -125,13 +164,19 @@ class CustomerOrderDetailView extends StatelessWidget {
                                   width: 64,
                                   height: 64,
                                   color: AppColors.surface,
-                                  child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                  child: const Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: AppColors.detail,
+                                  ),
                                 ),
                                 errorWidget: Container(
                                   width: 64,
                                   height: 64,
                                   color: AppColors.surface,
-                                  child: const Icon(Icons.shopping_bag_outlined, color: AppColors.detail),
+                                  child: const Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: AppColors.detail,
+                                  ),
                                 ),
                               ),
                             ),
@@ -142,21 +187,31 @@ class CustomerOrderDetailView extends StatelessWidget {
                                 children: [
                                   Text(
                                     item.productNameSnapshot,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 8),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         '${currencyFormat.format(item.priceSnapshot)} x ${item.quantity}',
-                                        style: const TextStyle(color: AppColors.detail, fontSize: 13),
+                                        style: const TextStyle(
+                                          color: AppColors.detail,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                       Text(
                                         currencyFormat.format(item.subtotal),
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -171,18 +226,40 @@ class CustomerOrderDetailView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Đã thanh toán', style: TextStyle(color: AppColors.detail, fontSize: 14)),
-                        Text(currencyFormat.format(amountPaid), style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500)),
+                        const Text(
+                          'Đã thanh toán',
+                          style: TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          currencyFormat.format(amountPaid),
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Cần thanh toán', style: TextStyle(color: AppColors.detail, fontSize: 14)),
+                        const Text(
+                          'Cần thanh toán',
+                          style: TextStyle(
+                            color: AppColors.detail,
+                            fontSize: 14,
+                          ),
+                        ),
                         Text(
                           currencyFormat.format(amountDue),
-                          style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -190,7 +267,12 @@ class CustomerOrderDetailView extends StatelessWidget {
                 ),
               );
 
-              final actionsWidget = _buildDetailActionButtons(context, currentOrder, userId, viewModel);
+              final actionsWidget = _buildDetailActionButtons(
+                context,
+                currentOrder,
+                userId,
+                viewModel,
+              );
 
               if (isDesktop) {
                 return SingleChildScrollView(
@@ -241,10 +323,7 @@ class CustomerOrderDetailView extends StatelessWidget {
                     productCard,
                     if (actionsWidget is! SizedBox) ...[
                       const SizedBox(height: 16),
-                      _OrderDetailSection(
-                        title: '',
-                        child: actionsWidget,
-                      ),
+                      _OrderDetailSection(title: '', child: actionsWidget),
                     ],
                   ],
                 ),
@@ -262,8 +341,14 @@ class CustomerOrderDetailView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.detail, fontSize: 14)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.detail, fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -345,9 +430,12 @@ class CustomerOrderDetailView extends StatelessWidget {
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () => _showUpdateDialog(context, order, viewModel, userId),
+            onPressed: () =>
+                _showUpdateDialog(context, order, viewModel, userId),
             child: const Text('Cập nhật thông tin nhận hàng'),
           ),
           const SizedBox(height: 12),
@@ -356,9 +444,12 @@ class CustomerOrderDetailView extends StatelessWidget {
               foregroundColor: AppColors.error,
               side: const BorderSide(color: AppColors.error),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () => _showCancelDialog(context, order, viewModel, userId),
+            onPressed: () =>
+                _showCancelDialog(context, order, viewModel, userId),
             child: const Text('Yêu cầu hủy đơn hàng'),
           ),
         ],
@@ -369,9 +460,12 @@ class CustomerOrderDetailView extends StatelessWidget {
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () => _onWithdrawCancel(context, order, viewModel, userId),
+            onPressed: () =>
+                _onWithdrawCancel(context, order, viewModel, userId),
             child: const Text('Rút yêu cầu hủy đơn hàng'),
           ),
         if (status == 'delivered')
@@ -380,9 +474,12 @@ class CustomerOrderDetailView extends StatelessWidget {
               foregroundColor: Colors.orange,
               side: const BorderSide(color: Colors.orange),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () => _showReturnDialog(context, order, viewModel, userId),
+            onPressed: () =>
+                _showReturnDialog(context, order, viewModel, userId),
             child: const Text('Yêu cầu đổi trả đơn hàng'),
           ),
         if (status == 'return_requested')
@@ -392,19 +489,29 @@ class CustomerOrderDetailView extends StatelessWidget {
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () => _showCancelReturnDialog(context, order, viewModel, userId),
+            onPressed: () =>
+                _showCancelReturnDialog(context, order, viewModel, userId),
             child: const Text('Hủy yêu cầu hoàn trả'),
           ),
       ],
     );
   }
 
-  void _showUpdateDialog(BuildContext context, OrderModel order, CustomerOrderListViewModel viewModel, String userId) {
+  void _showUpdateDialog(
+    BuildContext context,
+    OrderModel order,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+  ) {
     final nameController = TextEditingController(text: order.customerName);
     final phoneController = TextEditingController(text: order.customerPhone);
-    final addressController = TextEditingController(text: order.customerAddress);
+    final addressController = TextEditingController(
+      text: order.customerAddress,
+    );
     final noteController = TextEditingController(text: order.note ?? '');
 
     showDialog(
@@ -455,7 +562,10 @@ class CustomerOrderDetailView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -465,7 +575,10 @@ class CustomerOrderDetailView extends StatelessWidget {
               final note = noteController.text.trim();
 
               if (name.isEmpty || phone.isEmpty || address.isEmpty) {
-                AppToast.showError(context, 'Họ tên, SĐT và địa chỉ là bắt buộc.');
+                AppToast.showError(
+                  context,
+                  'Họ tên, SĐT và địa chỉ là bắt buộc.',
+                );
                 return;
               }
 
@@ -480,29 +593,48 @@ class CustomerOrderDetailView extends StatelessWidget {
               );
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Cập nhật thông tin đơn hàng thành công.');
+                  AppToast.showSuccess(
+                    context,
+                    'Cập nhật thông tin đơn hàng thành công.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Lưu lại', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Lưu lại',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showCancelDialog(BuildContext context, OrderModel order, CustomerOrderListViewModel viewModel, String userId) {
+  void _showCancelDialog(
+    BuildContext context,
+    OrderModel order,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Yêu cầu hủy đơn hàng'),
-        content: const Text('Bạn có chắc chắn muốn gửi yêu cầu hủy đơn hàng này không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn gửi yêu cầu hủy đơn hàng này không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -516,14 +648,25 @@ class CustomerOrderDetailView extends StatelessWidget {
                 }
               }
             },
-            child: const Text('Gửi yêu cầu', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Gửi yêu cầu',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _onWithdrawCancel(BuildContext context, OrderModel order, CustomerOrderListViewModel viewModel, String userId) async {
+  Future<void> _onWithdrawCancel(
+    BuildContext context,
+    OrderModel order,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+  ) async {
     final success = await viewModel.cancelRequestCancel(order.id, userId);
     if (context.mounted) {
       if (success) {
@@ -534,16 +677,26 @@ class CustomerOrderDetailView extends StatelessWidget {
     }
   }
 
-  void _showReturnDialog(BuildContext context, OrderModel order, CustomerOrderListViewModel viewModel, String userId) {
+  void _showReturnDialog(
+    BuildContext context,
+    OrderModel order,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Yêu cầu đổi trả đơn hàng'),
-        content: const Text('Bạn có chắc chắn muốn gửi yêu cầu đổi trả cho đơn hàng này không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn gửi yêu cầu đổi trả cho đơn hàng này không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -551,43 +704,74 @@ class CustomerOrderDetailView extends StatelessWidget {
               final success = await viewModel.requestReturn(order.id, userId);
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Đã gửi yêu cầu đổi trả đơn hàng.');
+                  AppToast.showSuccess(
+                    context,
+                    'Đã gửi yêu cầu đổi trả đơn hàng.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Gửi yêu cầu', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Gửi yêu cầu',
+              style: TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showCancelReturnDialog(BuildContext context, OrderModel order, CustomerOrderListViewModel viewModel, String userId) {
+  void _showCancelReturnDialog(
+    BuildContext context,
+    OrderModel order,
+    CustomerOrderListViewModel viewModel,
+    String userId,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Hủy yêu cầu hoàn trả'),
-        content: const Text('Bạn có chắc chắn muốn hủy yêu cầu hoàn trả cho đơn hàng này để đưa về trạng thái giao thành công không?'),
+        content: const Text(
+          'Bạn có chắc chắn muốn hủy yêu cầu hoàn trả cho đơn hàng này để đưa về trạng thái giao thành công không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy bỏ', style: TextStyle(color: AppColors.detail)),
+            child: const Text(
+              'Hủy bỏ',
+              style: TextStyle(color: AppColors.detail),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.of(ctx).pop();
-              final success = await viewModel.cancelRequestReturn(order.id, userId);
+              final success = await viewModel.cancelRequestReturn(
+                order.id,
+                userId,
+              );
               if (context.mounted) {
                 if (success) {
-                  AppToast.showSuccess(context, 'Đã hủy yêu cầu hoàn trả thành công.');
+                  AppToast.showSuccess(
+                    context,
+                    'Đã hủy yêu cầu hoàn trả thành công.',
+                  );
                 } else if (viewModel.errorMessage != null) {
                   AppToast.showError(context, viewModel.errorMessage!);
                 }
               }
             },
-            child: const Text('Đồng ý', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Đồng ý',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

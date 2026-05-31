@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../user/auth/viewmodel/auth_viewmodel.dart';
+import '../../login/auth/viewmodel/auth_viewmodel.dart';
 import '../cart/viewmodel/customer_cart_view_model.dart';
 
 class CustomerLayout extends StatelessWidget {
@@ -34,7 +34,10 @@ class CustomerLayout extends StatelessWidget {
                       const SizedBox(height: 36),
                       const Text(
                         'HAMSA STORE',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 28),
                       Expanded(child: _CustomerNavigation(currentPath: path)),
@@ -60,7 +63,10 @@ class CustomerLayout extends StatelessWidget {
           appBar: AppBar(
             title: Text(_titleForPath(path)),
             centerTitle: true,
-            leading: (path.startsWith('/shop/products/') || path == '/checkout' || path == '/shop/orders/detail')
+            leading:
+                (path.startsWith('/shop/products/') ||
+                    path == '/checkout' ||
+                    path == '/shop/orders/detail')
                 ? IconButton(
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back),
@@ -95,7 +101,9 @@ class _DesktopTopBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (path.startsWith('/shop/products/') || path == '/checkout' || path == '/shop/orders/detail') ...[
+          if (path.startsWith('/shop/products/') ||
+              path == '/checkout' ||
+              path == '/shop/orders/detail') ...[
             IconButton(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back),

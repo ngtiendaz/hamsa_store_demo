@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../user/profile/view/profile_view.dart';
+import '../../../login/profile/view/profile_view.dart';
 
 class CustomerProfileView extends StatelessWidget {
   const CustomerProfileView({super.key});

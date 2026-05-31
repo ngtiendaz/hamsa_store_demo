@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/user/auth/view/login_view.dart';
-import '../../features/user/auth/view/register_view.dart';
-import '../../features/user/auth/viewmodel/auth_viewmodel.dart';
+import '../../features/login/auth/view/login_view.dart';
+import '../../features/login/auth/view/register_view.dart';
+import '../../features/login/auth/viewmodel/auth_viewmodel.dart';
 import '../../features/admin/products/view/product_list_view.dart';
 import '../../features/admin/products/view/product_form_view.dart';
 import '../../features/admin/categories/view/category_list_view.dart';
@@ -21,8 +21,8 @@ import '../../features/customer/layout/customer_layout.dart';
 import '../../features/customer/orders/view/customer_order_list_view.dart';
 import '../../features/customer/orders/view/customer_order_detail_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
-import '../../features/user/profile/view/profile_view.dart';
-import '../../features/user/profile/view/change_password_view.dart';
+import '../../features/login/profile/view/profile_view.dart';
+import '../../features/login/profile/view/change_password_view.dart';
 import '../../features/admin/orders/view/admin_order_list_view.dart';
 import '../../features/admin/orders/view/order_detail_view.dart';
 import '../../data/models/order_model.dart';
@@ -73,7 +73,10 @@ class AppRouter {
       },
       routes: [
         GoRoute(path: '/login', builder: (context, state) => const LoginView()),
-        GoRoute(path: '/register', builder: (context, state) => const RegisterView()),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterView(),
+        ),
         // ShellRoute for Admin pages
         ShellRoute(
           builder: (context, state, child) => MainLayout(child: child),

@@ -267,6 +267,7 @@ lib/
   - Có tìm kiếm, bộ lọc danh mục, nhãn hàng.
   - Card hiển thị ảnh, tên, giá và nút thêm vào giỏ hàng.
   - Hiển thị thanh phân trang `Trước / Sau`, mỗi trang cố định 40 sản phẩm.
+  - Giữ thanh chọn trang trên một hàng, co giãn theo chiều rộng app và giới hạn chiều rộng hợp lý trên web.
   - Toàn bộ vùng card, bao gồm ảnh sản phẩm trên web, có thể bấm để mở trang chi tiết; nút thêm giỏ hàng giữ thao tác riêng.
   - Cấu hình ảnh HTML trên Flutter Web dùng hit-test trong suốt để click xuyên xuống card và thumbnail.
 - [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có gallery ảnh, thumbnail đổi ảnh chính, thông tin chi tiết và nút thêm vào giỏ hàng.
@@ -304,6 +305,10 @@ lib/
 - [x] 11.7.8. Đăng ký các routes (`/checkout`, `/admin/orders`) trong `app_router.dart` và đăng ký các ViewModels trong `main.dart`.
 - [x] 11.7.9. Viết unit tests kiểm chứng toàn bộ luồng thanh toán và cập nhật trạng thái đơn hàng trong `widget_test.dart`.
 - [x] 11.7.10. Thiết kế màn hình chi tiết đơn hàng của Khách hàng (`CustomerOrderDetailView`) cho phép xem chi tiết sản phẩm và thao tác nghiệp vụ.
+- [x] 11.7.11. Tối ưu card danh sách đơn hàng của Khách hàng trên mobile:
+  - Cho phép thông tin đơn giá, số lượng và thành tiền tự xuống dòng khi màn hình hẹp.
+  - Xếp phần phương thức thanh toán và tổng tiền theo chiều dọc trên mobile.
+  - Cho phép nhóm nút thao tác tự xuống dòng để tránh overflow.
 
 
 ### PHASE 12: Dashboard Admin

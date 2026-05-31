@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/services/supabase_service.dart';
-import 'features/user/auth/viewmodel/auth_viewmodel.dart';
+import 'features/login/auth/viewmodel/auth_viewmodel.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/customer/cart/viewmodel/customer_cart_view_model.dart';

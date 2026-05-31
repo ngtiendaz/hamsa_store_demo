@@ -22,6 +22,7 @@ import '../../features/customer/orders/view/customer_order_list_view.dart';
 import '../../features/customer/orders/view/customer_order_detail_view.dart';
 import '../../features/customer/profile/view/customer_profile_view.dart';
 import '../../features/user/profile/view/profile_view.dart';
+import '../../features/user/profile/view/change_password_view.dart';
 import '../../features/admin/orders/view/admin_order_list_view.dart';
 import '../../features/admin/orders/view/order_detail_view.dart';
 import '../../data/models/order_model.dart';
@@ -158,6 +159,10 @@ class AppRouter {
               path: '/profile',
               builder: (context, state) => const ProfileView(),
             ),
+            GoRoute(
+              path: '/profile/change-password',
+              builder: (context, state) => const ChangePasswordView(),
+            ),
           ],
         ),
         ShellRoute(
@@ -207,6 +212,10 @@ class AppRouter {
               path: '/shop/profile',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: CustomerProfileView()),
+            ),
+            GoRoute(
+              path: '/shop/profile/change-password',
+              builder: (context, state) => const ChangePasswordView(),
             ),
           ],
         ),

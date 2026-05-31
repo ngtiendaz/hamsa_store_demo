@@ -101,7 +101,8 @@ class MainLayout extends StatelessWidget {
                                 currentRoute == '/admin/brands/edit' ||
                                 currentRoute == '/admin/orders/detail' ||
                                 currentRoute == '/admin/users/new' ||
-                                currentRoute == '/admin/users/edit') ...[
+                                currentRoute == '/admin/users/edit' ||
+                                currentRoute == '/profile/change-password') ...[
                               IconButton(
                                 icon: const Icon(
                                   Icons.arrow_back,
@@ -126,7 +127,7 @@ class MainLayout extends StatelessWidget {
                                     )) {
                                       context.go('/admin/users');
                                     } else {
-                                      context.go('/admin/orders');
+                                      context.go('/profile');
                                     }
                                   }
                                 },
@@ -163,7 +164,8 @@ class MainLayout extends StatelessWidget {
                     currentRoute == '/admin/brands/edit' ||
                     currentRoute == '/admin/orders/detail' ||
                     currentRoute == '/admin/users/new' ||
-                    currentRoute == '/admin/users/edit')
+                    currentRoute == '/admin/users/edit' ||
+                    currentRoute == '/profile/change-password')
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
@@ -179,7 +181,7 @@ class MainLayout extends StatelessWidget {
                         } else if (currentRoute.contains('/users')) {
                           context.go('/admin/users');
                         } else {
-                          context.go('/admin/orders');
+                          context.go('/profile');
                         }
                       }
                     },
@@ -377,6 +379,7 @@ class MainLayout extends StatelessWidget {
     if (route.startsWith('/admin/users/new')) return 'Thêm người dùng';
     if (route.startsWith('/admin/users/edit')) return 'Chi tiết người dùng';
     if (route.startsWith('/admin/users')) return 'Quản lý người dùng';
+    if (route.startsWith('/profile/change-password')) return 'Đổi mật khẩu';
     if (route.startsWith('/profile')) return 'Trang cá nhân';
     return 'Hamsa Store';
   }

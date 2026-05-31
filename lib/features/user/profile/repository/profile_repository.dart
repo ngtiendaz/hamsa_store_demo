@@ -29,6 +29,12 @@ abstract class ProfileDataSource {
     required double amount,
     String? note,
   });
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String email,
+  });
 }
 
 class ProfileRepository implements ProfileDataSource {
@@ -108,5 +114,24 @@ class ProfileRepository implements ProfileDataSource {
       'p_amount': amount,
       'p_note': note,
     });
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String email,
+  }) async {
+    try {
+      await _client.auth.signInWithPassword(email: email, password: currentPassword);
+    } catch (_) {
+      throw Exception('Mật khẩu hiện tại không chính xác.');
+    }
+
+    try {
+      await _client.auth.updateUser(UserAttributes(password: newPassword));
+    } catch (e) {
+      throw Exception('Đổi mật khẩu thất bại: ${e.toString()}');
+    }
   }
 }

@@ -430,7 +430,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -458,7 +458,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -486,7 +486,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -507,7 +507,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Text(
@@ -523,7 +523,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -563,7 +563,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                   TableCell(
                     child: InkWell(
                       onTap: () =>
-                          context.go('/admin/orders/detail', extra: order),
+                          context.push('/admin/orders/detail', extra: order),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Center(child: _buildStatusBadge(order)),
@@ -637,7 +637,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () => context.go('/admin/orders/detail', extra: order),
+            onTap: () => context.push('/admin/orders/detail', extra: order),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

@@ -126,6 +126,10 @@ class MainLayout extends StatelessWidget {
                                       '/users',
                                     )) {
                                       context.go('/admin/users');
+                                    } else if (currentRoute.contains(
+                                      '/orders',
+                                    )) {
+                                      context.go('/admin/orders');
                                     } else {
                                       context.go('/profile');
                                     }
@@ -180,6 +184,8 @@ class MainLayout extends StatelessWidget {
                           context.go('/admin/brands');
                         } else if (currentRoute.contains('/users')) {
                           context.go('/admin/users');
+                        } else if (currentRoute.contains('/orders')) {
+                          context.go('/admin/orders');
                         } else {
                           context.go('/profile');
                         }

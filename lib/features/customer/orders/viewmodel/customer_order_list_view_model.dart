@@ -9,6 +9,9 @@ class CustomerOrderListViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  DateTime? _startDate;
+  DateTime? _endDate;
+
   CustomerOrderListViewModel({CustomerOrderDataSource? orderRepository})
       : _orderRepository = orderRepository ?? CustomerOrderRepository();
 
@@ -16,13 +19,32 @@ class CustomerOrderListViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  DateTime? get startDate => _startDate;
+  DateTime? get endDate => _endDate;
+
+  void setDateRange(DateTime start, DateTime end, String userId) {
+    _startDate = start;
+    _endDate = end;
+    loadOrders(userId);
+  }
+
+  void clearDateRange(String userId) {
+    _startDate = null;
+    _endDate = null;
+    loadOrders(userId);
+  }
+
   Future<void> loadOrders(String userId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _orders = await _orderRepository.getActiveOrders(userId);
+      _orders = await _orderRepository.getActiveOrders(
+        userId,
+        startDate: _startDate,
+        endDate: _endDate,
+      );
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
     } finally {

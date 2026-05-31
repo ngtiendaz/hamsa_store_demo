@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/order_model.dart';
+import '../../../../data/dto/pagination_result.dart';
+import '../../../../core/utils/debounce.dart';
 import '../repository/admin_order_repository.dart';
 
 class AdminOrderListViewModel extends ChangeNotifier {
   final AdminOrderDataSource _orderRepository;
+  final Debounce _debounce = Debounce(delay: const Duration(milliseconds: 500));
 
   List<OrderModel> _orders = [];
   bool _isLoading = false;
   String? _errorMessage;
+
+  int _currentPage = 1;
+  final int _pageSize = 20;
+  int _totalCount = 0;
+  String _keyword = '';
+  String _status = 'all';
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   AdminOrderListViewModel({AdminOrderDataSource? orderRepository})
       : _orderRepository = orderRepository ?? AdminOrderRepository();
@@ -16,13 +27,79 @@ class AdminOrderListViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> loadOrders() async {
+  int get currentPage => _currentPage;
+  int get totalPages => _totalCount == 0 ? 1 : (_totalCount / _pageSize).ceil();
+  bool get hasNextPage => _currentPage * _pageSize < _totalCount;
+  bool get hasPreviousPage => _currentPage > 1;
+  String get keyword => _keyword;
+  String get status => _status;
+  DateTime? get startDate => _startDate;
+  DateTime? get endDate => _endDate;
+
+  void setKeyword(String value) {
+    _keyword = value;
+    _debounce.run(() => loadOrders(refresh: true));
+  }
+
+  void selectStatus(String value) {
+    _status = value;
+    loadOrders(refresh: true);
+  }
+
+  void initFilters({String? status, String? keyword}) {
+    _status = status ?? 'all';
+    _keyword = keyword ?? '';
+    _startDate = null;
+    _endDate = null;
+    _currentPage = 1;
+    loadOrders();
+  }
+
+  void setDateRange(DateTime start, DateTime end) {
+    _startDate = start;
+    _endDate = end;
+    loadOrders(refresh: true);
+  }
+
+  void clearDateRange() {
+    _startDate = null;
+    _endDate = null;
+    loadOrders(refresh: true);
+  }
+
+  void nextPage() {
+    if (hasNextPage) {
+      _currentPage++;
+      loadOrders();
+    }
+  }
+
+  void previousPage() {
+    if (hasPreviousPage) {
+      _currentPage--;
+      loadOrders();
+    }
+  }
+
+  Future<void> loadOrders({bool refresh = false}) async {
+    if (refresh) {
+      _currentPage = 1;
+    }
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _orders = await _orderRepository.getAllOrders();
+      final PaginationResult<OrderModel> result = await _orderRepository.getAllOrders(
+        keyword: _keyword.trim(),
+        status: _status,
+        startDate: _startDate,
+        endDate: _endDate,
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
+      _orders = result.items;
+      _totalCount = result.totalCount;
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
     } finally {
@@ -155,5 +232,11 @@ class AdminOrderListViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _debounce.dispose();
+    super.dispose();
   }
 }

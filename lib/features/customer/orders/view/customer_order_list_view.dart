@@ -83,14 +83,14 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Search & Filter header
-              _buildHeader(),
+              _buildHeader(viewModel, userId),
               
               // Main Content
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async => _refresh(),
                   child: filteredOrders.isEmpty
-                      ? const Center(
+                       ? const Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -122,7 +122,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(CustomerOrderListViewModel viewModel, String userId) {
     final filters = [
       {'value': 'all', 'label': 'Tất cả'},
       {'value': 'pending_confirmation', 'label': 'Chờ xác nhận'},
@@ -178,7 +178,7 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
           );
 
           final filterDropdown = Container(
-            width: isLarge ? 220 : double.infinity,
+            width: isLarge ? 200 : double.infinity,
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
@@ -210,6 +210,80 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
             ),
           );
 
+          final dateRangeButton = Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border, width: 0.5),
+            ),
+            child: InkWell(
+              onTap: () async {
+                final DateTimeRange? picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  initialDateRange: viewModel.startDate != null && viewModel.endDate != null
+                      ? DateTimeRange(start: viewModel.startDate!, end: viewModel.endDate!)
+                      : null,
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          onSurface: AppColors.onSurface,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) {
+                  final endOfDay = DateTime(
+                    picked.end.year,
+                    picked.end.month,
+                    picked.end.day,
+                    23,
+                    59,
+                    59,
+                    999,
+                  );
+                  viewModel.setDateRange(picked.start, endOfDay, userId);
+                }
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.date_range, size: 18, color: AppColors.detail),
+                  const SizedBox(width: 8),
+                  Text(
+                    viewModel.startDate == null || viewModel.endDate == null
+                        ? 'Chọn khoảng thời gian'
+                        : '${DateFormat('dd/MM/yyyy').format(viewModel.startDate!)} - ${DateFormat('dd/MM/yyyy').format(viewModel.endDate!)}',
+                    style: const TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (viewModel.startDate != null) ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 14, color: AppColors.detail),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        viewModel.clearDateRange(userId);
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+
           if (isLarge) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -217,6 +291,8 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
                 searchField,
                 const SizedBox(width: 16),
                 filterDropdown,
+                const SizedBox(width: 16),
+                dateRangeButton,
               ],
             );
           }
@@ -227,6 +303,8 @@ class _CustomerOrderListViewState extends State<CustomerOrderListView> {
               searchField,
               const SizedBox(height: 12),
               filterDropdown,
+              const SizedBox(height: 12),
+              dateRangeButton,
             ],
           );
         },

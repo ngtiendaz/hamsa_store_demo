@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_loading.dart';
-import '../../../../core/utils/debounce.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/order_model.dart';
 import '../../../user/auth/viewmodel/auth_viewmodel.dart';
@@ -33,19 +32,14 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     'refunded',
   };
 
-  late String _statusFilter;
-  String _searchQuery = '';
-
-  late final Debounce _debounce;
   final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _statusFilter = _normalizeStatusFilter(widget.initialStatus);
-    _debounce = Debounce(delay: const Duration(milliseconds: 300));
+    final initialStatus = _normalizeStatusFilter(widget.initialStatus);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminOrderListViewModel>().loadOrders();
+      context.read<AdminOrderListViewModel>().initFilters(status: initialStatus);
     });
   }
 
@@ -53,9 +47,8 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
   void didUpdateWidget(covariant AdminOrderListView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialStatus != oldWidget.initialStatus) {
-      setState(() {
-        _statusFilter = _normalizeStatusFilter(widget.initialStatus);
-      });
+      final newStatus = _normalizeStatusFilter(widget.initialStatus);
+      context.read<AdminOrderListViewModel>().selectStatus(newStatus);
     }
   }
 
@@ -65,7 +58,6 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
 
   @override
   void dispose() {
-    _debounce.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -93,28 +85,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             return const AppLoading();
           }
 
-          // Lọc danh sách theo status và tìm kiếm
-          final filteredOrders = viewModel.orders.where((order) {
-            final matchesStatus =
-                _statusFilter == 'all' ||
-                (_statusFilter == 'refunded'
-                    ? order.paymentStatus == 'refunded' ||
-                          order.paymentStatus == 'partially_refunded'
-                    : order.status == _statusFilter);
-            final query = _searchQuery.trim().toLowerCase();
-            if (query.isEmpty) return matchesStatus;
-
-            final matchesCode = order.orderCode.toLowerCase().contains(query);
-            final matchesCustomer = order.customerName.toLowerCase().contains(
-              query,
-            );
-            final matchesPhone = (order.customerPhone ?? '')
-                .toLowerCase()
-                .contains(query);
-
-            return matchesStatus &&
-                (matchesCode || matchesCustomer || matchesPhone);
-          }).toList();
+          final filteredOrders = viewModel.orders;
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -124,7 +95,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Search & Filter header
-                  _buildHeader(),
+                  _buildHeader(viewModel),
 
                   // Main Content
                   Expanded(
@@ -160,6 +131,8 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                             ),
                     ),
                   ),
+                  if (viewModel.orders.isNotEmpty)
+                    _buildPaginationFooter(viewModel),
                 ],
               );
             },
@@ -169,7 +142,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AdminOrderListViewModel viewModel) {
     final filters = [
       {'value': 'all', 'label': 'Tất cả'},
       {'value': 'pending_confirmation', 'label': 'Chờ xác nhận'},
@@ -195,11 +168,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             child: TextField(
               controller: _searchController,
               onChanged: (val) {
-                _debounce.run(() {
-                  setState(() {
-                    _searchQuery = val;
-                  });
-                });
+                viewModel.setKeyword(val);
               },
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm mã đơn, khách hàng, SĐT...',
@@ -255,7 +224,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: _statusFilter,
+                value: viewModel.status,
                 icon: const Icon(
                   Icons.filter_list,
                   size: 18,
@@ -270,9 +239,7 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                 borderRadius: BorderRadius.circular(12),
                 onChanged: (String? newValue) {
                   if (newValue != null) {
-                    setState(() {
-                      _statusFilter = newValue;
-                    });
+                    viewModel.selectStatus(newValue);
                   }
                 },
                 items: filters.map<DropdownMenuItem<String>>((filter) {
@@ -285,6 +252,80 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
             ),
           );
 
+          final dateRangeButton = Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border, width: 0.5),
+            ),
+            child: InkWell(
+              onTap: () async {
+                final DateTimeRange? picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  initialDateRange: viewModel.startDate != null && viewModel.endDate != null
+                      ? DateTimeRange(start: viewModel.startDate!, end: viewModel.endDate!)
+                      : null,
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          onSurface: AppColors.onSurface,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) {
+                  final endOfDay = DateTime(
+                    picked.end.year,
+                    picked.end.month,
+                    picked.end.day,
+                    23,
+                    59,
+                    59,
+                    999,
+                  );
+                  viewModel.setDateRange(picked.start, endOfDay);
+                }
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.date_range, size: 18, color: AppColors.detail),
+                  const SizedBox(width: 8),
+                  Text(
+                    viewModel.startDate == null || viewModel.endDate == null
+                        ? 'Chọn khoảng thời gian'
+                        : '${DateFormat('dd/MM/yyyy').format(viewModel.startDate!)} - ${DateFormat('dd/MM/yyyy').format(viewModel.endDate!)}',
+                    style: const TextStyle(
+                      color: AppColors.onSurface,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (viewModel.startDate != null) ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 14, color: AppColors.detail),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        viewModel.clearDateRange();
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+
           if (isLarge) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -292,15 +333,43 @@ class _AdminOrderListViewState extends State<AdminOrderListView> {
                 searchField,
                 const SizedBox(width: 16),
                 filterDropdown,
+                const SizedBox(width: 16),
+                dateRangeButton,
               ],
             );
           }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [searchField, const SizedBox(height: 12), filterDropdown],
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              filterDropdown,
+              const SizedBox(height: 12),
+              dateRangeButton,
+            ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildPaginationFooter(AdminOrderListViewModel viewModel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          IconButton(
+            onPressed: viewModel.hasPreviousPage ? viewModel.previousPage : null,
+            icon: const Icon(Icons.chevron_left),
+          ),
+          Text('Trang ${viewModel.currentPage}/${viewModel.totalPages}'),
+          IconButton(
+            onPressed: viewModel.hasNextPage ? viewModel.nextPage : null,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
       ),
     );
   }

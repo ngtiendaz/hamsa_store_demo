@@ -202,18 +202,19 @@ lib/
 - [ ] 6.5.7. Đăng ký router và cấu hình route cho Category & Brand trong `app_router.dart`.
 
 ### PHASE 7: Module 4 — Quản lý đơn hàng (Order Management)
-- [ ] 7.1. Viết `AdminOrderRepository` tương tác với bảng `orders` và `order_items`.
-- [ ] 7.2. Xây dựng logic tạo đơn hàng (`OrderCreateViewModel` & `OrderCreateView`):
+- [x] 7.1. Viết `AdminOrderRepository` tương tác với bảng `orders` và `order_items`.
+- [x] 7.2. Xây dựng logic tạo đơn hàng (`OrderCreateViewModel` & `OrderCreateView`):
   - Cho phép thêm sản phẩm vào giỏ hàng.
   - Chọn khách hàng (hoặc dùng tài khoản mặc định `retail_customer`).
   - Tính tổng tiền đơn hàng tự động.
   - Cho phép nhập ghi chú đơn hàng.
   - Thực hiện trừ tồn kho sản phẩm tương ứng và tạo đơn hàng bằng transaction (hoặc RPC/Database trigger để đảm bảo an toàn).
-- [ ] 7.3. Viết `OrderListViewModel` & thiết kế `OrderListView`:
+- [x] 7.3. Viết `OrderListViewModel` & thiết kế `OrderListView`:
   - Tìm kiếm đơn hàng theo mã đơn (`order_code`) hoặc tên khách hàng.
-  - Bộ lọc đơn hàng theo trạng thái và khoảng thời gian.
-- [ ] 7.4. Viết `OrderDetailViewModel` & thiết kế `OrderDetailView` hiển thị chi tiết đơn hàng (thông tin KH, các sản phẩm kèm giá snapshot, ghi chú, trạng thái).
-- [ ] 7.5. Xử lý chức năng Hủy đơn hàng:
+  - Bộ lọc đơn hàng theo trạng thái và khoảng thời gian (hỗ trợ chọn khoảng thời gian bằng DateRangePicker cho cả Admin, Employee và Customer).
+  - Phân trang hiển thị (mặc định tải 20 đơn hàng đầu, hỗ trợ chuyển trang trước/sau với giao diện hiển thị số trang giống như Quản lý người dùng).
+- [x] 7.4. Viết `OrderDetailViewModel` & thiết kế `OrderDetailView` hiển thị chi tiết đơn hàng (thông tin KH, các sản phẩm kèm giá snapshot, ghi chú, trạng thái).
+- [x] 7.5. Xử lý chức năng Hủy đơn hàng:
   - Chỉ cho phép hủy khi đơn hàng ở trạng thái `pending_confirmation`.
   - Khi hủy đơn, cập nhật trạng thái đơn thành `cancelled`, đồng thời cộng lại số lượng tồn kho cho các sản phẩm trong đơn hàng.
   - Chuẩn hóa hiển thị thời gian đơn hàng theo múi giờ Việt Nam UTC+7 từ dữ liệu `timestamptz`.

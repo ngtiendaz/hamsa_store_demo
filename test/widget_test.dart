@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hamsa_store_demo/data/dto/pagination_result.dart';
 import 'package:hamsa_store_demo/data/models/cart_item_model.dart';
 import 'package:hamsa_store_demo/data/models/cart_model.dart';
 import 'package:hamsa_store_demo/data/models/products_model.dart';
@@ -577,8 +578,19 @@ class _FakeCustomerOrderRepository implements CustomerOrderDataSource {
   bool cancelRequestCancelCalled = false;
 
   @override
-  Future<List<OrderModel>> getActiveOrders(String userId) async {
-    return orders.where((o) => o.customerId == userId).toList();
+  Future<List<OrderModel>> getActiveOrders(
+    String userId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    var list = orders.where((o) => o.customerId == userId).toList();
+    if (startDate != null) {
+      list = list.where((o) => o.createdAt.isAfter(startDate) || o.createdAt.isAtSameMomentAs(startDate)).toList();
+    }
+    if (endDate != null) {
+      list = list.where((o) => o.createdAt.isBefore(endDate) || o.createdAt.isAtSameMomentAs(endDate)).toList();
+    }
+    return list;
   }
 
   @override
@@ -697,8 +709,44 @@ class _FakeAdminOrderRepository implements AdminOrderDataSource {
   _FakeAdminOrderRepository(this.orders);
 
   @override
-  Future<List<OrderModel>> getAllOrders() async {
-    return orders;
+  Future<PaginationResult<OrderModel>> getAllOrders({
+    String? keyword,
+    String? status,
+    DateTime? startDate,
+    DateTime? endDate,
+    required int page,
+    required int pageSize,
+  }) async {
+    var list = orders;
+    if (status != null && status != 'all') {
+      if (status == 'refunded') {
+        list = list.where((o) => o.paymentStatus == 'refunded' || o.paymentStatus == 'partially_refunded').toList();
+      } else {
+        list = list.where((o) => o.status == status).toList();
+      }
+    }
+    if (keyword != null && keyword.trim().isNotEmpty) {
+      final q = keyword.trim().toLowerCase();
+      list = list.where((o) => o.orderCode.toLowerCase().contains(q) ||
+          o.customerName.toLowerCase().contains(q) ||
+          (o.customerPhone ?? '').toLowerCase().contains(q)).toList();
+    }
+    if (startDate != null) {
+      list = list.where((o) => o.createdAt.isAfter(startDate) || o.createdAt.isAtSameMomentAs(startDate)).toList();
+    }
+    if (endDate != null) {
+      list = list.where((o) => o.createdAt.isBefore(endDate) || o.createdAt.isAtSameMomentAs(endDate)).toList();
+    }
+    final totalCount = list.length;
+    final offset = (page - 1) * pageSize;
+    final end = offset + pageSize;
+    final paginated = list.sublist(offset, end > totalCount ? totalCount : end);
+    return PaginationResult(
+      items: paginated,
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 
   @override

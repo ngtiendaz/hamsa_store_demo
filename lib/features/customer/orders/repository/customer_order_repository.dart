@@ -2,7 +2,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../data/models/order_model.dart';
 
 abstract class CustomerOrderDataSource {
-  Future<List<OrderModel>> getActiveOrders(String userId);
+  Future<List<OrderModel>> getActiveOrders(
+    String userId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<String> createOrder({
     required String userId,
     required String customerName,
@@ -34,13 +38,25 @@ class CustomerOrderRepository implements CustomerOrderDataSource {
       : _client = client ?? Supabase.instance.client;
 
   @override
-  Future<List<OrderModel>> getActiveOrders(String userId) async {
+  Future<List<OrderModel>> getActiveOrders(
+    String userId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
-      final response = await _client
+      var query = _client
           .from('orders')
           .select('*, order_items(*, products(*, product_images(image_url)))')
-          .eq('customer_id', userId)
-          .order('created_at', ascending: false);
+          .eq('customer_id', userId);
+
+      if (startDate != null) {
+        query = query.gte('created_at', startDate.toIso8601String());
+      }
+      if (endDate != null) {
+        query = query.lte('created_at', endDate.toIso8601String());
+      }
+
+      final response = await query.order('created_at', ascending: false);
       
       final data = response as List<dynamic>;
       return data.map((json) => OrderModel.fromJson(json as Map<String, dynamic>)).toList();

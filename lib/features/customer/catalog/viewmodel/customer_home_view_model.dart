@@ -13,7 +13,6 @@ class CustomerHomeViewModel extends ChangeNotifier {
   List<CategoryModel> _categories = [];
   List<BrandModel> _brands = [];
   bool _isLoading = false;
-  bool _isLoadingMore = false;
   String? _errorMessage;
   String _keyword = '';
   String? _selectedCategoryId;
@@ -21,17 +20,21 @@ class CustomerHomeViewModel extends ChangeNotifier {
   int _currentPage = 1;
   int _totalCount = 0;
   int _requestVersion = 0;
-  static const int _pageSize = 12;
 
   List<ProductModel> get products => List.unmodifiable(_products);
   List<CategoryModel> get categories => _categories;
   List<BrandModel> get brands => _brands;
   bool get isLoading => _isLoading;
-  bool get isLoadingMore => _isLoadingMore;
   String? get errorMessage => _errorMessage;
   String? get selectedCategoryId => _selectedCategoryId;
   String? get selectedBrandId => _selectedBrandId;
-  bool get hasMore => _products.length < _totalCount;
+  int get currentPage => _currentPage;
+  int get totalCount => _totalCount;
+  int get totalPages => _totalCount == 0
+      ? 1
+      : (_totalCount / CustomerProductRepository.pageSize).ceil();
+  bool get hasPreviousPage => _currentPage > 1;
+  bool get hasNextPage => _currentPage < totalPages;
 
   CustomerHomeViewModel() {
     loadFilters();
@@ -54,17 +57,13 @@ class CustomerHomeViewModel extends ChangeNotifier {
   }
 
   Future<void> loadProducts({bool refresh = false}) async {
-    if (!refresh && (_isLoading || _isLoadingMore)) return;
+    if (_isLoading && !refresh) return;
     final requestVersion = ++_requestVersion;
 
     if (refresh) {
       _currentPage = 1;
-      _isLoading = true;
-      _isLoadingMore = false;
-    } else {
-      if (!hasMore) return;
-      _isLoadingMore = true;
     }
+    _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -74,17 +73,12 @@ class CustomerHomeViewModel extends ChangeNotifier {
         categoryId: _selectedCategoryId,
         brandId: _selectedBrandId,
         page: _currentPage,
-        pageSize: _pageSize,
       );
       if (requestVersion != _requestVersion) return;
 
-      if (refresh) {
-        _products
-          ..clear()
-          ..addAll(result.items);
-      } else {
-        _products.addAll(result.items);
-      }
+      _products
+        ..clear()
+        ..addAll(result.items);
       _totalCount = result.totalCount;
     } catch (_) {
       if (requestVersion == _requestVersion) {
@@ -93,15 +87,20 @@ class CustomerHomeViewModel extends ChangeNotifier {
     } finally {
       if (requestVersion == _requestVersion) {
         _isLoading = false;
-        _isLoadingMore = false;
         notifyListeners();
       }
     }
   }
 
-  Future<void> loadMore() async {
-    if (!hasMore || _isLoading || _isLoadingMore) return;
+  Future<void> nextPage() async {
+    if (!hasNextPage || _isLoading) return;
     _currentPage++;
+    await loadProducts();
+  }
+
+  Future<void> previousPage() async {
+    if (!hasPreviousPage || _isLoading) return;
+    _currentPage--;
     await loadProducts();
   }
 

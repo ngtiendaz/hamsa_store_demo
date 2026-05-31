@@ -45,7 +45,11 @@ class ProductModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     List<String> urls = [];
     if (json['product_images'] != null) {
-      final images = json['product_images'] as List;
+      final images =
+          List<Map<String, dynamic>>.from(json['product_images'] as List)..sort(
+            (first, second) => ((first['sort_order'] as num?)?.toInt() ?? 0)
+                .compareTo((second['sort_order'] as num?)?.toInt() ?? 0),
+          );
       urls = images.map((img) => img['image_url'] as String).toList();
     }
 

@@ -25,6 +25,28 @@ import 'package:hamsa_store_demo/features/admin/dashboard/repository/admin_dashb
 import 'package:hamsa_store_demo/features/admin/dashboard/viewmodel/admin_dashboard_view_model.dart';
 
 void main() {
+  test('ProductModel sorts product images by sort order', () {
+    final product = ProductModel.fromJson({
+      'id': 'product-1',
+      'category_id': 'category-1',
+      'brand_id': 'brand-1',
+      'internal_name': 'Sản phẩm test',
+      'trade_name': 'Sản phẩm test',
+      'price': 100000,
+      'stock': 10,
+      'status': 'active',
+      'is_featured': false,
+      'created_at': '2026-05-31T00:00:00Z',
+      'updated_at': '2026-05-31T00:00:00Z',
+      'product_images': [
+        {'image_url': 'image-2.jpg', 'sort_order': 2},
+        {'image_url': 'image-1.jpg', 'sort_order': 1},
+      ],
+    });
+
+    expect(product.imageUrls, ['image-1.jpg', 'image-2.jpg']);
+  });
+
   test(
     'CustomerCartViewModel persists quantity within product stock',
     () async {

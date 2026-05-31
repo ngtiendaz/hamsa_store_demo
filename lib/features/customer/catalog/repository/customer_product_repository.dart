@@ -5,6 +5,8 @@ import '../../../../data/models/category_model.dart';
 import '../../../../data/models/products_model.dart';
 
 class CustomerProductRepository {
+  static const int pageSize = 20;
+
   final SupabaseClient _client = Supabase.instance.client;
 
   Future<PaginationResult<ProductModel>> getActiveProducts({
@@ -12,11 +14,10 @@ class CustomerProductRepository {
     String? categoryId,
     String? brandId,
     int page = 1,
-    int pageSize = 12,
   }) async {
     var query = _client
         .from('products')
-        .select('*, product_images(image_url)')
+        .select('*, product_images(image_url, sort_order)')
         .eq('status', 'active')
         .isFilter('deleted_at', null);
 
@@ -35,7 +36,7 @@ class CustomerProductRepository {
       query = query.eq('brand_id', brandId);
     }
 
-    final from = (page - 1) * pageSize;
+    final from = (page - 1) * CustomerProductRepository.pageSize;
     final to = from + pageSize - 1;
     final response = await query
         .order('created_at', ascending: false)
@@ -47,14 +48,14 @@ class CustomerProductRepository {
       items: data.map((json) => ProductModel.fromJson(json)).toList(),
       totalCount: response.count,
       page: page,
-      pageSize: pageSize,
+      pageSize: CustomerProductRepository.pageSize,
     );
   }
 
   Future<ProductModel> getActiveProduct(String id) async {
     final response = await _client
         .from('products')
-        .select('*, product_images(image_url)')
+        .select('*, product_images(image_url, sort_order)')
         .eq('id', id)
         .eq('status', 'active')
         .isFilter('deleted_at', null)

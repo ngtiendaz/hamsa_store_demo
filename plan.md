@@ -257,7 +257,7 @@ lib/
   - Thêm viền mặc định cho text field của danh mục, nhãn hàng; dãn đều nút thêm mới trên mobile và cố định chiều cao card kèm ellipsis.
 
 ### PHASE 10: Trang chủ Customer & Catalog
-- [x] 10.1. Tạo `CustomerProductRepository` chỉ đọc sản phẩm đang hoạt động, hỗ trợ tìm kiếm, lọc danh mục, lọc nhãn hàng và phân trang lazy load.
+- [x] 10.1. Tạo `CustomerProductRepository` chỉ đọc sản phẩm đang hoạt động, hỗ trợ tìm kiếm, lọc danh mục, lọc nhãn hàng và phân trang.
 - [x] 10.2. Tạo `CustomerHomeViewModel`, `CustomerProductDetailViewModel` và `CustomerCartViewModel` theo MVVM + Provider.
 - [x] 10.3. Xây dựng `CustomerLayout` responsive:
   - App dùng bottom menu gồm Trang chủ, Giỏ hàng, Đơn hàng, Cá nhân.
@@ -266,8 +266,9 @@ lib/
   - Grid sản phẩm active, app hiển thị 2 card mỗi dòng.
   - Có tìm kiếm, bộ lọc danh mục, nhãn hàng.
   - Card hiển thị ảnh, tên, giá và nút thêm vào giỏ hàng.
-  - Lazy load sản phẩm khi cuộn gần cuối danh sách.
-- [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có ảnh, thông tin chi tiết và nút thêm vào giỏ hàng.
+  - Hiển thị thanh phân trang `Trước / Sau`, mỗi trang cố định 40 sản phẩm.
+  - Toàn bộ vùng card, bao gồm ảnh sản phẩm trên web, có thể bấm để mở trang chi tiết; nút thêm giỏ hàng giữ thao tác riêng.
+- [x] 10.5. Xây dựng trang chi tiết sản phẩm customer có gallery ảnh, thumbnail đổi ảnh chính, thông tin chi tiết và nút thêm vào giỏ hàng.
 - [x] 10.6. Xây dựng trang giỏ hàng local state và màn hình customer cho tab Đơn hàng, Cá nhân.
 - [x] 10.7. Thay test counter template bằng test `CustomerCartViewModel` kiểm tra thêm, giới hạn tồn kho, giảm và xóa sản phẩm.
 

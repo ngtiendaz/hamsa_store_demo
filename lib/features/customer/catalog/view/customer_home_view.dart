@@ -21,22 +21,23 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
   void initState() {
     super.initState();
     _viewModel = CustomerHomeViewModel();
-    _scrollController.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
-    _scrollController
-      ..removeListener(_handleScroll)
-      ..dispose();
+    _scrollController.dispose();
     _viewModel.dispose();
     super.dispose();
   }
 
-  void _handleScroll() {
-    if (_scrollController.position.extentAfter < 500) {
-      _viewModel.loadMore();
-    }
+  Future<void> _changePage(Future<void> Function() action) async {
+    await action();
+    if (!mounted || !_scrollController.hasClients) return;
+    await _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -100,11 +101,19 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                       },
                     ),
                   ),
-                if (viewModel.isLoadingMore)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Center(child: CircularProgressIndicator()),
+                if (viewModel.products.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: _PaginationBar(
+                      currentPage: viewModel.currentPage,
+                      totalPages: viewModel.totalPages,
+                      totalCount: viewModel.totalCount,
+                      isLoading: viewModel.isLoading,
+                      onPrevious: viewModel.hasPreviousPage
+                          ? () => _changePage(viewModel.previousPage)
+                          : null,
+                      onNext: viewModel.hasNextPage
+                          ? () => _changePage(viewModel.nextPage)
+                          : null,
                     ),
                   ),
               ],
@@ -187,6 +196,54 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
           const Text(
             'Sản phẩm nổi bật',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaginationBar extends StatelessWidget {
+  final int currentPage;
+  final int totalPages;
+  final int totalCount;
+  final bool isLoading;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+
+  const _PaginationBar({
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalCount,
+    required this.isLoading,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: isLoading ? null : onPrevious,
+            icon: const Icon(Icons.chevron_left),
+            label: const Text('Trước'),
+          ),
+          Text(
+            'Trang $currentPage/$totalPages ($totalCount sản phẩm)',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          OutlinedButton.icon(
+            onPressed: isLoading ? null : onNext,
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.chevron_right),
+            label: const Text('Sau'),
           ),
         ],
       ),

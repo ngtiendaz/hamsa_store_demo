@@ -98,14 +98,31 @@ class CustomerProductDetailView extends StatelessWidget {
   }
 }
 
-class _ProductGallery extends StatelessWidget {
+class _ProductGallery extends StatefulWidget {
   final List<String> imageUrls;
 
   const _ProductGallery({required this.imageUrls});
 
   @override
+  State<_ProductGallery> createState() => _ProductGalleryState();
+}
+
+class _ProductGalleryState extends State<_ProductGallery> {
+  int _selectedIndex = 0;
+
+  @override
+  void didUpdateWidget(covariant _ProductGallery oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_selectedIndex >= widget.imageUrls.length) {
+      _selectedIndex = 0;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final imageUrl = imageUrls.isEmpty ? null : imageUrls.first;
+    final imageUrl = widget.imageUrls.isEmpty
+        ? null
+        : widget.imageUrls[_selectedIndex];
     final placeholder = Container(
       color: AppColors.surface,
       alignment: Alignment.center,
@@ -116,19 +133,62 @@ class _ProductGallery extends StatelessWidget {
       ),
     );
 
-    return AspectRatio(
-      aspectRatio: 1,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: imageUrl == null
-            ? placeholder
-            : AppNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: placeholder,
-                errorWidget: placeholder,
-              ),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: imageUrl == null
+                ? placeholder
+                : AppNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: placeholder,
+                    errorWidget: placeholder,
+                  ),
+          ),
+        ),
+        if (widget.imageUrls.length > 1) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 72,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: widget.imageUrls.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                final isSelected = index == _selectedIndex;
+                return InkWell(
+                  onTap: () => setState(() => _selectedIndex = index),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    width: 72,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.border,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: AppNetworkImage(
+                      imageUrl: widget.imageUrls[index],
+                      borderRadius: 7,
+                      fit: BoxFit.cover,
+                      placeholder: placeholder,
+                      errorWidget: placeholder,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

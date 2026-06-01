@@ -1436,3 +1436,52 @@ Khi có xung đột, ưu tiên theo thứ tự:
 - Không thêm module ngoài phạm vi nếu chưa được yêu cầu.
 - Nếu thêm tính năng mới, phải đặt đúng vào `features/admin` hoặc `features/user`.
 - Luôn ưu tiên hoàn thành module chính trước khi làm nâng cao.
+
+## 35. Quy tắc sử dụng RTK và GitNexus
+
+### 35.1 RTK cho lệnh terminal
+
+- Khi chạy lệnh terminal trong project, bắt buộc prefix lệnh bằng `rtk`.
+- Không chạy trực tiếp các lệnh shell khi `rtk` hỗ trợ lệnh tương ứng.
+- Áp dụng cho các lệnh đọc file, tìm kiếm, kiểm tra Git, liệt kê thư mục, chạy analyzer, test và build.
+- Nếu `rtk` không hỗ trợ một lệnh cần thiết, phải nêu rõ lý do trước khi dùng phương án thay thế.
+
+Ví dụ đúng:
+
+```bash
+rtk git status
+rtk ls -la
+rtk find . -name "*.dart"
+rtk rg -n "AppRouter" lib
+rtk flutter analyze
+rtk flutter test
+rtk flutter build web
+```
+
+Ví dụ không được chạy trực tiếp:
+
+```bash
+git status
+ls -la
+find . -name "*.dart"
+flutter analyze
+```
+
+### 35.2 GitNexus cho phân tích codebase
+
+- Ưu tiên dùng GitNexus trước khi phân tích kiến trúc, dependency graph hoặc execution flow của project.
+- Khi cần sửa code có phạm vi ảnh hưởng rộng, dùng GitNexus để kiểm tra symbol liên quan và blast radius trước khi chỉnh sửa.
+- Khi cần tìm nguyên nhân lỗi qua nhiều module, dùng GitNexus để truy vết flow trước khi kết luận.
+- Sau thay đổi lớn, dùng GitNexus để kiểm tra các flow bị ảnh hưởng nếu cần.
+- Nếu GitNexus chưa có index hoặc index đã cũ, chạy phân tích lại repository trước khi sử dụng kết quả.
+
+Các lệnh GitNexus thường dùng:
+
+```bash
+rtk gitnexus status
+rtk gitnexus analyze .
+rtk gitnexus query "application startup routing authentication"
+rtk gitnexus context AppRouter --file lib/core/router/app_router.dart
+rtk gitnexus impact AppRouter
+rtk gitnexus detect-changes
+```
